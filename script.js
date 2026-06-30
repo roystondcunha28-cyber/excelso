@@ -1,5 +1,28 @@
 console.log("EXCELSO'26 — Abyssal Glass loaded");
 
+/* ---------- Rising bubbles in hero ---------- */
+(function generateBubbles() {
+  const field = document.querySelector('.bubbles');
+  if (!field) return;
+  const count = window.innerWidth < 600 ? 14 : 26;
+  for (let i = 0; i < count; i++) {
+    const b = document.createElement('span');
+    b.className = 'bubble';
+    const size = Math.random() * 16 + 4;
+    const left = Math.random() * 100;
+    const duration = Math.random() * 10 + 9;
+    const delay = Math.random() * 12;
+    const drift = (Math.random() - 0.5) * 80;
+    b.style.width = `${size}px`;
+    b.style.height = `${size}px`;
+    b.style.left = `${left}%`;
+    b.style.setProperty('--drift', `${drift}px`);
+    b.style.animationDuration = `${duration}s`;
+    b.style.animationDelay = `${delay}s`;
+    field.appendChild(b);
+  }
+})();
+
 /* ---------- Rules toggle ---------- */
 document.querySelectorAll('.rules-toggle').forEach(button => {
   button.addEventListener('click', (e) => {
