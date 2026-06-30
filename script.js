@@ -1,4 +1,93 @@
+/* ---------- Confetti burst (page-load celebration) ---------- */
+function confettiBurst() {
+  const colors = ['#5fe3f0', '#ecc886', '#ffffff', '#2fa8b8'];
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight * 0.32;
+  for (let i = 0; i < 36; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const size = Math.random() * 7 + 4;
+    const color = colors[i % colors.length];
+    piece.style.width = `${size}px`;
+    piece.style.height = `${size * (Math.random() > .5 ? 1 : 2.4)}px`;
+    piece.style.background = color;
+    piece.style.boxShadow = `0 0 8px ${color}`;
+    piece.style.left = `${cx}px`;
+    piece.style.top = `${cy}px`;
+    document.body.appendChild(piece);
+
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * 260 + 120;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance - 60;
+    const rotate = Math.random() * 720 - 360;
+
+    piece.animate(
+      [
+        { transform: 'translate(-50%,-50%) rotate(0deg)', opacity: 1 },
+        { transform: `translate(${dx - size / 2}px, ${dy}px) rotate(${rotate}deg)`, opacity: 0 }
+      ],
+      { duration: 1300 + Math.random() * 500, easing: 'cubic-bezier(.16,.84,.44,1)' }
+    ).onfinish = () => piece.remove();
+  }
+}
+
 console.log("EXCELSO'26 — Abyssal Glass loaded");
+
+/* ---------- Preloader boot sequence ---------- */
+(function bootSequence() {
+  const preloader = document.getElementById('preloader');
+  const fill = document.getElementById('preloaderFill');
+  const percent = document.getElementById('preloaderPercent');
+  const log = document.getElementById('preloaderLog');
+  if (!preloader || !fill) return;
+
+  document.body.style.overflow = 'hidden';
+
+  const messages = [
+    'booting systems…',
+    'connecting to the abyss network…',
+    'calibrating depth sensors…',
+    'loading event modules…',
+    'syncing countdown core…',
+    'polishing trophies…',
+    'all systems go.'
+  ];
+
+  let progress = 0;
+  let msgIndex = 0;
+
+  const tick = setInterval(() => {
+    progress += Math.random() * 14 + 6;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(tick);
+      log.textContent = messages[messages.length - 1];
+      setTimeout(finishLoading, 350);
+    } else {
+      msgIndex = Math.min(Math.floor((progress / 100) * (messages.length - 1)), messages.length - 2);
+      log.textContent = messages[msgIndex];
+    }
+    fill.style.width = `${progress}%`;
+    percent.textContent = `${Math.floor(progress)}%`.padStart(3, '0');
+  }, 220);
+
+  function finishLoading() {
+    preloader.classList.add('hidden');
+    document.body.style.overflow = '';
+    document.body.classList.add('booted');
+    confettiBurst();
+    setTimeout(() => preloader.remove(), 800);
+  }
+
+  // Safety net: never block the page for more than 4.5s
+  setTimeout(() => {
+    if (!preloader.classList.contains('hidden')) {
+      clearInterval(tick);
+      finishLoading();
+    }
+  }, 4500);
+})();
 
 /* ---------- Rising bubbles in hero ---------- */
 (function generateBubbles() {
