@@ -24,6 +24,22 @@
 
 <header class="site-header">
     <div class="header-glow"></div>
+    <div class="caustics"></div>
+    <div class="depth-rings" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+    </div>
+    <svg class="hero-rays" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+            <linearGradient id="rayGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#5fe3f0" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#5fe3f0" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        <polygon class="ray ray-1" points="380,0 460,0 620,700 280,700" fill="url(#rayGrad)"/>
+        <polygon class="ray ray-2" points="560,0 660,0 760,700 420,700" fill="url(#rayGrad)"/>
+        <polygon class="ray ray-3" points="740,0 820,0 980,700 640,700" fill="url(#rayGrad)"/>
+    </svg>
+    <div class="bubbles" aria-hidden="true"></div>
 
     <div class="header-top">
         <img src="milagres-logo.PNG" class="college-logo-small" alt="Milagres College Logo">
@@ -285,7 +301,7 @@
 </section>
 
 <footer>
-    <p>@roysto.dev</p>
+    <p>web developed by Royston jhowin Dcunha</p>
     <p>Hampankatta, Mangaluru &ndash; 575001</p>
     <p>&copy; EXCELSO'26</p>
 </footer>
