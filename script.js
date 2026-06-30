@@ -1,135 +1,107 @@
-console.log("EXCSELSO’26 Website Loaded Successfully!");
+console.log("EXCELSO'26 — Abyssal Glass loaded");
 
-// Rules toggle
+/* ---------- Rules toggle ---------- */
 document.querySelectorAll('.rules-toggle').forEach(button => {
-    button.addEventListener('click', () => {
-        const rulesDiv = document.getElementById(button.getAttribute('aria-controls'));
-        const isExpanded = button.getAttribute('aria-expanded') === 'true';
-        button.setAttribute('aria-expanded', !isExpanded);
-        if (rulesDiv.style.display === 'block') {
-            rulesDiv.style.display = 'none';
-        } else {
-            rulesDiv.style.display = 'block';
-        }
-    });
+  button.addEventListener('click', (e) => {
+    const rulesDiv = document.getElementById(button.getAttribute('aria-controls'));
+    const isExpanded = button.getAttribute('aria-expanded') === 'true';
+    button.setAttribute('aria-expanded', String(!isExpanded));
+    rulesDiv.hidden = isExpanded;
+    rulesDiv.classList.toggle('open', !isExpanded);
+    if (!isExpanded) createSparkles(e.clientX, e.clientY);
+  });
 });
 
-// Animate event cards on scroll
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-        if(entry.isIntersecting){
-            entry.target.classList.add('fade-in');
-        }
-    });
-}, { threshold: 0.1 });
-// Add this at the top of your script
-const fireConfetti = () => {
-    // This is a simplified logic; usually, you'd use a library like 'canvas-confetti'
-    console.log("Confetti Celebration!"); 
-    // If you use the library, use: confetti();
-};
-
-document.querySelectorAll('.rules-toggle').forEach(button => {
-    button.addEventListener('click', () => {
-        // Trigger confetti when they open the rules
-        if(button.getAttribute('aria-expanded') === 'false') {
-            fireConfetti();
-        }
-    });
-});
-document.querySelectorAll('.event-card').forEach(card => {
-    observer.observe(card);
-});
-// Carnival Click Animation
-document.querySelectorAll('.rules-toggle').forEach(button => {
-    button.addEventListener('click', (e) => {
-        createSparkles(e.pageX, e.pageY);
-    });
-});
-
-function createSparkles(x, y) {
-    for (let i = 0; i < 10; i++) {
-        const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-        document.body.appendChild(sparkle);
-        
-        const size = Math.random() * 10 + 5;
-        sparkle.style.width = `${size}px`;
-        sparkle.style.height = `${size}px`;
-        sparkle.style.left = `${x}px`;
-        sparkle.style.top = `${y}px`;
-        sparkle.style.background = `gold`;
-        sparkle.style.position = `absolute`;
-        sparkle.style.borderRadius = `50%`;
-        
-        // Simple move animation
-        const destinationX = x + (Math.random() - 0.5) * 100;
-        const destinationY = y + (Math.random() - 0.5) * 100;
-        
-        sparkle.animate([
-            { transform: 'translate(0, 0)', opacity: 1 },
-            { transform: `translate(${destinationX - x}px, ${destinationY - y}px)`, opacity: 0 }
-        ], {
-            duration: 1000,
-            easing: 'ease-out'
-        }).onfinish = () => sparkle.remove();
+/* ---------- Scroll reveal ---------- */
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show');
+      revealObserver.unobserve(entry.target);
     }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in').forEach(el => revealObserver.observe(el));
+
+/* ---------- Sparkle micro-interaction ---------- */
+function createSparkles(x, y) {
+  const colors = ['#5fe3f0', '#ecc886'];
+  for (let i = 0; i < 8; i++) {
+    const sparkle = document.createElement('div');
+    const size = Math.random() * 6 + 4;
+    sparkle.style.cssText = `
+      position:fixed; left:${x}px; top:${y}px;
+      width:${size}px; height:${size}px; border-radius:50%;
+      background:${colors[i % 2]}; pointer-events:none; z-index:9999;
+      box-shadow:0 0 8px ${colors[i % 2]};
+    `;
+    document.body.appendChild(sparkle);
+    const dx = (Math.random() - 0.5) * 110;
+    const dy = (Math.random() - 0.5) * 110;
+    sparkle.animate(
+      [
+        { transform: 'translate(0,0)', opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px)`, opacity: 0 }
+      ],
+      { duration: 700, easing: 'ease-out' }
+    ).onfinish = () => sparkle.remove();
+  }
 }
+
+/* ---------- Countdown ---------- */
 const targetDate = new Date("March 7, 2026 08:30:00").getTime();
+const countdownEl = document.getElementById("countdown");
 
-const countdown = setInterval(function () {
-  const now = new Date().getTime();
-  const distance = targetDate - now;
-
+function updateCountdown() {
+  const distance = targetDate - Date.now();
+  if (distance <= 0) {
+    countdownEl.innerHTML = `<strong>It's here!</strong>`;
+    clearInterval(countdownTimer);
+    return;
+  }
   const days = Math.floor(distance / (1000 * 60 * 60 * 24));
   const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
 
-  document.getElementById("countdown").innerHTML =
-    `<strong>${days}</strong> Days 
-     <strong>${hours}</strong> Hours 
-     <strong>${minutes}</strong> Minutes`;
+  countdownEl.innerHTML =
+    `<span><strong>${days}</strong> Days</span>
+     <span><strong>${hours}</strong> Hours</span>
+     <span><strong>${minutes}</strong> Minutes</span>`;
+}
+updateCountdown();
+const countdownTimer = setInterval(updateCountdown, 1000 * 30);
 
-}, 1000);
-const faders = document.querySelectorAll(".fade-in");
-
-window.addEventListener("scroll", () => {
-  faders.forEach(el => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight - 100) {
-      el.classList.add("show");
-    }
-  });
-});
-console.log("EXCELSO’26 Website Loaded Successfully!");
+/* ---------- Multi-step registration form ---------- */
 const steps = document.querySelectorAll(".form-step");
 const nextBtns = document.querySelectorAll(".next-btn");
 const prevBtns = document.querySelectorAll(".prev-btn");
 let currentStep = 0;
 
 function showStep(step) {
-  steps.forEach((el, index) => {
-    el.classList.toggle("active", index === step);
-  });
+  steps.forEach((el, index) => el.classList.toggle("active", index === step));
 }
 
 nextBtns.forEach(btn => {
   btn.addEventListener("click", () => {
-    currentStep++;
+    const stepEl = btn.closest('.form-step');
+    const input = stepEl.querySelector('input[required]');
+    if (input && !input.reportValidity()) return;
+    currentStep = Math.min(currentStep + 1, steps.length - 1);
     showStep(currentStep);
   });
 });
 
 prevBtns.forEach(btn => {
   btn.addEventListener("click", () => {
-    currentStep--;
+    currentStep = Math.max(currentStep - 1, 0);
     showStep(currentStep);
   });
 });
 
 showStep(currentStep);
 
-// Dynamic Participants
+/* ---------- Dynamic participant fields ---------- */
 const eventCheckboxes = document.querySelectorAll(".event-checkbox");
 const container = document.getElementById("participantsContainer");
 
@@ -141,32 +113,22 @@ function generateParticipants() {
   container.innerHTML = "";
 
   eventCheckboxes.forEach(checkbox => {
-    if (checkbox.checked) {
-      let count = 0;
+    if (!checkbox.checked) return;
 
-      if (
-        checkbox.value === "Upside Down Abyss" ||
-        checkbox.value === "Comeback Arena" ||
-        checkbox.value === "Sunken Strategy Quest"
-      ) {
-        count = 2;
-      } else if (
-        checkbox.value === "Aquavengers" ||
-        checkbox.value === "Timeless Tides"
-      ) {
-        count = 1;
-      }
-
-      let html = `<h3>${checkbox.value}</h3>`;
-
-      for (let i = 1; i <= count; i++) {
-        html += `
-          <input type="text" name="${checkbox.value} Participant ${i} Name" required placeholder="Participant ${i} Name">
-          <input type="tel" name="${checkbox.value} Participant ${i} Contact" required placeholder="Participant ${i} Contact Number">
-        `;
-      }
-
-      container.innerHTML += html;
+    let count = 0;
+    if (["Upside Down Abyss", "Comeback Arena", "Sunken Strategy Quest"].includes(checkbox.value)) {
+      count = 2;
+    } else if (["Aquavengers", "Timeless Tides"].includes(checkbox.value)) {
+      count = 1;
     }
+
+    let html = `<h3>${checkbox.value}</h3>`;
+    for (let i = 1; i <= count; i++) {
+      html += `
+        <input type="text" name="${checkbox.value} Participant ${i} Name" required placeholder="Participant ${i} Name">
+        <input type="tel" name="${checkbox.value} Participant ${i} Contact" required placeholder="Participant ${i} Contact Number">
+      `;
+    }
+    container.innerHTML += html;
   });
 }
