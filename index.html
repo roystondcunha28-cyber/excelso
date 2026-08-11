@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Operations Management System</title>
+    <title>UsedBookR Operations Management</title>
 
-    <!-- Main stylesheet -->
+    <!-- CSS will be added later -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,37 +21,34 @@
         <div class="login-card">
 
             <div class="login-brand">
-                <div class="login-brand-name">
-                    UsedBookR
-                </div>
+                <div class="logo-mark">UB</div>
 
-                <div class="login-brand-subtitle">
-                    OPERATIONS MANAGEMENT SYSTEM
-                </div>
+                <h1>UsedBookR</h1>
+
+                <p>OPERATIONS MANAGEMENT SYSTEM</p>
             </div>
 
             <div class="login-divider"></div>
 
-            <h1>Operations Login</h1>
+            <h2>Operations Login</h2>
 
             <p class="login-description">
-                Access the centralized operations tracking and
-                monitoring system.
+                Centralized system for tracking, monitoring and
+                managing all departmental operations.
             </p>
 
             <form id="loginForm">
 
-                <div class="login-field">
+                <div class="form-group">
 
-                    <label for="password">
+                    <label for="loginPassword">
                         Password
                     </label>
 
                     <input
                         type="password"
-                        id="password"
+                        id="loginPassword"
                         placeholder="Enter password"
-                        autocomplete="current-password"
                         required
                     >
 
@@ -74,7 +71,7 @@
             </div>
 
             <div class="login-footer">
-                Operations Management System
+                Authorized Operations Access
             </div>
 
         </div>
@@ -84,40 +81,59 @@
 
     <!-- =====================================================
          MAIN APPLICATION
-         Hidden until successful login
     ====================================================== -->
 
     <div
         id="app"
-        class="app-container"
+        class="app"
         style="display: none;"
     >
+
 
         <!-- =================================================
              SIDEBAR
         ================================================== -->
 
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar">
 
-            <div class="sidebar-brand">
+            <!-- BRAND -->
 
-                <div class="sidebar-brand-name">
-                    UsedBookR
+            <div class="sidebar-header">
+
+                <div class="sidebar-logo">
+                    UB
                 </div>
 
-                <div class="sidebar-brand-subtitle">
-                    OPERATIONS
+                <div class="sidebar-brand">
+
+                    <strong>
+                        UsedBookR
+                    </strong>
+
+                    <span>
+                        OPERATIONS
+                    </span>
+
                 </div>
 
             </div>
 
 
+            <!-- NAVIGATION -->
+
             <nav class="sidebar-navigation">
+
+
+                <!-- MAIN -->
+
+                <div class="navigation-title">
+                    MAIN
+                </div>
+
 
                 <button
                     class="nav-item active"
                     data-page="dashboard"
-                    type="button"
                 >
                     <span class="nav-icon">▦</span>
                     <span>Dashboard</span>
@@ -127,7 +143,6 @@
                 <button
                     class="nav-item"
                     data-page="tasks"
-                    type="button"
                 >
                     <span class="nav-icon">✓</span>
                     <span>All Tasks</span>
@@ -136,38 +151,174 @@
 
                 <button
                     class="nav-item"
-                    data-page="departments"
-                    type="button"
-                >
-                    <span class="nav-icon">▤</span>
-                    <span>Departments</span>
-                </button>
-
-
-                <button
-                    class="nav-item"
                     data-page="followups"
-                    type="button"
                 >
                     <span class="nav-icon">↻</span>
                     <span>Follow-ups</span>
                 </button>
 
 
+                <!-- DEPARTMENTS -->
+
+                <div class="navigation-title">
+                    DEPARTMENTS
+                </div>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="B2B / Sales"
+                >
+                    <span class="department-code">B2B</span>
+                    <span>B2B / Sales</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Customer Support"
+                >
+                    <span class="department-code">CS</span>
+                    <span>Customer Support</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Warehouse"
+                >
+                    <span class="department-code">WH</span>
+                    <span>Warehouse</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Scanning / Catalog"
+                >
+                    <span class="department-code">SC</span>
+                    <span>Scanning / Catalog</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Listing / Inventory"
+                >
+                    <span class="department-code">LI</span>
+                    <span>Listing / Inventory</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Digital Marketing"
+                >
+                    <span class="department-code">DM</span>
+                    <span>Digital Marketing</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="IT / Software Development"
+                >
+                    <span class="department-code">IT</span>
+                    <span>IT / Software Development</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Finance"
+                >
+                    <span class="department-code">FN</span>
+                    <span>Finance</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Book Fair / Events"
+                >
+                    <span class="department-code">BF</span>
+                    <span>Book Fair / Events</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Books & Supply Procurement"
+                >
+                    <span class="department-code">BP</span>
+                    <span>Books & Supply Procurement</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="HR"
+                >
+                    <span class="department-code">HR</span>
+                    <span>HR</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Data Analysis"
+                >
+                    <span class="department-code">DA</span>
+                    <span>Data Analysis</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Software Testing"
+                >
+                    <span class="department-code">ST</span>
+                    <span>Software Testing</span>
+                </button>
+
+
+                <button
+                    class="nav-item department-item"
+                    data-department="Product Development"
+                >
+                    <span class="department-code">PD</span>
+                    <span>Product Development</span>
+                </button>
+
+
+                <!-- ANALYSIS -->
+
+                <div class="navigation-title">
+                    ANALYSIS
+                </div>
+
+
                 <button
                     class="nav-item"
                     data-page="reports"
-                    type="button"
                 >
                     <span class="nav-icon">▥</span>
-                    <span>Reports</span>
+                    <span>Reports & Analysis</span>
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    data-page="activity"
+                >
+                    <span class="nav-icon">◷</span>
+                    <span>Activity Log</span>
                 </button>
 
 
                 <button
                     class="nav-item"
                     data-page="settings"
-                    type="button"
                 >
                     <span class="nav-icon">⚙</span>
                     <span>Settings</span>
@@ -176,15 +327,36 @@
             </nav>
 
 
-            <div class="sidebar-bottom">
+            <!-- SIDEBAR FOOTER -->
+
+            <div class="sidebar-footer">
+
+                <div class="logged-user">
+
+                    <div class="user-avatar">
+                        OH
+                    </div>
+
+                    <div class="user-details">
+
+                        <strong>
+                            Operations Head
+                        </strong>
+
+                        <span>
+                            Administrator
+                        </span>
+
+                    </div>
+
+                </div>
+
 
                 <button
                     id="logoutButton"
                     class="logout-button"
-                    type="button"
                 >
-                    <span class="nav-icon">↪</span>
-                    <span>Logout</span>
+                    Logout
                 </button>
 
             </div>
@@ -198,17 +370,16 @@
 
         <main class="main-content">
 
+
             <!-- TOP HEADER -->
 
-            <header class="top-header">
+            <header class="topbar">
 
-                <div class="header-left">
+                <div class="topbar-left">
 
                     <button
                         id="menuToggle"
                         class="menu-toggle"
-                        type="button"
-                        aria-label="Toggle menu"
                     >
                         ☰
                     </button>
@@ -220,8 +391,7 @@
                         </h1>
 
                         <p id="pageSubtitle">
-                            Monitor all operational activities
-                            from one place.
+                            Centralized operational monitoring
                         </p>
 
                     </div>
@@ -229,31 +399,18 @@
                 </div>
 
 
-                <div class="header-right">
+                <div class="topbar-right">
 
-                    <div class="header-date" id="currentDate">
+                    <span id="currentDate">
                         --
-                    </div>
+                    </span>
 
-                    <div class="user-profile">
-
-                        <div class="user-avatar">
-                            OH
-                        </div>
-
-                        <div class="user-details">
-
-                            <strong>
-                                Operations Head
-                            </strong>
-
-                            <span>
-                                Administrator
-                            </span>
-
-                        </div>
-
-                    </div>
+                    <button
+                        id="topAddTask"
+                        class="top-add-button"
+                    >
+                        + Add Task
+                    </button>
 
                 </div>
 
@@ -261,40 +418,45 @@
 
 
             <!-- =================================================
-                 PAGE CONTAINER
+                 CONTENT
             ================================================== -->
 
-            <section class="page-container">
+            <div class="content-area">
 
 
                 <!-- =================================================
-                     DASHBOARD PAGE
+                     DASHBOARD
                 ================================================== -->
 
-                <div
+                <section
                     id="dashboardPage"
                     class="page active-page"
                 >
 
-                    <div class="page-introduction">
+                    <div class="page-header">
 
                         <div>
 
+                            <span class="page-label">
+                                OVERVIEW
+                            </span>
+
                             <h2>
-                                Operations Overview
+                                Operations Dashboard
                             </h2>
 
                             <p>
-                                Track the current status of all
-                                department activities.
+                                Monitor tasks, priorities,
+                                follow-ups and performance across
+                                all 14 departments.
                             </p>
 
                         </div>
 
+
                         <button
+                            id="dashboardAddTask"
                             class="primary-button"
-                            id="addTaskButton"
-                            type="button"
                         >
                             + Add New Task
                         </button>
@@ -302,140 +464,121 @@
                     </div>
 
 
-                    <!-- SUMMARY CARDS -->
+                    <!-- KPI CARDS -->
 
-                    <div class="summary-grid">
+                    <div class="kpi-grid">
 
-                        <div class="summary-card">
 
-                            <div class="summary-card-label">
+                        <div class="kpi-card">
+
+                            <span>
                                 Total Tasks
-                            </div>
+                            </span>
 
-                            <div
-                                class="summary-card-value"
-                                id="totalTasks"
-                            >
+                            <strong id="totalTasks">
                                 0
-                            </div>
+                            </strong>
 
-                            <div class="summary-card-description">
-                                All operational tasks
-                            </div>
+                            <small>
+                                All departments
+                            </small>
 
                         </div>
 
 
-                        <div class="summary-card open-card">
+                        <div class="kpi-card">
 
-                            <div class="summary-card-label">
+                            <span>
                                 Open
-                            </div>
+                            </span>
 
-                            <div
-                                class="summary-card-value"
-                                id="openTasks"
-                            >
+                            <strong id="openTasks">
                                 0
-                            </div>
+                            </strong>
 
-                            <div class="summary-card-description">
-                                Tasks not yet started
-                            </div>
+                            <small>
+                                Not started
+                            </small>
 
                         </div>
 
 
-                        <div class="summary-card progress-card">
+                        <div class="kpi-card">
 
-                            <div class="summary-card-label">
+                            <span>
                                 In Progress
-                            </div>
+                            </span>
 
-                            <div
-                                class="summary-card-value"
-                                id="progressTasks"
-                            >
+                            <strong id="progressTasks">
                                 0
-                            </div>
+                            </strong>
 
-                            <div class="summary-card-description">
-                                Currently being worked on
-                            </div>
+                            <small>
+                                Currently working
+                            </small>
 
                         </div>
 
 
-                        <div class="summary-card blocked-card">
+                        <div class="kpi-card">
 
-                            <div class="summary-card-label">
+                            <span>
                                 Blocked
-                            </div>
+                            </span>
 
-                            <div
-                                class="summary-card-value"
-                                id="blockedTasks"
-                            >
+                            <strong id="blockedTasks">
                                 0
-                            </div>
+                            </strong>
 
-                            <div class="summary-card-description">
+                            <small>
                                 Need attention
-                            </div>
+                            </small>
 
                         </div>
 
 
-                        <div class="summary-card overdue-card">
+                        <div class="kpi-card">
 
-                            <div class="summary-card-label">
+                            <span>
                                 Overdue
-                            </div>
+                            </span>
 
-                            <div
-                                class="summary-card-value"
-                                id="overdueTasks"
-                            >
+                            <strong id="overdueTasks">
                                 0
-                            </div>
+                            </strong>
 
-                            <div class="summary-card-description">
-                                Past their due date
-                            </div>
+                            <small>
+                                Past due date
+                            </small>
 
                         </div>
 
 
-                        <div class="summary-card completed-card">
+                        <div class="kpi-card">
 
-                            <div class="summary-card-label">
+                            <span>
                                 Completed
-                            </div>
+                            </span>
 
-                            <div
-                                class="summary-card-value"
-                                id="completedTasks"
-                            >
+                            <strong id="completedTasks">
                                 0
-                            </div>
+                            </strong>
 
-                            <div class="summary-card-description">
-                                Successfully completed
-                            </div>
+                            <small>
+                                Closed tasks
+                            </small>
 
                         </div>
 
                     </div>
 
 
-                    <!-- DASHBOARD CONTENT GRID -->
+                    <!-- PRIORITY + FOLLOWUP -->
 
-                    <div class="dashboard-grid">
+                    <div class="dashboard-columns">
 
 
-                        <!-- PRIORITY OVERVIEW -->
-
-                        <div class="dashboard-panel">
+                        <div class="panel">
 
                             <div class="panel-header">
 
@@ -456,10 +599,7 @@
 
                             <div class="priority-list">
 
-                                <div class="priority-row">
-
-                                    <span class="priority-indicator high">
-                                    </span>
+                                <div>
 
                                     <span>
                                         High Priority
@@ -472,10 +612,7 @@
                                 </div>
 
 
-                                <div class="priority-row">
-
-                                    <span class="priority-indicator medium">
-                                    </span>
+                                <div>
 
                                     <span>
                                         Medium Priority
@@ -488,10 +625,7 @@
                                 </div>
 
 
-                                <div class="priority-row">
-
-                                    <span class="priority-indicator low">
-                                    </span>
+                                <div>
 
                                     <span>
                                         Low Priority
@@ -508,20 +642,18 @@
                         </div>
 
 
-                        <!-- DEPARTMENT OVERVIEW -->
-
-                        <div class="dashboard-panel">
+                        <div class="panel">
 
                             <div class="panel-header">
 
                                 <div>
 
                                     <h3>
-                                        Department Overview
+                                        Follow-up Monitoring
                                     </h3>
 
                                     <p>
-                                        Current operational workload
+                                        Actions requiring attention
                                     </p>
 
                                 </div>
@@ -529,13 +661,44 @@
                             </div>
 
 
-                            <div
-                                id="departmentOverview"
-                                class="department-overview"
-                            >
+                            <div class="followup-summary">
 
-                                <div class="empty-state">
-                                    No department data available yet.
+                                <div>
+
+                                    <strong id="followupsToday">
+                                        0
+                                    </strong>
+
+                                    <span>
+                                        Due Today
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong id="followupsOverdue">
+                                        0
+                                    </strong>
+
+                                    <span>
+                                        Overdue
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong id="followupsUpcoming">
+                                        0
+                                    </strong>
+
+                                    <span>
+                                        Upcoming
+                                    </span>
+
                                 </div>
 
                             </div>
@@ -545,9 +708,42 @@
                     </div>
 
 
+                    <!-- DEPARTMENT OVERVIEW -->
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <h3>
+                                    Department Overview
+                                </h3>
+
+                                <p>
+                                    Current workload by department
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="departmentPerformance"
+                            class="department-performance"
+                        >
+
+                            <!-- JavaScript will populate this -->
+
+                        </div>
+
+                    </div>
+
+
                     <!-- RECENT TASKS -->
 
-                    <div class="dashboard-panel full-width-panel">
+                    <div class="panel">
 
                         <div class="panel-header">
 
@@ -558,25 +754,17 @@
                                 </h3>
 
                                 <p>
-                                    Latest operational activities
+                                    Latest operational updates
                                 </p>
 
                             </div>
 
-                            <button
-                                class="secondary-button"
-                                data-page-target="tasks"
-                                type="button"
-                            >
-                                View All
-                            </button>
-
                         </div>
 
 
-                        <div class="table-wrapper">
+                        <div class="table-container">
 
-                            <table class="operations-table">
+                            <table>
 
                                 <thead>
 
@@ -614,6 +802,7 @@
 
                                 </thead>
 
+
                                 <tbody id="recentTasksTable">
 
                                     <tr>
@@ -622,7 +811,7 @@
                                             colspan="7"
                                             class="empty-table"
                                         >
-                                            No tasks added yet.
+                                            No tasks available.
                                         </td>
 
                                     </tr>
@@ -635,37 +824,40 @@
 
                     </div>
 
-                </div>
+                </section>
 
 
                 <!-- =================================================
-                     TASKS PAGE
+                     ALL TASKS
                 ================================================== -->
 
-                <div
+                <section
                     id="tasksPage"
                     class="page"
                 >
 
-                    <div class="page-introduction">
+                    <div class="page-header">
 
                         <div>
+
+                            <span class="page-label">
+                                TASK MANAGEMENT
+                            </span>
 
                             <h2>
                                 All Tasks
                             </h2>
 
                             <p>
-                                Manage and monitor every operational
-                                task.
+                                Manage tasks across all departments.
                             </p>
 
                         </div>
 
+
                         <button
+                            id="tasksAddButton"
                             class="primary-button"
-                            id="addTaskButtonSecondary"
-                            type="button"
                         >
                             + Add New Task
                         </button>
@@ -673,16 +865,19 @@
                     </div>
 
 
+                    <!-- FILTERS -->
+
                     <div class="filter-panel">
 
-                        <div class="filter-group">
+
+                        <div class="filter-field">
 
                             <label>
                                 Search
                             </label>
 
                             <input
-                                type="text"
+                                type="search"
                                 id="taskSearch"
                                 placeholder="Search tasks..."
                             >
@@ -690,7 +885,7 @@
                         </div>
 
 
-                        <div class="filter-group">
+                        <div class="filter-field">
 
                             <label>
                                 Department
@@ -707,7 +902,7 @@
                         </div>
 
 
-                        <div class="filter-group">
+                        <div class="filter-field">
 
                             <label>
                                 Priority
@@ -736,7 +931,7 @@
                         </div>
 
 
-                        <div class="filter-group">
+                        <div class="filter-field">
 
                             <label>
                                 Status
@@ -775,11 +970,13 @@
                     </div>
 
 
-                    <div class="dashboard-panel">
+                    <!-- TASK TABLE -->
 
-                        <div class="table-wrapper">
+                    <div class="panel">
 
-                            <table class="operations-table">
+                        <div class="table-container">
+
+                            <table>
 
                                 <thead>
 
@@ -814,12 +1011,13 @@
                                         </th>
 
                                         <th>
-                                            Action
+                                            Actions
                                         </th>
 
                                     </tr>
 
                                 </thead>
+
 
                                 <tbody id="allTasksTable">
 
@@ -842,91 +1040,32 @@
 
                     </div>
 
-                </div>
+                </section>
 
 
                 <!-- =================================================
-                     DEPARTMENTS PAGE
+                     FOLLOW UPS
                 ================================================== -->
 
-                <div
-                    id="departmentsPage"
-                    class="page"
-                >
-
-                    <div class="page-introduction">
-
-                        <div>
-
-                            <h2>
-                                Departments
-                            </h2>
-
-                            <p>
-                                Monitor operational activity by
-                                department.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        id="departmentsGrid"
-                        class="departments-grid"
-                    >
-
-                        <div class="department-card">
-
-                            <div class="department-card-icon">
-                                +
-                            </div>
-
-                            <h3>
-                                Add Department
-                            </h3>
-
-                            <p>
-                                Create a department workspace
-                                for your team.
-                            </p>
-
-                            <button
-                                class="secondary-button"
-                                id="addDepartmentButton"
-                                type="button"
-                            >
-                                Add Department
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- =================================================
-                     FOLLOW-UPS PAGE
-                ================================================== -->
-
-                <div
+                <section
                     id="followupsPage"
                     class="page"
                 >
 
-                    <div class="page-introduction">
+                    <div class="page-header">
 
                         <div>
+
+                            <span class="page-label">
+                                MONITORING
+                            </span>
 
                             <h2>
                                 Follow-ups
                             </h2>
 
                             <p>
-                                Track pending follow-ups and actions
-                                requiring attention.
+                                Monitor commitments and pending actions.
                             </p>
 
                         </div>
@@ -934,11 +1073,54 @@
                     </div>
 
 
-                    <div class="dashboard-panel">
+                    <div class="followup-dashboard">
 
-                        <div class="table-wrapper">
+                        <div class="followup-card">
 
-                            <table class="operations-table">
+                            <span>
+                                Due Today
+                            </span>
+
+                            <strong id="followupPageToday">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="followup-card">
+
+                            <span>
+                                Overdue
+                            </span>
+
+                            <strong id="followupPageOverdue">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="followup-card">
+
+                            <span>
+                                Upcoming
+                            </span>
+
+                            <strong id="followupPageUpcoming">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="table-container">
+
+                            <table>
 
                                 <thead>
 
@@ -957,11 +1139,15 @@
                                         </th>
 
                                         <th>
+                                            Assigned To
+                                        </th>
+
+                                        <th>
                                             Follow-up Date
                                         </th>
 
                                         <th>
-                                            Last Follow-up
+                                            Last Action
                                         </th>
 
                                         <th>
@@ -972,12 +1158,13 @@
 
                                 </thead>
 
+
                                 <tbody id="followupsTable">
 
                                     <tr>
 
                                         <td
-                                            colspan="6"
+                                            colspan="7"
                                             class="empty-table"
                                         >
                                             No follow-ups available.
@@ -993,29 +1180,33 @@
 
                     </div>
 
-                </div>
+                </section>
 
 
                 <!-- =================================================
-                     REPORTS PAGE
+                     DEPARTMENTS
                 ================================================== -->
 
-                <div
-                    id="reportsPage"
+                <section
+                    id="departmentsPage"
                     class="page"
                 >
 
-                    <div class="page-introduction">
+                    <div class="page-header">
 
                         <div>
 
+                            <span class="page-label">
+                                ORGANIZATION
+                            </span>
+
                             <h2>
-                                Reports & Analysis
+                                Departments
                             </h2>
 
                             <p>
-                                Analyze operational performance
-                                and export records.
+                                All 14 departments and their
+                                operational workload.
                             </p>
 
                         </div>
@@ -1023,26 +1214,281 @@
                     </div>
 
 
-                    <div class="reports-grid">
+                    <div
+                        id="departmentsGrid"
+                        class="departments-grid"
+                    >
+
+                        <!-- JavaScript will populate -->
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     DEPARTMENT DETAIL
+                ================================================== -->
+
+                <section
+                    id="departmentDetailPage"
+                    class="page"
+                >
+
+                    <div class="page-header">
+
+                        <div>
+
+                            <span
+                                id="departmentDetailCode"
+                                class="page-label"
+                            >
+                                DEPARTMENT
+                            </span>
+
+                            <h2 id="departmentDetailTitle">
+                                Department
+                            </h2>
+
+                            <p id="departmentDetailSubtitle">
+                                Department operational overview.
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            id="departmentAddTaskButton"
+                            class="primary-button"
+                        >
+                            + Add Task
+                        </button>
+
+                    </div>
+
+
+                    <!-- DEPARTMENT KPIs -->
+
+                    <div class="kpi-grid">
+
+
+                        <div class="kpi-card">
+
+                            <span>
+                                Total Tasks
+                            </span>
+
+                            <strong id="departmentTotal">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="kpi-card">
+
+                            <span>
+                                Open
+                            </span>
+
+                            <strong id="departmentOpen">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="kpi-card">
+
+                            <span>
+                                In Progress
+                            </span>
+
+                            <strong id="departmentProgress">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="kpi-card">
+
+                            <span>
+                                Blocked
+                            </span>
+
+                            <strong id="departmentBlocked">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="kpi-card">
+
+                            <span>
+                                Overdue
+                            </span>
+
+                            <strong id="departmentOverdue">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="kpi-card">
+
+                            <span>
+                                Completed
+                            </span>
+
+                            <strong id="departmentCompleted">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DEPARTMENT TASKS -->
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <h3>
+                                    Department Tasks
+                                </h3>
+
+                                <p>
+                                    Tasks assigned to this department.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="table-container">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            ID
+                                        </th>
+
+                                        <th>
+                                            Task
+                                        </th>
+
+                                        <th>
+                                            Assigned To
+                                        </th>
+
+                                        <th>
+                                            Priority
+                                        </th>
+
+                                        <th>
+                                            Status
+                                        </th>
+
+                                        <th>
+                                            Due Date
+                                        </th>
+
+                                        <th>
+                                            Follow-up
+                                        </th>
+
+                                        <th>
+                                            Action
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody id="departmentTasksTable">
+
+                                    <tr>
+
+                                        <td
+                                            colspan="8"
+                                            class="empty-table"
+                                        >
+                                            No department tasks available.
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     REPORTS
+                ================================================== -->
+
+                <section
+                    id="reportsPage"
+                    class="page"
+                >
+
+                    <div class="page-header">
+
+                        <div>
+
+                            <span class="page-label">
+                                ANALYSIS
+                            </span>
+
+                            <h2>
+                                Reports & Analysis
+                            </h2>
+
+                            <p>
+                                Analyze workload and operational
+                                performance.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-grid">
+
 
                         <div class="report-card">
-
-                            <div class="report-card-icon">
-                                ▦
-                            </div>
 
                             <h3>
                                 Task Report
                             </h3>
 
                             <p>
-                                Export all operational tasks.
+                                Review all operational tasks.
                             </p>
 
                             <button
-                                class="primary-button"
                                 id="exportTasksButton"
-                                type="button"
+                                class="primary-button"
                             >
                                 Export Tasks
                             </button>
@@ -1052,22 +1498,17 @@
 
                         <div class="report-card">
 
-                            <div class="report-card-icon">
-                                ▥
-                            </div>
-
                             <h3>
                                 Department Report
                             </h3>
 
                             <p>
-                                View workload by department.
+                                Compare all 14 departments.
                             </p>
 
                             <button
-                                class="secondary-button"
                                 id="departmentReportButton"
-                                type="button"
+                                class="secondary-button"
                             >
                                 Generate Report
                             </button>
@@ -1077,54 +1518,190 @@
 
                         <div class="report-card">
 
-                            <div class="report-card-icon">
-                                ↗
-                            </div>
-
                             <h3>
                                 Performance Analysis
                             </h3>
 
                             <p>
-                                Analyze completion and overdue
-                                performance.
+                                Analyze completion and delays.
                             </p>
 
                             <button
-                                class="secondary-button"
                                 id="performanceReportButton"
-                                type="button"
+                                class="secondary-button"
                             >
-                                View Analysis
+                                Analyze
+                            </button>
+
+                        </div>
+
+
+                        <div class="report-card">
+
+                            <h3>
+                                Excel Export
+                            </h3>
+
+                            <p>
+                                Export structured operational data.
+                            </p>
+
+                            <button
+                                id="exportExcelButton"
+                                class="secondary-button"
+                            >
+                                Export Excel
                             </button>
 
                         </div>
 
                     </div>
 
-                </div>
+
+                    <!-- ANALYSIS TABLE -->
+
+                    <div class="panel">
+
+                        <div class="table-container">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            Department
+                                        </th>
+
+                                        <th>
+                                            Total
+                                        </th>
+
+                                        <th>
+                                            Open
+                                        </th>
+
+                                        <th>
+                                            In Progress
+                                        </th>
+
+                                        <th>
+                                            Blocked
+                                        </th>
+
+                                        <th>
+                                            Overdue
+                                        </th>
+
+                                        <th>
+                                            Completed
+                                        </th>
+
+                                        <th>
+                                            Completion %
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody id="analysisTable">
+
+                                    <tr>
+
+                                        <td
+                                            colspan="8"
+                                            class="empty-table"
+                                        >
+                                            No analysis data available.
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
 
 
                 <!-- =================================================
-                     SETTINGS PAGE
+                     ACTIVITY LOG
                 ================================================== -->
 
-                <div
+                <section
+                    id="activityPage"
+                    class="page"
+                >
+
+                    <div class="page-header">
+
+                        <div>
+
+                            <span class="page-label">
+                                AUDIT TRAIL
+                            </span>
+
+                            <h2>
+                                Activity Log
+                            </h2>
+
+                            <p>
+                                Track task changes and follow-up actions.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div
+                            id="activityTimeline"
+                            class="activity-timeline"
+                        >
+
+                            <div class="empty-state">
+                                No activity recorded yet.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     SETTINGS
+                ================================================== -->
+
+                <section
                     id="settingsPage"
                     class="page"
                 >
 
-                    <div class="page-introduction">
+                    <div class="page-header">
 
                         <div>
 
+                            <span class="page-label">
+                                CONFIGURATION
+                            </span>
+
                             <h2>
-                                System Settings
+                                Settings
                             </h2>
 
                             <p>
-                                Configure the operations management
-                                system.
+                                Manage system configuration.
                             </p>
 
                         </div>
@@ -1134,21 +1711,14 @@
 
                     <div class="settings-grid">
 
-                        <div class="dashboard-panel">
+
+                        <div class="panel">
 
                             <div class="panel-header">
 
-                                <div>
-
-                                    <h3>
-                                        System Information
-                                    </h3>
-
-                                    <p>
-                                        Current system configuration
-                                    </p>
-
-                                </div>
+                                <h3>
+                                    System Information
+                                </h3>
 
                             </div>
 
@@ -1171,24 +1741,11 @@
                                 <div class="settings-row">
 
                                     <span>
-                                        Version
+                                        Departments
                                     </span>
 
                                     <strong>
-                                        1.0
-                                    </strong>
-
-                                </div>
-
-
-                                <div class="settings-row">
-
-                                    <span>
-                                        Data Storage
-                                    </span>
-
-                                    <strong>
-                                        Database
+                                        14
                                     </strong>
 
                                 </div>
@@ -1201,7 +1758,20 @@
                                     </span>
 
                                     <strong>
-                                        Operations Administrator
+                                        Operations Head
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="settings-row">
+
+                                    <span>
+                                        Data Source
+                                    </span>
+
+                                    <strong id="dataSourceStatus">
+                                        Preparing
                                     </strong>
 
                                 </div>
@@ -1211,21 +1781,13 @@
                         </div>
 
 
-                        <div class="dashboard-panel">
+                        <div class="panel">
 
                             <div class="panel-header">
 
-                                <div>
-
-                                    <h3>
-                                        Data Management
-                                    </h3>
-
-                                    <p>
-                                        Manage system data and reports.
-                                    </p>
-
-                                </div>
+                                <h3>
+                                    Data Management
+                                </h3>
 
                             </div>
 
@@ -1233,19 +1795,18 @@
                             <div class="settings-actions">
 
                                 <button
+                                    id="importExcelButton"
                                     class="secondary-button"
-                                    id="exportAllDataButton"
-                                    type="button"
                                 >
-                                    Export All Data
+                                    Import Excel
                                 </button>
 
+
                                 <button
-                                    class="danger-button"
-                                    id="clearLocalDataButton"
-                                    type="button"
+                                    id="exportAllButton"
+                                    class="secondary-button"
                                 >
-                                    Clear Test Data
+                                    Export All Data
                                 </button>
 
                             </div>
@@ -1254,10 +1815,9 @@
 
                     </div>
 
-                </div>
+                </section>
 
-
-            </section>
+            </div>
 
         </main>
 
@@ -1271,30 +1831,30 @@
     <div
         id="taskModal"
         class="modal-overlay"
-        style="display: none;"
+        style="display:none;"
     >
 
         <div class="modal">
+
 
             <div class="modal-header">
 
                 <div>
 
+                    <span class="modal-label">
+                        TASK
+                    </span>
+
                     <h2 id="taskModalTitle">
                         Add New Task
                     </h2>
 
-                    <p>
-                        Enter the operational task details.
-                    </p>
-
                 </div>
+
 
                 <button
                     id="closeTaskModal"
                     class="modal-close"
-                    type="button"
-                    aria-label="Close"
                 >
                     ×
                 </button>
@@ -1306,13 +1866,16 @@
 
                 <input
                     type="hidden"
-                    id="taskId"
+                    id="editTaskId"
                 >
 
 
                 <div class="form-grid">
 
-                    <div class="form-field form-field-wide">
+
+                    <!-- TASK -->
+
+                    <div class="form-group full-width">
 
                         <label for="taskName">
                             Task *
@@ -1328,7 +1891,9 @@
                     </div>
 
 
-                    <div class="form-field">
+                    <!-- DEPARTMENT -->
+
+                    <div class="form-group">
 
                         <label for="taskDepartment">
                             Department *
@@ -1348,7 +1913,9 @@
                     </div>
 
 
-                    <div class="form-field">
+                    <!-- ASSIGNED PERSON -->
+
+                    <div class="form-group">
 
                         <label for="taskAssignedTo">
                             Assigned To *
@@ -1357,14 +1924,16 @@
                         <input
                             type="text"
                             id="taskAssignedTo"
-                            placeholder="Staff name"
+                            placeholder="Responsible person"
                             required
                         >
 
                     </div>
 
 
-                    <div class="form-field">
+                    <!-- PRIORITY -->
+
+                    <div class="form-group">
 
                         <label for="taskPriority">
                             Priority *
@@ -1379,7 +1948,10 @@
                                 High
                             </option>
 
-                            <option value="Medium" selected>
+                            <option
+                                value="Medium"
+                                selected
+                            >
                                 Medium
                             </option>
 
@@ -1392,7 +1964,9 @@
                     </div>
 
 
-                    <div class="form-field">
+                    <!-- STATUS -->
+
+                    <div class="form-group">
 
                         <label for="taskStatus">
                             Status *
@@ -1424,7 +1998,25 @@
                     </div>
 
 
-                    <div class="form-field">
+                    <!-- CREATED DATE -->
+
+                    <div class="form-group">
+
+                        <label for="taskCreatedDate">
+                            Created Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="taskCreatedDate"
+                        >
+
+                    </div>
+
+
+                    <!-- DUE DATE -->
+
+                    <div class="form-group">
 
                         <label for="taskDueDate">
                             Due Date *
@@ -1439,7 +2031,9 @@
                     </div>
 
 
-                    <div class="form-field">
+                    <!-- FOLLOW UP -->
+
+                    <div class="form-group">
 
                         <label for="taskFollowupDate">
                             Follow-up Date
@@ -1453,22 +2047,26 @@
                     </div>
 
 
-                    <div class="form-field form-field-wide">
+                    <!-- ACTION TAKEN -->
 
-                        <label for="taskFollowup">
-                            Last Follow-up / Action Taken
+                    <div class="form-group full-width">
+
+                        <label for="taskFollowupAction">
+                            Follow-up / Action Taken
                         </label>
 
                         <textarea
-                            id="taskFollowup"
-                            rows="3"
-                            placeholder="Enter the latest follow-up or action taken"
+                            id="taskFollowupAction"
+                            rows="4"
+                            placeholder="Record follow-ups, calls, messages, meetings or actions taken..."
                         ></textarea>
 
                     </div>
 
 
-                    <div class="form-field form-field-wide">
+                    <!-- REMARKS -->
+
+                    <div class="form-group full-width">
 
                         <label for="taskRemarks">
                             Remarks
@@ -1476,8 +2074,8 @@
 
                         <textarea
                             id="taskRemarks"
-                            rows="3"
-                            placeholder="Additional information"
+                            rows="4"
+                            placeholder="Additional information, dependencies or notes..."
                         ></textarea>
 
                     </div>
@@ -1489,11 +2087,12 @@
 
                     <button
                         type="button"
-                        class="secondary-button"
                         id="cancelTaskButton"
+                        class="secondary-button"
                     >
                         Cancel
                     </button>
+
 
                     <button
                         type="submit"
@@ -1512,103 +2111,30 @@
 
 
     <!-- =====================================================
-         ADD DEPARTMENT MODAL
+         NOTIFICATION
     ====================================================== -->
 
     <div
-        id="departmentModal"
-        class="modal-overlay"
-        style="display: none;"
+        id="notification"
+        class="notification"
     >
 
-        <div class="modal small-modal">
+        <strong id="notificationTitle">
+            Notification
+        </strong>
 
-            <div class="modal-header">
-
-                <div>
-
-                    <h2>
-                        Add Department
-                    </h2>
-
-                    <p>
-                        Create a new operational department.
-                    </p>
-
-                </div>
-
-                <button
-                    id="closeDepartmentModal"
-                    class="modal-close"
-                    type="button"
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-            <form id="departmentForm">
-
-                <div class="form-field">
-
-                    <label for="departmentName">
-                        Department Name *
-                    </label>
-
-                    <input
-                        type="text"
-                        id="departmentName"
-                        placeholder="Example: Warehouse"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-field">
-
-                    <label for="departmentHead">
-                        Department Head
-                    </label>
-
-                    <input
-                        type="text"
-                        id="departmentHead"
-                        placeholder="Head name"
-                    >
-
-                </div>
-
-
-                <div class="modal-footer">
-
-                    <button
-                        type="button"
-                        class="secondary-button"
-                        id="cancelDepartmentButton"
-                    >
-                        Cancel
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="primary-button"
-                    >
-                        Add Department
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
+        <span id="notificationMessage">
+            --
+        </span>
 
     </div>
 
 
     <!-- =====================================================
          JAVASCRIPT
+         
+         We will add script.js separately after you approve
+         this HTML.
     ====================================================== -->
 
     <script src="script.js"></script>
