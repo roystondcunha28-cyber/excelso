@@ -1,3 +1,168 @@
+/* =====================================================
+   OPERATIONS LOGIN SYSTEM
+===================================================== */
+
+// Universal Operations Password
+const OPERATIONS_PASSWORD = "UsedBookR@2026";
+
+
+/* -----------------------------------------------------
+   LOGIN ELEMENTS
+----------------------------------------------------- */
+
+const loginScreen = document.getElementById("loginScreen");
+const operationsApp = document.getElementById("operationsApp");
+
+const loginForm = document.getElementById("loginForm");
+const loginPassword = document.getElementById("loginPassword");
+const loginError = document.getElementById("loginError");
+
+const logoutButton = document.getElementById("logoutButton");
+
+
+/* -----------------------------------------------------
+   CHECK LOGIN SESSION
+----------------------------------------------------- */
+
+function checkLoginSession() {
+
+    const loggedIn =
+        sessionStorage.getItem("operationsLoggedIn");
+
+    if (loggedIn === "true") {
+
+        showOperationsApp();
+
+    } else {
+
+        showLoginScreen();
+
+    }
+
+}
+
+
+/* -----------------------------------------------------
+   SHOW LOGIN SCREEN
+----------------------------------------------------- */
+
+function showLoginScreen() {
+
+    if (loginScreen) {
+        loginScreen.style.display = "flex";
+    }
+
+    if (operationsApp) {
+        operationsApp.style.display = "none";
+    }
+
+}
+
+
+/* -----------------------------------------------------
+   SHOW OPERATIONS APPLICATION
+----------------------------------------------------- */
+
+function showOperationsApp() {
+
+    if (loginScreen) {
+        loginScreen.style.display = "none";
+    }
+
+    if (operationsApp) {
+        operationsApp.style.display = "block";
+    }
+
+}
+
+
+/* -----------------------------------------------------
+   LOGIN
+----------------------------------------------------- */
+
+if (loginForm) {
+
+    loginForm.addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+
+        const enteredPassword =
+            loginPassword.value;
+
+
+        if (enteredPassword === OPERATIONS_PASSWORD) {
+
+            // Save login for this browser session
+            sessionStorage.setItem(
+                "operationsLoggedIn",
+                "true"
+            );
+
+
+            // Hide error
+            loginError.classList.remove("show");
+
+
+            // Clear password
+            loginPassword.value = "";
+
+
+            // Open operations system
+            showOperationsApp();
+
+
+        } else {
+
+            // Show error
+            loginError.classList.add("show");
+
+
+            // Clear incorrect password
+            loginPassword.value = "";
+
+
+            // Put cursor back into password field
+            loginPassword.focus();
+
+        }
+
+    });
+
+}
+
+
+/* -----------------------------------------------------
+   LOGOUT
+----------------------------------------------------- */
+
+if (logoutButton) {
+
+    logoutButton.addEventListener("click", function() {
+
+        sessionStorage.removeItem(
+            "operationsLoggedIn"
+        );
+
+
+        showLoginScreen();
+
+
+        if (loginPassword) {
+            loginPassword.value = "";
+            loginPassword.focus();
+        }
+
+    });
+
+}
+
+
+/* -----------------------------------------------------
+   START LOGIN CHECK
+----------------------------------------------------- */
+
+checkLoginSession();
 /* =========================================================
    USEDBOOKR OPERATIONS CONTROL TOWER
    JAVASCRIPT - V1
