@@ -1,545 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>UsedBookR Operations Control Tower</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <!-- CSS will be added in the next step -->
-    <link rel="stylesheet" href="style.css">
+    <title>
+        UsedBookR — Operations Control Tower
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- =========================================
-         MAIN APPLICATION
-    ========================================== -->
 
-    <div class="app">
+<!-- =====================================================
+     LOGIN SCREEN
+===================================================== -->
 
-        <!-- =====================================
-             SIDEBAR
-        ====================================== -->
+<div
+    id="loginScreen"
+    class="login-screen"
+>
 
-        <aside class="sidebar">
+    <div class="login-card">
 
-            <div class="brand">
-                <div class="brand-name">UsedBookR</div>
-                <div class="brand-subtitle">OPERATIONS</div>
+        <div class="login-brand">
+
+            <div class="login-brand-name">
+                UsedBookR
             </div>
 
-            <div class="system-name">
+            <div class="login-brand-subtitle">
+                OPERATIONS CONTROL TOWER
+            </div>
+
+        </div>
+
+
+        <div class="login-divider"></div>
+
+
+        <h1>
+            Operations Login
+        </h1>
+
+        <p class="login-description">
+            Enter the universal operations password
+            to access and manage the system.
+        </p>
+
+
+        <form id="loginForm">
+
+            <div class="login-field">
+
+                <label for="loginPassword">
+                    Operations Password
+                </label>
+
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Enter password"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button"
+            >
+                Login
+            </button>
+
+
+            <div
+                id="loginError"
+                class="login-error"
+            >
+                Incorrect password. Please try again.
+            </div>
+
+        </form>
+
+
+        <div class="login-footer">
+
+            Authorized operations access only.
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MAIN APPLICATION
+===================================================== -->
+
+<div
+    id="operationsApp"
+    class="app"
+    style="display:none;"
+>
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <div class="brand-name">
+                UsedBookR
+            </div>
+
+            <div class="brand-subtitle">
+                OPERATIONS
+            </div>
+
+        </div>
+
+
+        <div class="system-name">
+
+            Operations Control Tower
+
+        </div>
+
+
+        <nav class="navigation">
+
+
+            <button
+                class="nav-item active"
+                data-view="dashboard"
+            >
+                Dashboard
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-view="tasks"
+            >
+                All Tasks
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-view="mytasks"
+            >
+                Department Tasks
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-view="followups"
+            >
+                Follow-ups
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-view="departments"
+            >
+                Departments
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-view="analysis"
+            >
+                Analysis
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-view="excel"
+            >
+                Excel / Data
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-view="settings"
+            >
+                Settings
+            </button>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <strong>
                 Operations Control Tower
-            </div>
+            </strong>
 
-            <nav class="navigation">
+            <br>
 
-                <button class="nav-item active" data-view="dashboard">
-                    Dashboard
-                </button>
+            Central monitoring and task management system.
 
-                <button class="nav-item" data-view="tasks">
-                    All Tasks
-                </button>
-
-                <button class="nav-item" data-view="mytasks">
-                    My Tasks
-                </button>
-
-                <button class="nav-item" data-view="followups">
-                    Follow-ups
-                </button>
-
-                <button class="nav-item" data-view="departments">
-                    Departments
-                </button>
-
-                <button class="nav-item" data-view="analysis">
-                    Analysis
-                </button>
-
-                <button class="nav-item" data-view="excel">
-                    Excel / Data
-                </button>
-
-                <button class="nav-item" data-view="settings">
-                    Settings
-                </button>
-
-            </nav>
-
-            <div class="sidebar-footer">
-                <strong>Operations System V1</strong>
-                <br>
-                <span>Internal Management System</span>
-            </div>
-
-        </aside>
+        </div>
 
 
-        <!-- =====================================
-             MAIN CONTENT
-        ====================================== -->
+    </aside>
 
-        <main class="main-content">
 
-            <!-- TOP HEADER -->
 
-            <header class="top-header">
+    <!-- =================================================
+         MAIN CONTENT
+    ================================================== -->
 
-                <div class="header-information">
+    <main class="main-content">
 
-                    <div class="company-label">
-                        USEDBOOKR
-                    </div>
 
-                    <h1 id="page-title">
-                        Operations Dashboard
-                    </h1>
+        <!-- =================================================
+             TOP HEADER
+        ================================================== -->
 
-                    <p id="page-description">
-                        Observe → Understand → Coordinate → Follow up → Escalate → Verify → Close
-                    </p>
+        <header class="top-header">
 
+
+            <div class="header-information">
+
+                <div class="company-label">
+                    USEDBOOKR
                 </div>
 
+
+                <h1 id="page-title">
+                    Operations Dashboard
+                </h1>
+
+
+                <p id="page-description">
+                    Observe → Understand → Coordinate
+                    → Follow up → Escalate → Verify → Close
+                </p>
+
+            </div>
+
+
+            <div
+                class="header-actions"
+                style="
+                    display:flex;
+                    gap:8px;
+                    align-items:center;
+                "
+            >
+
                 <button
-                    class="new-task-button"
                     id="newTaskButton"
+                    class="new-task-button"
                 >
                     + New Task
                 </button>
 
-            </header>
+
+                <button
+                    id="logoutButton"
+                    class="secondary-button"
+                >
+                    Logout
+                </button>
+
+            </div>
 
 
-            <!-- =====================================
-                 DASHBOARD
-            ====================================== -->
+        </header>
 
-            <section
-                id="dashboard"
-                class="page-section active-section"
-            >
 
-                <!-- KPI CARDS -->
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <section
+            id="dashboard"
+            class="page-section active-section"
+        >
+
+
+            <div class="dashboard-cards">
+
 
                 <div
-                    class="dashboard-cards"
-                    id="dashboardCards"
+                    class="dashboard-card blue-card"
                 >
 
-                    <div class="dashboard-card blue-card">
-                        <div class="card-label">
-                            ACTIVE
-                        </div>
-
-                        <div
-                            class="card-number"
-                            id="activeCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="card-description">
-                            Open tasks
-                        </div>
+                    <div class="card-label">
+                        ACTIVE TASKS
                     </div>
 
-
-                    <div class="dashboard-card red-card">
-                        <div class="card-label">
-                            OVERDUE
-                        </div>
-
-                        <div
-                            class="card-number"
-                            id="overdueCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="card-description">
-                            Deadline missed
-                        </div>
+                    <div
+                        id="activeCount"
+                        class="card-number"
+                    >
+                        0
                     </div>
 
-
-                    <div class="dashboard-card orange-card">
-                        <div class="card-label">
-                            DUE TODAY
-                        </div>
-
-                        <div
-                            class="card-number"
-                            id="dueTodayCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="card-description">
-                            Requires attention
-                        </div>
-                    </div>
-
-
-                    <div class="dashboard-card red-card">
-                        <div class="card-label">
-                            BLOCKED
-                        </div>
-
-                        <div
-                            class="card-number"
-                            id="blockedCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="card-description">
-                            Cannot proceed
-                        </div>
-                    </div>
-
-
-                    <div class="dashboard-card orange-card">
-                        <div class="card-label">
-                            WAITING
-                        </div>
-
-                        <div
-                            class="card-number"
-                            id="waitingCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="card-description">
-                            Waiting for action
-                        </div>
-                    </div>
-
-
-                    <div class="dashboard-card red-card">
-                        <div class="card-label">
-                            P0 CRITICAL
-                        </div>
-
-                        <div
-                            class="card-number"
-                            id="criticalCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="card-description">
-                            Critical priority
-                        </div>
-                    </div>
-
-
-                    <div class="dashboard-card green-card">
-                        <div class="card-label">
-                            COMPLETED
-                        </div>
-
-                        <div
-                            class="card-number"
-                            id="completedCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="card-description">
-                            Finished tasks
-                        </div>
-                    </div>
-
-
-                    <div class="dashboard-card blue-card">
-                        <div class="card-label">
-                            FOLLOW-UPS
-                        </div>
-
-                        <div
-                            class="card-number"
-                            id="followupCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="card-description">
-                            Follow-up required
-                        </div>
+                    <div class="card-description">
+                        Currently open tasks
                     </div>
 
                 </div>
 
 
-                <!-- =================================
-                     DASHBOARD LOWER AREA
-                ================================== -->
+                <div
+                    class="dashboard-card red-card"
+                >
 
-                <div class="dashboard-grid">
-
-
-                    <!-- DEPARTMENT HEALTH -->
-
-                    <div class="content-panel">
-
-                        <div class="panel-header">
-
-                            <div>
-                                <h2>Department Health</h2>
-
-                                <p>
-                                    Current workload by department
-                                </p>
-                            </div>
-
-                        </div>
-
-
-                        <div class="table-container">
-
-                            <table>
-
-                                <thead>
-
-                                    <tr>
-                                        <th>Department</th>
-                                        <th>Open</th>
-                                        <th>Overdue</th>
-                                        <th>Blocked</th>
-                                        <th>Waiting</th>
-                                        <th>Completed</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody id="departmentHealthTable">
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
+                    <div class="card-label">
+                        OVERDUE
                     </div>
 
+                    <div
+                        id="overdueCount"
+                        class="card-number"
+                    >
+                        0
+                    </div>
 
-                    <!-- NEEDS ATTENTION -->
-
-                    <div class="content-panel">
-
-                        <div class="panel-header">
-
-                            <div>
-                                <h2>Needs Attention</h2>
-
-                                <p>
-                                    Critical, overdue and blocked work
-                                </p>
-                            </div>
-
-                        </div>
-
-
-                        <div
-                            id="attentionList"
-                            class="attention-list"
-                        >
-
-                            <div class="empty-state">
-                                No urgent tasks.
-                            </div>
-
-                        </div>
-
+                    <div class="card-description">
+                        Tasks past deadline
                     </div>
 
                 </div>
 
-            </section>
+
+                <div
+                    class="dashboard-card orange-card"
+                >
+
+                    <div class="card-label">
+                        DUE TODAY
+                    </div>
+
+                    <div
+                        id="dueTodayCount"
+                        class="card-number"
+                    >
+                        0
+                    </div>
+
+                    <div class="card-description">
+                        Tasks requiring attention
+                    </div>
+
+                </div>
 
 
-            <!-- =====================================
-                 ALL TASKS
-            ====================================== -->
+                <div
+                    class="dashboard-card green-card"
+                >
 
-            <section
-                id="tasks"
-                class="page-section"
-            >
+                    <div class="card-label">
+                        COMPLETED
+                    </div>
+
+                    <div
+                        id="completedCount"
+                        class="card-number"
+                    >
+                        0
+                    </div>
+
+                    <div class="card-description">
+                        Closed tasks
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="dashboard-grid">
+
+
+                <!-- DEPARTMENT HEALTH -->
 
                 <div class="content-panel">
 
                     <div class="panel-header">
 
                         <div>
-                            <h2>All Tasks</h2>
+
+                            <h2>
+                                Department Health
+                            </h2>
 
                             <p>
-                                Central task register
+                                Current workload and exceptions
                             </p>
-                        </div>
 
-                        <button
-                            class="new-task-button"
-                            id="newTaskButton2"
-                        >
-                            + New Task
-                        </button>
-
-                    </div>
-
-
-                    <!-- FILTER BAR -->
-
-                    <div class="filter-bar">
-
-                        <input
-                            type="text"
-                            id="taskSearch"
-                            placeholder="Search task, owner, department..."
-                        >
-
-                        <select id="departmentFilter">
-                            <option value="">All Departments</option>
-                        </select>
-
-                        <select id="priorityFilter">
-                            <option value="">All Priorities</option>
-                        </select>
-
-                        <select id="statusFilter">
-                            <option value="">All Statuses</option>
-                        </select>
-
-                        <button
-                            class="secondary-button"
-                            id="clearFilters"
-                        >
-                            Clear
-                        </button>
-
-                    </div>
-
-
-                    <!-- TASK TABLE -->
-
-                    <div class="table-container">
-
-                        <table>
-
-                            <thead>
-
-                                <tr>
-                                    <th>Task ID</th>
-                                    <th>Task / Issue</th>
-                                    <th>Department</th>
-                                    <th>Priority</th>
-                                    <th>Owner</th>
-                                    <th>Deadline</th>
-                                    <th>Status</th>
-                                    <th>Progress</th>
-                                    <th>Action</th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody id="taskTable">
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =====================================
-                 MY TASKS
-            ====================================== -->
-
-            <section
-                id="mytasks"
-                class="page-section"
-            >
-
-                <div class="content-panel">
-
-                    <div class="panel-header">
-
-                        <div>
-                            <h2>My Department Tasks</h2>
-
-                            <p>
-                                Department-level task monitoring
-                            </p>
-                        </div>
-
-                        <select id="myDepartment">
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="table-container">
-
-                        <table>
-
-                            <thead>
-
-                                <tr>
-                                    <th>Task ID</th>
-                                    <th>Task</th>
-                                    <th>Priority</th>
-                                    <th>Owner</th>
-                                    <th>Deadline</th>
-                                    <th>Status</th>
-                                    <th>Next Action</th>
-                                    <th>Action</th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody id="myTaskTable">
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =====================================
-                 FOLLOW UPS
-            ====================================== -->
-
-            <section
-                id="followups"
-                class="page-section"
-            >
-
-                <div class="content-panel">
-
-                    <div class="panel-header">
-
-                        <div>
-                            <h2>Follow-up Queue</h2>
-
-                            <p>
-                                Follow-ups due today or overdue
-                            </p>
                         </div>
 
                     </div>
@@ -552,20 +436,39 @@
                             <thead>
 
                                 <tr>
-                                    <th>Task</th>
-                                    <th>Department</th>
-                                    <th>Priority</th>
-                                    <th>Follow-up Date</th>
-                                    <th>Next Action</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+
+                                    <th>
+                                        Department
+                                    </th>
+
+                                    <th>
+                                        Open
+                                    </th>
+
+                                    <th>
+                                        Overdue
+                                    </th>
+
+                                    <th>
+                                        Blocked
+                                    </th>
+
+                                    <th>
+                                        Waiting
+                                    </th>
+
+                                    <th>
+                                        Completed
+                                    </th>
+
                                 </tr>
 
                             </thead>
 
-                            <tbody id="followupTable">
 
-                            </tbody>
+                            <tbody
+                                id="departmentHealthTable"
+                            ></tbody>
 
                         </table>
 
@@ -573,730 +476,1208 @@
 
                 </div>
 
-            </section>
 
 
-            <!-- =====================================
-                 DEPARTMENTS
-            ====================================== -->
-
-            <section
-                id="departments"
-                class="page-section"
-            >
+                <!-- NEEDS ATTENTION -->
 
                 <div class="content-panel">
 
                     <div class="panel-header">
 
                         <div>
-                            <h2>Department Overview</h2>
+
+                            <h2>
+                                Needs Attention
+                            </h2>
 
                             <p>
-                                Workload and exception monitoring
+                                Critical and exception tasks
                             </p>
-                        </div>
 
-                    </div>
-
-
-                    <div class="table-container">
-
-                        <table>
-
-                            <thead>
-
-                                <tr>
-                                    <th>Department</th>
-                                    <th>Open</th>
-                                    <th>P0</th>
-                                    <th>Overdue</th>
-                                    <th>Blocked</th>
-                                    <th>Waiting</th>
-                                    <th>Completed</th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody id="departmentTable">
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =====================================
-                 ANALYSIS
-            ====================================== -->
-
-            <section
-                id="analysis"
-                class="page-section"
-            >
-
-                <div class="analysis-grid">
-
-                    <!-- PRIORITY ANALYSIS -->
-
-                    <div class="content-panel">
-
-                        <div class="panel-header">
-
-                            <div>
-                                <h2>Priority Analysis</h2>
-
-                                <p>
-                                    Workload by priority
-                                </p>
-                            </div>
-
-                        </div>
-
-
-                        <div class="table-container">
-
-                            <table>
-
-                                <thead>
-
-                                    <tr>
-                                        <th>Priority</th>
-                                        <th>Open</th>
-                                        <th>Overdue</th>
-                                        <th>Blocked</th>
-                                        <th>Completed</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody id="priorityAnalysisTable">
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- STATUS ANALYSIS -->
-
-                    <div class="content-panel">
-
-                        <div class="panel-header">
-
-                            <div>
-                                <h2>Status Analysis</h2>
-
-                                <p>
-                                    Overall task distribution
-                                </p>
-                            </div>
-
-                        </div>
-
-
-                        <div class="table-container">
-
-                            <table>
-
-                                <thead>
-
-                                    <tr>
-                                        <th>Status</th>
-                                        <th>Total</th>
-                                        <th>Percentage</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody id="statusAnalysisTable">
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- OPERATIONAL EXCEPTIONS -->
-
-                <div class="content-panel">
-
-                    <div class="panel-header">
-
-                        <div>
-                            <h2>Operational Exceptions</h2>
-
-                            <p>
-                                Missing or attention-required information
-                            </p>
                         </div>
 
                     </div>
 
 
                     <div
-                        id="exceptionList"
-                        class="exception-list"
-                    >
+                        id="attentionList"
+                        class="attention-list"
+                    ></div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- QUICK STATUS -->
+
+            <div class="content-panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            Operations Snapshot
+                        </h2>
+
+                        <p>
+                            Real-time task indicators
+                        </p>
 
                     </div>
 
                 </div>
 
-            </section>
+
+                <div class="dashboard-cards">
 
 
-            <!-- =====================================
-                 EXCEL / DATA
-            ====================================== -->
+                    <div class="dashboard-card">
 
-            <section
-                id="excel"
-                class="page-section"
-            >
+                        <div class="card-label">
+                            BLOCKED
+                        </div>
 
-                <div class="two-column-grid">
-
-                    <div class="content-panel">
-
-                        <h2>Export Tasks</h2>
-
-                        <p>
-                            Export the central task register in
-                            Excel-compatible CSV format.
-                        </p>
-
-                        <button
-                            class="primary-button"
-                            id="exportTasks"
+                        <div
+                            id="blockedCount"
+                            class="card-number"
                         >
-                            Export Tasks
-                        </button>
+                            0
+                        </div>
 
                     </div>
 
 
-                    <div class="content-panel">
+                    <div class="dashboard-card">
 
-                        <h2>Import Data</h2>
+                        <div class="card-label">
+                            WAITING
+                        </div>
 
-                        <p>
-                            Import your existing task data later.
-                            Production version will support structured
-                            Excel import.
-                        </p>
-
-                        <input
-                            type="file"
-                            id="importFile"
-                            accept=".csv,.xlsx"
+                        <div
+                            id="waitingCount"
+                            class="card-number"
                         >
+                            0
+                        </div>
 
                     </div>
+
+
+                    <div class="dashboard-card">
+
+                        <div class="card-label">
+                            CRITICAL P0
+                        </div>
+
+                        <div
+                            id="criticalCount"
+                            class="card-number"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-card">
+
+                        <div class="card-label">
+                            FOLLOW-UPS DUE
+                        </div>
+
+                        <div
+                            id="followupCount"
+                            class="card-number"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
 
                 </div>
 
-            </section>
+            </div>
 
 
-            <!-- =====================================
-                 SETTINGS
-            ====================================== -->
+        </section>
 
-            <section
-                id="settings"
-                class="page-section"
-            >
 
-                <div class="content-panel">
 
-                    <h2>System Settings</h2>
+        <!-- =================================================
+             ALL TASKS
+        ================================================== -->
 
-                    <p>
-                        This is the first functional version of the
-                        Operations Control Tower.
-                    </p>
+        <section
+            id="tasks"
+            class="page-section"
+        >
 
-                    <hr>
+            <div class="content-panel">
 
-                    <h3>Current V1 storage</h3>
 
-                    <p>
-                        Task data is stored locally in the browser.
-                    </p>
+                <div class="panel-header">
 
-                    <p>
-                        The production version should use a central
-                        database so every department head can enter
-                        tasks and management can monitor them centrally.
-                    </p>
+                    <div>
+
+                        <h2>
+                            Central Task Register
+                        </h2>
+
+                        <p>
+                            All operational tasks
+                        </p>
+
+                    </div>
+
 
                     <button
-                        class="danger-button"
-                        id="resetData"
+                        id="newTaskButton2"
+                        class="primary-button"
                     >
-                        Reset Demo Data
+                        + New Task
                     </button>
 
                 </div>
 
-            </section>
 
-        </main>
+                <div class="filter-bar">
 
-    </div>
+                    <input
+                        type="text"
+                        id="taskSearch"
+                        placeholder="Search tasks, owners, departments..."
+                    >
 
 
-    <!-- =========================================
-         CREATE / EDIT TASK MODAL
-    ========================================== -->
+                    <select
+                        id="departmentFilter"
+                    ></select>
 
-    <div
-        class="modal-overlay"
-        id="taskModal"
-    >
 
-        <div class="task-modal">
+                    <select
+                        id="priorityFilter"
+                    ></select>
 
-            <div class="modal-header">
 
-                <div>
-                    <div class="company-label">
-                        TASK RECORD
-                    </div>
+                    <select
+                        id="statusFilter"
+                    ></select>
 
-                    <h2 id="modalTitle">
-                        Create New Task
-                    </h2>
+
+                    <button
+                        id="clearFilters"
+                        class="secondary-button"
+                    >
+                        Clear
+                    </button>
+
+
+                    <button
+                        id="exportTasks"
+                        class="secondary-button"
+                    >
+                        Export CSV
+                    </button>
+
                 </div>
 
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Task ID
+                                </th>
+
+                                <th>
+                                    Task
+                                </th>
+
+                                <th>
+                                    Department
+                                </th>
+
+                                <th>
+                                    Priority
+                                </th>
+
+                                <th>
+                                    Owner
+                                </th>
+
+                                <th>
+                                    Deadline
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Progress
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="taskTable"
+                        ></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             DEPARTMENT TASKS
+        ================================================== -->
+
+        <section
+            id="mytasks"
+            class="page-section"
+        >
+
+            <div class="content-panel">
+
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            Department Tasks
+                        </h2>
+
+                        <p>
+                            View tasks for a selected department
+                        </p>
+
+                    </div>
+
+
+                    <select
+                        id="myDepartment"
+                    ></select>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Task ID
+                                </th>
+
+                                <th>
+                                    Task
+                                </th>
+
+                                <th>
+                                    Priority
+                                </th>
+
+                                <th>
+                                    Owner
+                                </th>
+
+                                <th>
+                                    Deadline
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Next Action
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="myTaskTable"
+                        ></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             FOLLOW-UPS
+        ================================================== -->
+
+        <section
+            id="followups"
+            class="page-section"
+        >
+
+            <div class="content-panel">
+
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            Follow-up Queue
+                        </h2>
+
+                        <p>
+                            Follow-ups due today or overdue
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Task
+                                </th>
+
+                                <th>
+                                    Department
+                                </th>
+
+                                <th>
+                                    Priority
+                                </th>
+
+                                <th>
+                                    Follow-up
+                                </th>
+
+                                <th>
+                                    Next Action
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="followupTable"
+                        ></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             DEPARTMENTS
+        ================================================== -->
+
+        <section
+            id="departments"
+            class="page-section"
+        >
+
+            <div class="content-panel">
+
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            Department Overview
+                        </h2>
+
+                        <p>
+                            Department workload and exceptions
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Department
+                                </th>
+
+                                <th>
+                                    Open
+                                </th>
+
+                                <th>
+                                    P0
+                                </th>
+
+                                <th>
+                                    Overdue
+                                </th>
+
+                                <th>
+                                    Blocked
+                                </th>
+
+                                <th>
+                                    Waiting
+                                </th>
+
+                                <th>
+                                    Completed
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="departmentTable"
+                        ></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ANALYSIS
+        ================================================== -->
+
+        <section
+            id="analysis"
+            class="page-section"
+        >
+
+
+            <div class="analysis-grid">
+
+
+                <div class="content-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h2>
+                                Priority Analysis
+                            </h2>
+
+                            <p>
+                                Task distribution by priority
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Priority
+                                    </th>
+
+                                    <th>
+                                        Open
+                                    </th>
+
+                                    <th>
+                                        Overdue
+                                    </th>
+
+                                    <th>
+                                        Blocked
+                                    </th>
+
+                                    <th>
+                                        Completed
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody
+                                id="priorityAnalysisTable"
+                            ></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="content-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h2>
+                                Status Analysis
+                            </h2>
+
+                            <p>
+                                Overall task status
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Status
+                                    </th>
+
+                                    <th>
+                                        Count
+                                    </th>
+
+                                    <th>
+                                        %
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody
+                                id="statusAnalysisTable"
+                            ></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="content-panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            Operational Exceptions
+                        </h2>
+
+                        <p>
+                            Data and process gaps requiring attention
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="exceptionList"
+                    class="exception-list"
+                ></div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             EXCEL / DATA
+        ================================================== -->
+
+        <section
+            id="excel"
+            class="page-section"
+        >
+
+            <div class="content-panel">
+
+                <h2>
+                    Excel / Data
+                </h2>
+
+                <p>
+                    Export the current operational task
+                    register into a CSV file that can
+                    be opened in Microsoft Excel.
+                </p>
+
+
                 <button
-                    class="close-modal"
-                    id="closeTaskModal"
+                    id="exportTasks2"
+                    class="primary-button"
+                    onclick="document.getElementById('exportTasks').click()"
                 >
-                    ×
+                    Export Task Register
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             SETTINGS
+        ================================================== -->
+
+        <section
+            id="settings"
+            class="page-section"
+        >
+
+            <div class="content-panel">
+
+                <h2>
+                    System Settings
+                </h2>
+
+                <p>
+                    Current version uses browser storage
+                    for task data.
+                </p>
+
+
+                <hr>
+
+
+                <h3>
+                    Data Management
+                </h3>
+
+                <p>
+                    Resetting the demo data will remove
+                    current browser-stored tasks and
+                    restore the sample operations data.
+                </p>
+
+
+                <button
+                    id="resetData"
+                    class="danger-button"
+                >
+                    Reset Demo Data
+                </button>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- =====================================================
+     TASK MODAL
+===================================================== -->
+
+<div
+    id="taskModal"
+    class="modal-overlay"
+>
+
+
+    <div class="task-modal">
+
+
+        <div class="modal-header">
+
+
+            <div>
+
+                <div
+                    class="company-label"
+                >
+                    OPERATIONS CONTROL TOWER
+                </div>
+
+
+                <h2 id="modalTitle">
+                    Create New Task
+                </h2>
+
+            </div>
+
+
+            <button
+                id="closeTaskModal"
+                class="close-modal"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+
+        <form id="taskForm">
+
+
+            <input
+                type="hidden"
+                id="taskId"
+            >
+
+
+            <div class="form-grid">
+
+
+                <div class="form-field full-width">
+
+                    <label for="taskName">
+                        Task / Issue *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskName"
+                        required
+                        placeholder="Enter task or issue"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskDepartment">
+                        Department *
+                    </label>
+
+                    <select
+                        id="taskDepartment"
+                        required
+                    ></select>
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskArea">
+                        Area / Project
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskArea"
+                        placeholder="Project or work area"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskType">
+                        Task Type
+                    </label>
+
+                    <select
+                        id="taskType"
+                    ></select>
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskPriority">
+                        Priority
+                    </label>
+
+                    <select
+                        id="taskPriority"
+                    ></select>
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskOwner">
+                        Task Owner *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskOwner"
+                        required
+                        placeholder="Person responsible"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskCoordinator">
+                        Coordinator
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskCoordinator"
+                        placeholder="Coordinator / Operations"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskRaised">
+                        Date Raised
+                    </label>
+
+                    <input
+                        type="date"
+                        id="taskRaised"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskDeadline">
+                        Deadline
+                    </label>
+
+                    <input
+                        type="date"
+                        id="taskDeadline"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskStatus">
+                        Status
+                    </label>
+
+                    <select
+                        id="taskStatus"
+                    ></select>
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskProgress">
+                        Progress %
+                    </label>
+
+                    <input
+                        type="number"
+                        id="taskProgress"
+                        min="0"
+                        max="100"
+                        value="0"
+                    >
+
+                </div>
+
+
+                <div class="form-field full-width">
+
+                    <label for="taskDependency">
+                        Dependency / Waiting For
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskDependency"
+                        placeholder="Person, team, approval, information, etc."
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskFollowup">
+                        Next Follow-up
+                    </label>
+
+                    <input
+                        type="date"
+                        id="taskFollowup"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskEscalation">
+                        Escalation
+                    </label>
+
+                    <select id="taskEscalation">
+
+                        <option>
+                            None
+                        </option>
+
+                        <option>
+                            Monitor
+                        </option>
+
+                        <option>
+                            Management Attention
+                        </option>
+
+                        <option>
+                            Urgent Escalation
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-field full-width">
+
+                    <label for="taskNextAction">
+                        Next Action *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskNextAction"
+                        required
+                        placeholder="What needs to happen next?"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskVerification">
+                        Verification
+                    </label>
+
+                    <select id="taskVerification">
+
+                        <option>
+                            Not Required
+                        </option>
+
+                        <option>
+                            Pending
+                        </option>
+
+                        <option>
+                            Verified
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskVerificationOwner">
+                        Verification Owner
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskVerificationOwner"
+                        placeholder="Person verifying completion"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskSource">
+                        Source
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskSource"
+                        placeholder="Meeting, customer, management, etc."
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="taskOutcome">
+                        Result / Outcome
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskOutcome"
+                        placeholder="Final result"
+                    >
+
+                </div>
+
+
+                <div class="form-field full-width">
+
+                    <label for="taskNotes">
+                        Notes
+                    </label>
+
+                    <textarea
+                        id="taskNotes"
+                        placeholder="Additional information"
+                    ></textarea>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    id="cancelTask"
+                    class="secondary-button"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                >
+                    Save Task
                 </button>
 
             </div>
 
 
-            <form id="taskForm">
+        </form>
 
-                <input
-                    type="hidden"
-                    id="taskId"
-                >
-
-
-                <div class="form-grid">
-
-
-                    <!-- TASK -->
-
-                    <div class="form-field full-width">
-
-                        <label>
-                            Task / Issue *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="taskName"
-                            required
-                            placeholder="Enter the task or issue"
-                        >
-
-                    </div>
-
-
-                    <!-- DEPARTMENT -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Department *
-                        </label>
-
-                        <select
-                            id="taskDepartment"
-                            required
-                        >
-                        </select>
-
-                    </div>
-
-
-                    <!-- AREA -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Area / Project
-                        </label>
-
-                        <input
-                            type="text"
-                            id="taskArea"
-                            placeholder="Project or functional area"
-                        >
-
-                    </div>
-
-
-                    <!-- TASK TYPE -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Task Type
-                        </label>
-
-                        <select id="taskType">
-                        </select>
-
-                    </div>
-
-
-                    <!-- PRIORITY -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Priority *
-                        </label>
-
-                        <select
-                            id="taskPriority"
-                            required
-                        >
-                        </select>
-
-                    </div>
-
-
-                    <!-- OWNER -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Owner *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="taskOwner"
-                            required
-                            placeholder="Person responsible"
-                        >
-
-                    </div>
-
-
-                    <!-- COORDINATOR -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Coordinator
-                        </label>
-
-                        <input
-                            type="text"
-                            id="taskCoordinator"
-                            placeholder="Coordinator"
-                        >
-
-                    </div>
-
-
-                    <!-- DATE RAISED -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Date Raised
-                        </label>
-
-                        <input
-                            type="date"
-                            id="taskRaised"
-                        >
-
-                    </div>
-
-
-                    <!-- DEADLINE -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Deadline *
-                        </label>
-
-                        <input
-                            type="date"
-                            id="taskDeadline"
-                            required
-                        >
-
-                    </div>
-
-
-                    <!-- STATUS -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Status *
-                        </label>
-
-                        <select
-                            id="taskStatus"
-                            required
-                        >
-                        </select>
-
-                    </div>
-
-
-                    <!-- PROGRESS -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Progress %
-                        </label>
-
-                        <input
-                            type="number"
-                            id="taskProgress"
-                            min="0"
-                            max="100"
-                            value="0"
-                        >
-
-                    </div>
-
-
-                    <!-- DEPENDENCY -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Dependency / Waiting For
-                        </label>
-
-                        <input
-                            type="text"
-                            id="taskDependency"
-                            placeholder="Person, vendor, customer, system..."
-                        >
-
-                    </div>
-
-
-                    <!-- FOLLOW UP -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Next Follow-up
-                        </label>
-
-                        <input
-                            type="date"
-                            id="taskFollowup"
-                        >
-
-                    </div>
-
-
-                    <!-- NEXT ACTION -->
-
-                    <div class="form-field full-width">
-
-                        <label>
-                            Next Action *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="taskNextAction"
-                            required
-                            placeholder="What should happen next?"
-                        >
-
-                    </div>
-
-
-                    <!-- ESCALATION -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Escalation
-                        </label>
-
-                        <select id="taskEscalation">
-
-                            <option value="None">
-                                None
-                            </option>
-
-                            <option value="Monitor">
-                                Monitor
-                            </option>
-
-                            <option value="Escalated">
-                                Escalated
-                            </option>
-
-                            <option value="Management Attention">
-                                Management Attention
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- VERIFICATION -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Verification Status
-                        </label>
-
-                        <select id="taskVerification">
-
-                            <option value="Not Required">
-                                Not Required
-                            </option>
-
-                            <option value="Pending">
-                                Pending
-                            </option>
-
-                            <option value="Verified">
-                                Verified
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- VERIFICATION OWNER -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Verification Owner
-                        </label>
-
-                        <input
-                            type="text"
-                            id="taskVerificationOwner"
-                        >
-
-                    </div>
-
-
-                    <!-- SOURCE -->
-
-                    <div class="form-field">
-
-                        <label>
-                            Source
-                        </label>
-
-                        <input
-                            type="text"
-                            id="taskSource"
-                            placeholder="Meeting / Email / WhatsApp / System"
-                        >
-
-                    </div>
-
-
-                    <!-- OUTCOME -->
-
-                    <div class="form-field full-width">
-
-                        <label>
-                            Result / Outcome
-                        </label>
-
-                        <textarea
-                            id="taskOutcome"
-                            placeholder="Final result"
-                        ></textarea>
-
-                    </div>
-
-
-                    <!-- NOTES -->
-
-                    <div class="form-field full-width">
-
-                        <label>
-                            Notes
-                        </label>
-
-                        <textarea
-                            id="taskNotes"
-                            placeholder="Additional information"
-                        ></textarea>
-
-                    </div>
-
-                </div>
-
-
-                <!-- FORM BUTTONS -->
-
-                <div class="modal-actions">
-
-                    <button
-                        type="button"
-                        class="secondary-button"
-                        id="cancelTask"
-                    >
-                        Cancel
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="primary-button"
-                    >
-                        Save Task
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
 
     </div>
 
+</div>
 
-    <!-- JavaScript will be added after you approve this HTML -->
-    <script src="app.js"></script>
+
+
+<script src="app.js"></script>
+
 
 </body>
+
 </html>
