@@ -1,338 +1,1302 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>EXCELSO'26 | Milagres College</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>UsedBookR Operations Control Tower</title>
+
+    <!-- CSS will be added in the next step -->
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div id="preloader" class="preloader">
-    <div class="preloader-grid"></div>
-    <div class="preloader-content">
-        <div class="preloader-3d">
-            <div class="cube">
-                <span class="cube-face face-front">₹</span>
-                <span class="cube-face face-back">%</span>
-                <span class="cube-face face-right">&lt;/&gt;</span>
-                <span class="cube-face face-left">▲</span>
-                <span class="cube-face face-top">Σ</span>
-                <span class="cube-face face-bottom">$</span>
-            </div>
-            <div class="orbit-ring orbit-ring-1"></div>
-            <div class="orbit-ring orbit-ring-2"></div>
-        </div>
-        <div class="preloader-bar-track">
-            <div class="preloader-bar-fill" id="preloaderFill"></div>
-        </div>
-        <div class="preloader-meta">
-            <span class="preloader-label">INITIALIZING EXCELSO'26</span>
-            <span class="preloader-percent" id="preloaderPercent">00%</span>
-        </div>
-        <div class="preloader-log" id="preloaderLog">booting systems&hellip;</div>
-    </div>
-</div>
+    <!-- =========================================
+         MAIN APPLICATION
+    ========================================== -->
 
-<div class="abyss-bg"></div>
-<div class="particles"></div>
+    <div class="app">
 
-<nav class="navbar">
-    <div class="logo">
-        <img src="sexcelso-logo.png" class="college-logo-small" alt="Excelso Logo">
-        <span class="navbar-title">EXCELSO'26</span>
-    </div>
-    <a href="https://www.instagram.com/_excelso26_?igsh=MXY4ajl4YzA3enVlag%3D%3D&utm_source=qr" target="_blank" class="instagram-link">
-        <img src="instagram-logo.png" class="instagram-icon" alt="Instagram"> <span>@excelso_2026_</span>
-    </a>
-</nav>
+        <!-- =====================================
+             SIDEBAR
+        ====================================== -->
 
-<header class="site-header">
-    <div class="header-glow"></div>
-    <div class="caustics"></div>
-    <div class="depth-rings" aria-hidden="true">
-        <span></span><span></span><span></span><span></span>
-    </div>
-    <svg class="hero-rays" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-            <linearGradient id="rayGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#5fe3f0" stop-opacity="0.35"/>
-                <stop offset="100%" stop-color="#5fe3f0" stop-opacity="0"/>
-            </linearGradient>
-        </defs>
-        <polygon class="ray ray-1" points="380,0 460,0 620,700 280,700" fill="url(#rayGrad)"/>
-        <polygon class="ray ray-2" points="560,0 660,0 760,700 420,700" fill="url(#rayGrad)"/>
-        <polygon class="ray ray-3" points="740,0 820,0 980,700 640,700" fill="url(#rayGrad)"/>
-    </svg>
-    <div class="bubbles" aria-hidden="true"></div>
+        <aside class="sidebar">
 
-    <div class="header-top">
-        <img src="milagres-logo.PNG" class="college-logo-small" alt="Milagres College Logo">
-        <div class="college-info">Milagres College, Hampankatta, Mangaluru &ndash; 575001</div>
-    </div>
-
-    <div class="department-line">
-        <span class="eyebrow-badge">National-Level Fest &middot; Commerce &amp; Management</span><br>
-        Department of Commerce &amp; Management
-        <span class="presents">Presents</span>
-    </div>
-
-    <div class="excelso-logo-container">
-        <img src="excelso-logo.PNG" class="excelso-logo" alt="Excelso Logo">
-    </div>
-
-    <div class="hero-details">7th March 2026 &nbsp;|&nbsp; Milagres College Auditorium</div>
-
-    <div id="countdown" class="countdown-box"></div>
-
-    <div class="scroll-cue" aria-hidden="true"><span></span></div>
-</header>
-
-<!-- ABOUT -->
-<section id="about" class="about-section">
-    <div class="glass-panel fade-in">
-        <h2>About EXCELSO'26</h2>
-        <p>EXCELSO'26 is a national-level platform showcasing talent in commerce, management, marketing, finance, strategy, creativity, and leadership through competitive and engaging events.</p>
-    </div>
-    <div class="glass-panel fade-in">
-        <h2>About Milagres College</h2>
-        <p>Milagres College, Mangaluru, established in 1848, is one of the oldest and reputed institutions in the region. Managed by the Catholic Board of Education and affiliated to Mangalore University, the college offers quality higher education with a focus on academic excellence, holistic development, and values-based learning.</p>
-    </div>
-</section>
-
-<!-- GENERAL RULES -->
-<section class="rules-section fade-in">
-    <h2 class="gradient-text">General Rules &amp; Guidelines</h2>
-    <ol>
-        <li>No Registration Fees Involved</li>
-        <li>Each college may register a maximum of eight (8) participants and only one entry per event.</li>
-        <li>Participants must carry their college ID card and an official permission letter from their institution.</li>
-        <li>Participants are required to bring their own laptop, pen drive, and internet dongle (if needed).</li>
-        <li>All teams must report to the venue by 8:30 a.m. on the day of the event.</li>
-        <li>To be considered for the Overall Championship, participation in all events is mandatory.</li>
-        <li>Any pre-assignment task, if applicable, will be communicated the night before the event.</li>
-        <li>Food and refreshments will be provided to all registered participants.</li>
-        <li>The judges' decision shall be final and binding in all matters. Any form of misconduct or indiscipline will result in immediate disqualification of the team.</li>
-        <li>The organizing committee reserves the right to modify rules or schedules, and is not responsible for loss or damage of personal belongings.</li>
-        <li>Participants must confirm registration with event coordinators via phone or email.</li>
-    </ol>
-</section>
-
-<!-- EVENTS -->
-<section id="events" class="event-section">
-    <h2 class="section-title">Events</h2>
-    <div class="event-grid">
-
-        <div class="event-card fade-in">
-            <img src="quiz-logo.PNG" alt="UpsideDown Abyss" class="event-logo">
-            <h3>UpsideDown Abyss</h3>
-            <p class="event-tag">Ultimate Quiz Challenge</p>
-            <p><span class="faculty-highlight">Faculty In-Charge:</span> Mr. Joel Mascarenhas &middot; +91 73535 64359</p>
-            <h4>Student Convenors</h4>
-            <table class="convenors-table">
-                <tr><th>Name</th><th>Contact</th></tr>
-                <tr><td>Joylin</td><td>+91 86604 34075</td></tr>
-                <tr><td>Tenzil</td><td>+91 73386 89031</td></tr>
-            </table>
-            <button class="rules-toggle" aria-controls="quiz-rules" aria-expanded="false">Rules &amp; Regulations</button>
-            <div id="quiz-rules" class="event-rules" hidden>
-                <ul>
-                    <li>Each team shall consist of <strong>two participants</strong>.</li>
-                    <li>The quiz shall comprise <strong>written and oral rounds</strong>.</li>
-                    <li>Use of <strong>mobile phones and electronic devices</strong> during the event is strictly prohibited.</li>
-                    <li>Rules specific to each round will be <strong>announced prior to commencement</strong>.</li>
-                    <li>The <strong>top six teams</strong> from preliminary rounds will qualify for the final round.</li>
-                    <li>The <strong>Quiz Master's decision</strong> shall be <strong>final and binding</strong>.</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="event-card fade-in">
-            <img src="treasure-logo.PNG" alt="Sunken Strategy Quest" class="event-logo">
-            <h3>Sunken Strategy Quest</h3>
-            <p class="event-tag">The Treasure Hunt</p>
-            <p><span class="faculty-highlight">Faculty In-Charge:</span> Mrs. Chethana Kumari &middot; +91 90718 27414</p>
-            <h4>Student Convenors</h4>
-            <table class="convenors-table">
-                <tr><th>Name</th><th>Contact</th></tr>
-                <tr><td>Leesha Lobo</td><td>+91 91485 02215</td></tr>
-                <tr><td>Rohan Dsouza</td><td>+91 84539 84299</td></tr>
-                <tr><td>Mohammed Azman</td><td>+91 6360 891633</td></tr>
-            </table>
-            <button class="rules-toggle" aria-controls="treasure-rules" aria-expanded="false">Rules &amp; Regulations</button>
-            <div id="treasure-rules" class="event-rules" hidden>
-                <ul>
-                    <li>Each team shall consist of <strong>two participants</strong> and must report <strong>on time</strong> with valid college ID.</li>
-                    <li>Participants shall <strong>carry their mobile phones</strong> for the purpose of the hunt.</li>
-                    <li>Team members must <strong>remain together</strong> and follow the prescribed sequence of clues.</li>
-                    <li>Any attempt to <strong>tamper with clues or obstruct other teams</strong> will result in disqualification.</li>
-                    <li>The team that <strong>reaches the final treasure first</strong> will be declared the winner (ties decided by time and accuracy).</li>
-                    <li>The <strong>organizing committee's decision</strong> shall be <strong>final and binding</strong>.</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="event-card fade-in">
-            <img src="marketing-logo.PNG" alt="The Comeback Arena" class="event-logo">
-            <h3>The Comeback Arena</h3>
-            <p class="event-tag">Marketing Challenge</p>
-            <p><span class="faculty-highlight">Faculty In-Charge:</span> Ms. Beulah &middot; +91 88675 54191</p>
-            <h4>Student Convenors</h4>
-            <table class="convenors-table">
-                <tr><th>Name</th><th>Contact</th></tr>
-                <tr><td>Neloan Joshua Fernandes</td><td>+91 6364 155 106</td></tr>
-                <tr><td>Prekshika D.R</td><td>+91 77604 98915</td></tr>
-            </table>
-            <button class="rules-toggle" aria-controls="marketing-rules" aria-expanded="false">Rules &amp; Regulations</button>
-            <div id="marketing-rules" class="event-rules" hidden>
-                <ul>
-                    <li>Each team shall consist of <strong>two participants from the same college</strong>.</li>
-                    <li>Participants must maintain <strong>discipline and professional conduct</strong> throughout the event.</li>
-                    <li>Details regarding <strong>rounds and formats</strong> will be announced at the venue.</li>
-                    <li>Participants must <strong>strictly adhere to the time limits</strong> specified for each round.</li>
-                    <li>The organizing committee shall <strong>not be responsible for technical glitches</strong>.</li>
-                    <li>The <strong>judges' decision</strong> shall be <strong>final and binding</strong>.</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="event-card fade-in">
-            <img src="bestmanager-logo.PNG" alt="Aquavengers" class="event-logo">
-            <h3>Aquavengers &ndash; The Oceanic Endgame</h3>
-            <p class="event-tag">Best Manager &middot; Individual</p>
-            <p><span class="faculty-highlight">Faculty In-Charge:</span> Ms. Lenisha Peris &middot; +91 98440 92658</p>
-            <h4>Student Convenors</h4>
-            <table class="convenors-table">
-                <tr><th>Name</th><th>Contact</th></tr>
-                <tr><td>Joslin Valder</td><td>+91 77953 71852</td></tr>
-                <tr><td>Nikel</td><td>+91 93539 72680</td></tr>
-            </table>
-            <button class="rules-toggle" aria-controls="bestmanager-rules" aria-expanded="false">Rules &amp; Regulations</button>
-            <div id="bestmanager-rules" class="event-rules" hidden>
-                <ul>
-                    <li>This is an <strong>individual event</strong>.</li>
-                    <li>The <strong>format and rounds</strong> will be announced on the spot.</li>
-                    <li>Participants must <strong>follow all instructions</strong> given by the coordinators.</li>
-                    <li>Participants are expected to maintain <strong>professional behavior</strong> at all times.</li>
-                    <li>Any use of <strong>unfair means</strong> will result in disqualification.</li>
-                    <li>The <strong>judges' decision</strong> shall be <strong>final and binding</strong>.</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="event-card fade-in">
-            <img src="reels-logo.PNG" alt="Timeless Tides" class="event-logo">
-            <h3>Timeless Tides</h3>
-            <p class="event-tag">Reel Making Event</p>
-            <p><span class="faculty-highlight">Faculty In-Charge:</span> Mrs. Chethana Kumari &middot; +91 90718 27414</p>
-            <h4>Student Convenors</h4>
-            <table class="convenors-table">
-                <tr><th>Name</th><th>Contact</th></tr>
-                <tr><td>Kaushik Karkera</td><td>+91 6361 334 804</td></tr>
-                <tr><td>Royston Jhowin Dcunha</td><td>+91 94825 15690</td></tr>
-            </table>
-            <button class="rules-toggle" aria-controls="reels-rules" aria-expanded="false">Rules &amp; Regulations</button>
-            <div id="reels-rules" class="event-rules" hidden>
-                <ul>
-                    <li>This is an <strong>individual event</strong>; each participant may submit <strong>one original reel only</strong>.</li>
-                    <li>Participants must <strong>bring their own mobile phones and required shooting/editing equipment</strong>.</li>
-                    <li>Reel duration must be <strong>20&ndash;90 seconds</strong> (preferred 30&ndash;60 seconds) and must align with the given theme.</li>
-                    <li>Content must be <strong>appropriate, positive, and respectful</strong>.</li>
-                    <li>Use of <strong>copyrighted material</strong> without permission is not permitted.</li>
-                    <li>Entries will be judged based on <strong>creativity, relevance, storytelling, editing, and engagement</strong>; judges' decisions are final.</li>
-                </ul>
-            </div>
-        </div>
-
-    </div>
-</section>
-
-<!-- REGISTRATION -->
-<section id="registration" class="registration-section">
-    <h2 class="gradient-heading">Registrations as per College</h2>
-    <div class="registration-card fade-in">
-        <p class="subtitle">Fill in your college details and select the events you wish to participate in.</p>
-
-        <form id="registrationForm" action="https://formspree.io/f/maqdddzz" method="POST">
-
-            <div class="form-step active">
-                <label>College Name</label>
-                <input type="text" name="College Name" required placeholder="Enter your College Name">
-                <button type="button" class="next-btn">Next</button>
+            <div class="brand">
+                <div class="brand-name">UsedBookR</div>
+                <div class="brand-subtitle">OPERATIONS</div>
             </div>
 
-            <div class="form-step">
-                <label>In-Charge Faculty Name</label>
-                <input type="text" name="In-Charge Faculty" required placeholder="Enter Faculty Name">
-                <button type="button" class="prev-btn">Back</button>
-                <button type="button" class="next-btn">Next</button>
+            <div class="system-name">
+                Operations Control Tower
             </div>
 
-            <div class="form-step">
-                <div class="event-selection">
-                    <h3>Select Events</h3>
+            <nav class="navigation">
 
-                    <label class="event-option">
-                        <input type="checkbox" class="event-checkbox" value="Upside Down Abyss">
-                        <p>Upside Down Abyss &ndash; Quiz</p>
-                    </label>
+                <button class="nav-item active" data-view="dashboard">
+                    Dashboard
+                </button>
 
-                    <label class="event-option">
-                        <input type="checkbox" class="event-checkbox" value="Comeback Arena">
-                        <p>Comeback Arena &ndash; Marketing</p>
-                    </label>
+                <button class="nav-item" data-view="tasks">
+                    All Tasks
+                </button>
 
-                    <label class="event-option">
-                        <input type="checkbox" class="event-checkbox" value="Sunken Strategy Quest">
-                        <p>Sunken Strategy Quest &ndash; Treasure Hunt</p>
-                    </label>
+                <button class="nav-item" data-view="mytasks">
+                    My Tasks
+                </button>
 
-                    <label class="event-option">
-                        <input type="checkbox" class="event-checkbox" value="Aquavengers">
-                        <p>Aquavengers &ndash; Best Manager</p>
-                    </label>
+                <button class="nav-item" data-view="followups">
+                    Follow-ups
+                </button>
 
-                    <label class="event-option">
-                        <input type="checkbox" class="event-checkbox" value="Timeless Tides">
-                        <p>Timeless Tides &ndash; Reel Contest</p>
-                    </label>
+                <button class="nav-item" data-view="departments">
+                    Departments
+                </button>
+
+                <button class="nav-item" data-view="analysis">
+                    Analysis
+                </button>
+
+                <button class="nav-item" data-view="excel">
+                    Excel / Data
+                </button>
+
+                <button class="nav-item" data-view="settings">
+                    Settings
+                </button>
+
+            </nav>
+
+            <div class="sidebar-footer">
+                <strong>Operations System V1</strong>
+                <br>
+                <span>Internal Management System</span>
+            </div>
+
+        </aside>
+
+
+        <!-- =====================================
+             MAIN CONTENT
+        ====================================== -->
+
+        <main class="main-content">
+
+            <!-- TOP HEADER -->
+
+            <header class="top-header">
+
+                <div class="header-information">
+
+                    <div class="company-label">
+                        USEDBOOKR
+                    </div>
+
+                    <h1 id="page-title">
+                        Operations Dashboard
+                    </h1>
+
+                    <p id="page-description">
+                        Observe → Understand → Coordinate → Follow up → Escalate → Verify → Close
+                    </p>
+
                 </div>
 
-                <div id="participantsContainer" class="participants-box"></div>
+                <button
+                    class="new-task-button"
+                    id="newTaskButton"
+                >
+                    + New Task
+                </button>
 
-                <button type="submit" class="register-btn">Complete Registration</button>
+            </header>
+
+
+            <!-- =====================================
+                 DASHBOARD
+            ====================================== -->
+
+            <section
+                id="dashboard"
+                class="page-section active-section"
+            >
+
+                <!-- KPI CARDS -->
+
+                <div
+                    class="dashboard-cards"
+                    id="dashboardCards"
+                >
+
+                    <div class="dashboard-card blue-card">
+                        <div class="card-label">
+                            ACTIVE
+                        </div>
+
+                        <div
+                            class="card-number"
+                            id="activeCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="card-description">
+                            Open tasks
+                        </div>
+                    </div>
+
+
+                    <div class="dashboard-card red-card">
+                        <div class="card-label">
+                            OVERDUE
+                        </div>
+
+                        <div
+                            class="card-number"
+                            id="overdueCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="card-description">
+                            Deadline missed
+                        </div>
+                    </div>
+
+
+                    <div class="dashboard-card orange-card">
+                        <div class="card-label">
+                            DUE TODAY
+                        </div>
+
+                        <div
+                            class="card-number"
+                            id="dueTodayCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="card-description">
+                            Requires attention
+                        </div>
+                    </div>
+
+
+                    <div class="dashboard-card red-card">
+                        <div class="card-label">
+                            BLOCKED
+                        </div>
+
+                        <div
+                            class="card-number"
+                            id="blockedCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="card-description">
+                            Cannot proceed
+                        </div>
+                    </div>
+
+
+                    <div class="dashboard-card orange-card">
+                        <div class="card-label">
+                            WAITING
+                        </div>
+
+                        <div
+                            class="card-number"
+                            id="waitingCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="card-description">
+                            Waiting for action
+                        </div>
+                    </div>
+
+
+                    <div class="dashboard-card red-card">
+                        <div class="card-label">
+                            P0 CRITICAL
+                        </div>
+
+                        <div
+                            class="card-number"
+                            id="criticalCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="card-description">
+                            Critical priority
+                        </div>
+                    </div>
+
+
+                    <div class="dashboard-card green-card">
+                        <div class="card-label">
+                            COMPLETED
+                        </div>
+
+                        <div
+                            class="card-number"
+                            id="completedCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="card-description">
+                            Finished tasks
+                        </div>
+                    </div>
+
+
+                    <div class="dashboard-card blue-card">
+                        <div class="card-label">
+                            FOLLOW-UPS
+                        </div>
+
+                        <div
+                            class="card-number"
+                            id="followupCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="card-description">
+                            Follow-up required
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- =================================
+                     DASHBOARD LOWER AREA
+                ================================== -->
+
+                <div class="dashboard-grid">
+
+
+                    <!-- DEPARTMENT HEALTH -->
+
+                    <div class="content-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <h2>Department Health</h2>
+
+                                <p>
+                                    Current workload by department
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="table-container">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Department</th>
+                                        <th>Open</th>
+                                        <th>Overdue</th>
+                                        <th>Blocked</th>
+                                        <th>Waiting</th>
+                                        <th>Completed</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="departmentHealthTable">
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- NEEDS ATTENTION -->
+
+                    <div class="content-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <h2>Needs Attention</h2>
+
+                                <p>
+                                    Critical, overdue and blocked work
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="attentionList"
+                            class="attention-list"
+                        >
+
+                            <div class="empty-state">
+                                No urgent tasks.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================
+                 ALL TASKS
+            ====================================== -->
+
+            <section
+                id="tasks"
+                class="page-section"
+            >
+
+                <div class="content-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h2>All Tasks</h2>
+
+                            <p>
+                                Central task register
+                            </p>
+                        </div>
+
+                        <button
+                            class="new-task-button"
+                            id="newTaskButton2"
+                        >
+                            + New Task
+                        </button>
+
+                    </div>
+
+
+                    <!-- FILTER BAR -->
+
+                    <div class="filter-bar">
+
+                        <input
+                            type="text"
+                            id="taskSearch"
+                            placeholder="Search task, owner, department..."
+                        >
+
+                        <select id="departmentFilter">
+                            <option value="">All Departments</option>
+                        </select>
+
+                        <select id="priorityFilter">
+                            <option value="">All Priorities</option>
+                        </select>
+
+                        <select id="statusFilter">
+                            <option value="">All Statuses</option>
+                        </select>
+
+                        <button
+                            class="secondary-button"
+                            id="clearFilters"
+                        >
+                            Clear
+                        </button>
+
+                    </div>
+
+
+                    <!-- TASK TABLE -->
+
+                    <div class="table-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Task ID</th>
+                                    <th>Task / Issue</th>
+                                    <th>Department</th>
+                                    <th>Priority</th>
+                                    <th>Owner</th>
+                                    <th>Deadline</th>
+                                    <th>Status</th>
+                                    <th>Progress</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="taskTable">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================
+                 MY TASKS
+            ====================================== -->
+
+            <section
+                id="mytasks"
+                class="page-section"
+            >
+
+                <div class="content-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h2>My Department Tasks</h2>
+
+                            <p>
+                                Department-level task monitoring
+                            </p>
+                        </div>
+
+                        <select id="myDepartment">
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Task ID</th>
+                                    <th>Task</th>
+                                    <th>Priority</th>
+                                    <th>Owner</th>
+                                    <th>Deadline</th>
+                                    <th>Status</th>
+                                    <th>Next Action</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="myTaskTable">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================
+                 FOLLOW UPS
+            ====================================== -->
+
+            <section
+                id="followups"
+                class="page-section"
+            >
+
+                <div class="content-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h2>Follow-up Queue</h2>
+
+                            <p>
+                                Follow-ups due today or overdue
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Department</th>
+                                    <th>Priority</th>
+                                    <th>Follow-up Date</th>
+                                    <th>Next Action</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="followupTable">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================
+                 DEPARTMENTS
+            ====================================== -->
+
+            <section
+                id="departments"
+                class="page-section"
+            >
+
+                <div class="content-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h2>Department Overview</h2>
+
+                            <p>
+                                Workload and exception monitoring
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Open</th>
+                                    <th>P0</th>
+                                    <th>Overdue</th>
+                                    <th>Blocked</th>
+                                    <th>Waiting</th>
+                                    <th>Completed</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="departmentTable">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================
+                 ANALYSIS
+            ====================================== -->
+
+            <section
+                id="analysis"
+                class="page-section"
+            >
+
+                <div class="analysis-grid">
+
+                    <!-- PRIORITY ANALYSIS -->
+
+                    <div class="content-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <h2>Priority Analysis</h2>
+
+                                <p>
+                                    Workload by priority
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="table-container">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Priority</th>
+                                        <th>Open</th>
+                                        <th>Overdue</th>
+                                        <th>Blocked</th>
+                                        <th>Completed</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="priorityAnalysisTable">
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- STATUS ANALYSIS -->
+
+                    <div class="content-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <h2>Status Analysis</h2>
+
+                                <p>
+                                    Overall task distribution
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="table-container">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th>Percentage</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="statusAnalysisTable">
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- OPERATIONAL EXCEPTIONS -->
+
+                <div class="content-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h2>Operational Exceptions</h2>
+
+                            <p>
+                                Missing or attention-required information
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="exceptionList"
+                        class="exception-list"
+                    >
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================
+                 EXCEL / DATA
+            ====================================== -->
+
+            <section
+                id="excel"
+                class="page-section"
+            >
+
+                <div class="two-column-grid">
+
+                    <div class="content-panel">
+
+                        <h2>Export Tasks</h2>
+
+                        <p>
+                            Export the central task register in
+                            Excel-compatible CSV format.
+                        </p>
+
+                        <button
+                            class="primary-button"
+                            id="exportTasks"
+                        >
+                            Export Tasks
+                        </button>
+
+                    </div>
+
+
+                    <div class="content-panel">
+
+                        <h2>Import Data</h2>
+
+                        <p>
+                            Import your existing task data later.
+                            Production version will support structured
+                            Excel import.
+                        </p>
+
+                        <input
+                            type="file"
+                            id="importFile"
+                            accept=".csv,.xlsx"
+                        >
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================
+                 SETTINGS
+            ====================================== -->
+
+            <section
+                id="settings"
+                class="page-section"
+            >
+
+                <div class="content-panel">
+
+                    <h2>System Settings</h2>
+
+                    <p>
+                        This is the first functional version of the
+                        Operations Control Tower.
+                    </p>
+
+                    <hr>
+
+                    <h3>Current V1 storage</h3>
+
+                    <p>
+                        Task data is stored locally in the browser.
+                    </p>
+
+                    <p>
+                        The production version should use a central
+                        database so every department head can enter
+                        tasks and management can monitor them centrally.
+                    </p>
+
+                    <button
+                        class="danger-button"
+                        id="resetData"
+                    >
+                        Reset Demo Data
+                    </button>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================================
+         CREATE / EDIT TASK MODAL
+    ========================================== -->
+
+    <div
+        class="modal-overlay"
+        id="taskModal"
+    >
+
+        <div class="task-modal">
+
+            <div class="modal-header">
+
+                <div>
+                    <div class="company-label">
+                        TASK RECORD
+                    </div>
+
+                    <h2 id="modalTitle">
+                        Create New Task
+                    </h2>
+                </div>
+
+                <button
+                    class="close-modal"
+                    id="closeTaskModal"
+                >
+                    ×
+                </button>
+
             </div>
 
-        </form>
+
+            <form id="taskForm">
+
+                <input
+                    type="hidden"
+                    id="taskId"
+                >
+
+
+                <div class="form-grid">
+
+
+                    <!-- TASK -->
+
+                    <div class="form-field full-width">
+
+                        <label>
+                            Task / Issue *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskName"
+                            required
+                            placeholder="Enter the task or issue"
+                        >
+
+                    </div>
+
+
+                    <!-- DEPARTMENT -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Department *
+                        </label>
+
+                        <select
+                            id="taskDepartment"
+                            required
+                        >
+                        </select>
+
+                    </div>
+
+
+                    <!-- AREA -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Area / Project
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskArea"
+                            placeholder="Project or functional area"
+                        >
+
+                    </div>
+
+
+                    <!-- TASK TYPE -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Task Type
+                        </label>
+
+                        <select id="taskType">
+                        </select>
+
+                    </div>
+
+
+                    <!-- PRIORITY -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Priority *
+                        </label>
+
+                        <select
+                            id="taskPriority"
+                            required
+                        >
+                        </select>
+
+                    </div>
+
+
+                    <!-- OWNER -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Owner *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskOwner"
+                            required
+                            placeholder="Person responsible"
+                        >
+
+                    </div>
+
+
+                    <!-- COORDINATOR -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Coordinator
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskCoordinator"
+                            placeholder="Coordinator"
+                        >
+
+                    </div>
+
+
+                    <!-- DATE RAISED -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Date Raised
+                        </label>
+
+                        <input
+                            type="date"
+                            id="taskRaised"
+                        >
+
+                    </div>
+
+
+                    <!-- DEADLINE -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Deadline *
+                        </label>
+
+                        <input
+                            type="date"
+                            id="taskDeadline"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Status *
+                        </label>
+
+                        <select
+                            id="taskStatus"
+                            required
+                        >
+                        </select>
+
+                    </div>
+
+
+                    <!-- PROGRESS -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Progress %
+                        </label>
+
+                        <input
+                            type="number"
+                            id="taskProgress"
+                            min="0"
+                            max="100"
+                            value="0"
+                        >
+
+                    </div>
+
+
+                    <!-- DEPENDENCY -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Dependency / Waiting For
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskDependency"
+                            placeholder="Person, vendor, customer, system..."
+                        >
+
+                    </div>
+
+
+                    <!-- FOLLOW UP -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Next Follow-up
+                        </label>
+
+                        <input
+                            type="date"
+                            id="taskFollowup"
+                        >
+
+                    </div>
+
+
+                    <!-- NEXT ACTION -->
+
+                    <div class="form-field full-width">
+
+                        <label>
+                            Next Action *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskNextAction"
+                            required
+                            placeholder="What should happen next?"
+                        >
+
+                    </div>
+
+
+                    <!-- ESCALATION -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Escalation
+                        </label>
+
+                        <select id="taskEscalation">
+
+                            <option value="None">
+                                None
+                            </option>
+
+                            <option value="Monitor">
+                                Monitor
+                            </option>
+
+                            <option value="Escalated">
+                                Escalated
+                            </option>
+
+                            <option value="Management Attention">
+                                Management Attention
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- VERIFICATION -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Verification Status
+                        </label>
+
+                        <select id="taskVerification">
+
+                            <option value="Not Required">
+                                Not Required
+                            </option>
+
+                            <option value="Pending">
+                                Pending
+                            </option>
+
+                            <option value="Verified">
+                                Verified
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- VERIFICATION OWNER -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Verification Owner
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskVerificationOwner"
+                        >
+
+                    </div>
+
+
+                    <!-- SOURCE -->
+
+                    <div class="form-field">
+
+                        <label>
+                            Source
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskSource"
+                            placeholder="Meeting / Email / WhatsApp / System"
+                        >
+
+                    </div>
+
+
+                    <!-- OUTCOME -->
+
+                    <div class="form-field full-width">
+
+                        <label>
+                            Result / Outcome
+                        </label>
+
+                        <textarea
+                            id="taskOutcome"
+                            placeholder="Final result"
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- NOTES -->
+
+                    <div class="form-field full-width">
+
+                        <label>
+                            Notes
+                        </label>
+
+                        <textarea
+                            id="taskNotes"
+                            placeholder="Additional information"
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FORM BUTTONS -->
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        id="cancelTask"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="primary-button"
+                    >
+                        Save Task
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
     </div>
-</section>
 
-<!-- VENUE -->
-<section id="venue" class="venue-section">
-    <h2 class="section-title">Event Venue</h2>
-    <p class="venue-address">Milagres College, Hampankatta, Mangaluru &ndash; 575001</p>
-    <div class="venue-frame fade-in">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.710827347024!2d74.79934407587027!3d12.87486219087878!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35a4c66670121%3A0x8795747a583dd784!2sMilagres%20College!5e0!3m2!1sen!2sin!4v1697400000000!5m2!1sen!2sin" width="100%" height="400" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-</section>
 
-<!-- CONTACT -->
-<section id="contact">
-    <h2 class="gradient-heading">For More Details Contact</h2>
-    <div class="contact-box">
-        <div class="contact-card fade-in"><p><strong>Mrs. Rohitha Melita Crasta</strong><span>Event Co-ordinator</span>+91 90195 26429</p></div>
-        <div class="contact-card fade-in"><p><strong>Royston Jhowin Dcunha</strong><span>Student Co-ordinator</span>+91 94825 15690</p></div>
-        <div class="contact-card fade-in"><p><strong>Leesha Vinisha Lobo</strong><span>Student Co-ordinator</span>+91 91485 02215</p></div>
-    </div>
-</section>
+    <!-- JavaScript will be added after you approve this HTML -->
+    <script src="app.js"></script>
 
-<footer>
-    <p>web developed by Royston Jhowin Dcunha</p>
-    <p>Hampankatta, Mangaluru &ndash; 575001</p>
-    <p>&copy; EXCELSO'26</p>
-</footer>
-
-<script src="script.js"></script>
 </body>
 </html>
