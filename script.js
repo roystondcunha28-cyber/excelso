@@ -1,7 +1,6 @@
 /* =========================================================
    USEDBOOKR OPERATIONS MANAGEMENT SYSTEM
    FRONTEND JAVASCRIPT
-   Google Sheets / Apps Script Backend
 ========================================================= */
 
 
@@ -12,15 +11,10 @@
 const API_URL =
     "https://script.google.com/macros/s/AKfycbyrOAQZ--7aDiAHv0ey60C8-xXuTKDAhOVDQjUOc-uiGdgNnpuJ97nL4m-ABkw0Znf3ig/exec";
 
-const LOGIN_PASSWORD = "admin123";
 
-const LOGIN_STORAGE_KEY =
-    "usedbookrOperationsLogin";
+const LOGIN_PASSWORD =
+    "admin123";
 
-
-/* =========================================================
-   DEPARTMENTS
-========================================================= */
 
 const DEPARTMENTS = [
     "B2B / Sales",
@@ -40,17 +34,16 @@ const DEPARTMENTS = [
 ];
 
 
-/* =========================================================
-   APPLICATION STATE
-========================================================= */
-
 let tasks = [];
 
 let currentDepartment = "";
 
-let currentPage = "dashboard";
+let currentPage =
+    "dashboard";
 
-let isLoadingTasks = false;
+
+let editingTaskId =
+    "";
 
 
 /* =========================================================
@@ -92,9 +85,13 @@ document.addEventListener(
 function initializeLogin() {
 
     const form =
-        document.getElementById("loginForm");
+        document.getElementById(
+            "loginForm"
+        );
+
 
     if (!form) return;
+
 
     form.addEventListener(
         "submit",
@@ -102,49 +99,45 @@ function initializeLogin() {
 
             event.preventDefault();
 
-            const input =
+
+            const password =
                 document.getElementById(
                     "loginPassword"
-                );
+                )?.value || "";
+
 
             const error =
                 document.getElementById(
                     "loginError"
                 );
 
-            const password =
-                input ? input.value.trim() : "";
 
-            if (password === LOGIN_PASSWORD) {
+            if (
+                password ===
+                LOGIN_PASSWORD
+            ) {
 
                 localStorage.setItem(
-                    LOGIN_STORAGE_KEY,
+                    "usedbookrOperationsLogin",
                     "true"
                 );
 
-                document.getElementById(
-                    "loginScreen"
-                ).style.display = "none";
 
-                document.getElementById(
-                    "app"
-                ).style.display = "flex";
+                hideLogin();
 
-                if (error) {
-                    error.classList.remove("show");
-                }
 
                 loadTasks();
 
-            } else {
+            }
+
+            else {
 
                 if (error) {
-                    error.classList.add("show");
-                }
 
-                if (input) {
-                    input.value = "";
-                    input.focus();
+                    error.classList.add(
+                        "show"
+                    );
+
                 }
 
             }
@@ -155,50 +148,81 @@ function initializeLogin() {
 }
 
 
-/* =========================================================
-   CHECK LOGIN
-========================================================= */
-
 function checkLogin() {
 
     const loggedIn =
         localStorage.getItem(
-            LOGIN_STORAGE_KEY
+            "usedbookrOperationsLogin"
         );
 
-    const loginScreen =
+
+    if (
+        loggedIn === "true"
+    ) {
+
+        hideLogin();
+
+        loadTasks();
+
+    }
+
+    else {
+
+        showLogin();
+
+    }
+
+}
+
+
+function hideLogin() {
+
+    const login =
         document.getElementById(
             "loginScreen"
         );
+
 
     const app =
         document.getElementById(
             "app"
         );
 
-    if (loggedIn === "true") {
 
-        if (loginScreen) {
-            loginScreen.style.display = "none";
-        }
+    if (login)
+        login.style.display =
+            "none";
 
-        if (app) {
-            app.style.display = "flex";
-        }
 
-        loadTasks();
+    if (app)
+        app.style.display =
+            "flex";
 
-    } else {
+}
 
-        if (loginScreen) {
-            loginScreen.style.display = "flex";
-        }
 
-        if (app) {
-            app.style.display = "none";
-        }
+function showLogin() {
 
-    }
+    const login =
+        document.getElementById(
+            "loginScreen"
+        );
+
+
+    const app =
+        document.getElementById(
+            "app"
+        );
+
+
+    if (login)
+        login.style.display =
+            "flex";
+
+
+    if (app)
+        app.style.display =
+            "none";
 
 }
 
@@ -214,15 +238,18 @@ function initializeLogout() {
             "logoutButton"
         );
 
+
     if (!button) return;
+
 
     button.addEventListener(
         "click",
         function () {
 
             localStorage.removeItem(
-                LOGIN_STORAGE_KEY
+                "usedbookrOperationsLogin"
             );
+
 
             location.reload();
 
@@ -238,21 +265,24 @@ function initializeLogout() {
 
 function initializeDepartments() {
 
-    const departmentSelect =
+    const select =
         document.getElementById(
             "taskDepartment"
         );
 
-    const departmentFilter =
+
+    const filter =
         document.getElementById(
             "departmentFilter"
         );
 
-    if (departmentSelect) {
 
-        departmentSelect.innerHTML =
+    if (select) {
+
+        select.innerHTML =
             '<option value="">Select Department</option>';
 
+
         DEPARTMENTS.forEach(
             function (department) {
 
@@ -261,12 +291,16 @@ function initializeDepartments() {
                         "option"
                     );
 
-                option.value = department;
+
+                option.value =
+                    department;
+
 
                 option.textContent =
                     department;
 
-                departmentSelect.appendChild(
+
+                select.appendChild(
                     option
                 );
 
@@ -276,11 +310,12 @@ function initializeDepartments() {
     }
 
 
-    if (departmentFilter) {
+    if (filter) {
 
-        departmentFilter.innerHTML =
+        filter.innerHTML =
             '<option value="">All Departments</option>';
 
+
         DEPARTMENTS.forEach(
             function (department) {
 
@@ -289,12 +324,16 @@ function initializeDepartments() {
                         "option"
                     );
 
-                option.value = department;
+
+                option.value =
+                    department;
+
 
                 option.textContent =
                     department;
 
-                departmentFilter.appendChild(
+
+                filter.appendChild(
                     option
                 );
 
@@ -302,6 +341,9 @@ function initializeDepartments() {
         );
 
     }
+
+
+    renderDepartmentCards();
 
 }
 
@@ -317,17 +359,20 @@ function initializeDate() {
             "currentDate"
         );
 
+
     if (!element) return;
 
+
     element.textContent =
-        new Date().toLocaleDateString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric"
-            }
-        );
+        new Date()
+            .toLocaleDateString(
+                "en-IN",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                }
+            );
 
 }
 
@@ -338,70 +383,71 @@ function initializeDate() {
 
 function initializeNavigation() {
 
-    const navigationItems =
-        document.querySelectorAll(
+    document
+        .querySelectorAll(
             ".nav-item"
+        )
+        .forEach(
+            function (item) {
+
+                item.addEventListener(
+                    "click",
+                    function () {
+
+                        const page =
+                            item.dataset.page;
+
+
+                        const department =
+                            item.dataset.department;
+
+
+                        if (department) {
+
+                            openDepartment(
+                                department
+                            );
+
+                            return;
+
+                        }
+
+
+                        if (page) {
+
+                            showPage(
+                                page
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
         );
 
-    navigationItems.forEach(
-        function (item) {
 
-            item.addEventListener(
-                "click",
-                function () {
-
-                    const page =
-                        item.dataset.page;
-
-                    const department =
-                        item.dataset.department;
-
-
-                    if (department) {
-
-                        openDepartment(
-                            department
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (page) {
-
-                        showPage(page);
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-
-    const menuToggle =
+    const menu =
         document.getElementById(
             "menuToggle"
         );
 
-    if (menuToggle) {
 
-        menuToggle.addEventListener(
+    if (menu) {
+
+        menu.addEventListener(
             "click",
             function () {
 
-                const sidebar =
-                    document.querySelector(
+                document
+                    .querySelector(
                         ".sidebar"
-                    );
-
-                if (sidebar) {
-                    sidebar.classList.toggle(
+                    )
+                    ?.classList
+                    .toggle(
                         "sidebar-open"
                     );
-                }
 
             }
         );
@@ -411,16 +457,16 @@ function initializeNavigation() {
 }
 
 
-/* =========================================================
-   SHOW PAGE
-========================================================= */
-
 function showPage(page) {
 
-    currentPage = page;
+    currentPage =
+        page;
+
 
     document
-        .querySelectorAll(".page")
+        .querySelectorAll(
+            ".page"
+        )
         .forEach(
             function (section) {
 
@@ -434,8 +480,10 @@ function showPage(page) {
 
     const target =
         document.getElementById(
-            page + "Page"
+            page +
+            "Page"
         );
+
 
     if (target) {
 
@@ -447,7 +495,9 @@ function showPage(page) {
 
 
     document
-        .querySelectorAll(".nav-item")
+        .querySelectorAll(
+            ".nav-item"
+        )
         .forEach(
             function (item) {
 
@@ -455,8 +505,10 @@ function showPage(page) {
                     "active"
                 );
 
+
                 if (
-                    item.dataset.page === page
+                    item.dataset.page ===
+                    page
                 ) {
 
                     item.classList.add(
@@ -469,35 +521,47 @@ function showPage(page) {
         );
 
 
-    updatePageHeader(page);
+    updatePageHeader(
+        page
+    );
 
 
-    if (page === "dashboard") {
+    if (
+        page ===
+        "dashboard"
+    )
         updateDashboard();
-    }
 
-    if (page === "tasks") {
+
+    if (
+        page ===
+        "tasks"
+    )
         renderTasksTable();
-    }
 
-    if (page === "followups") {
+
+    if (
+        page ===
+        "followups"
+    )
         renderFollowups();
-    }
 
-    if (page === "reports") {
+
+    if (
+        page ===
+        "reports"
+    )
         renderAnalysis();
-    }
 
-    if (page === "activity") {
+
+    if (
+        page ===
+        "activity"
+    )
         renderActivity();
-    }
 
 }
 
-
-/* =========================================================
-   PAGE HEADER
-========================================================= */
 
 function updatePageHeader(page) {
 
@@ -506,13 +570,14 @@ function updatePageHeader(page) {
             "pageTitle"
         );
 
+
     const subtitle =
         document.getElementById(
             "pageSubtitle"
         );
 
 
-    const pageNames = {
+    const names = {
 
         dashboard: [
             "Operations Dashboard",
@@ -548,18 +613,17 @@ function updatePageHeader(page) {
 
 
     if (
-        pageNames[page]
+        names[page]
     ) {
 
-        if (title) {
+        if (title)
             title.textContent =
-                pageNames[page][0];
-        }
+                names[page][0];
 
-        if (subtitle) {
+
+        if (subtitle)
             subtitle.textContent =
-                pageNames[page][1];
-        }
+                names[page][1];
 
     }
 
@@ -567,7 +631,7 @@ function updatePageHeader(page) {
 
 
 /* =========================================================
-   API REQUEST
+   API
 ========================================================= */
 
 async function apiRequest(
@@ -590,7 +654,8 @@ async function apiRequest(
 
                     body:
                         JSON.stringify({
-                            action,
+                            action:
+                                action,
                             ...data
                         })
                 }
@@ -600,7 +665,7 @@ async function apiRequest(
         if (!response.ok) {
 
             throw new Error(
-                "HTTP error " +
+                "HTTP " +
                 response.status
             );
 
@@ -611,16 +676,10 @@ async function apiRequest(
             await response.json();
 
 
-        console.log(
-            "API:",
-            action,
-            result
-        );
-
-
         return result;
 
     }
+
     catch (error) {
 
         console.error(
@@ -636,13 +695,9 @@ async function apiRequest(
 
 
         return {
-
             success: false,
-
             message:
-                error.message ||
-                "API connection failed."
-
+                error.message
         };
 
     }
@@ -656,339 +711,170 @@ async function apiRequest(
 
 async function loadTasks() {
 
-    if (isLoadingTasks) {
-        return;
-    }
-
-    isLoadingTasks = true;
-
-
     showNotification(
         "Loading",
         "Loading operations data..."
     );
 
 
-    try {
-
-        const result =
-            await apiRequest(
-                "getTasks"
-            );
-
-
-        if (!result || !result.success) {
-
-            showNotification(
-                "Error",
-                result?.message ||
-                "Unable to load tasks."
-            );
-
-            return;
-
-        }
-
-
-        const rawTasks =
-            Array.isArray(
-                result.tasks
-            )
-                ? result.tasks
-                : [];
-
-
-        console.log(
-            "Raw tasks from API:",
-            rawTasks
+    const result =
+        await apiRequest(
+            "getTasks"
         );
 
 
-        tasks =
-            normalizeTasks(
-                rawTasks
-            );
+    if (
+        !result ||
+        !result.success
+    ) {
 
-
-        console.log(
-            "Normalized tasks:",
-            tasks
+        showNotification(
+            "Error",
+            result?.message ||
+            "Unable to load tasks."
         );
+
+
+        tasks = [];
 
 
         updateAllViews();
 
 
-        const source =
-            document.getElementById(
-                "dataSourceStatus"
-            );
+        return;
 
-        if (source) {
-            source.textContent =
-                "Google Sheets";
-        }
+    }
 
 
-        showNotification(
-            "Updated",
-            tasks.length +
-            " task(s) loaded from Google Sheets."
+    tasks =
+        normalizeTasks(
+            result.tasks || []
         );
 
-    }
-    finally {
 
-        isLoadingTasks = false;
+    updateAllViews();
+
+
+    const source =
+        document.getElementById(
+            "dataSourceStatus"
+        );
+
+
+    if (source) {
+
+        source.textContent =
+            "Google Sheets";
 
     }
+
+
+    showNotification(
+        "Updated",
+        tasks.length +
+        " task(s) loaded from Google Sheets."
+    );
 
 }
 
 
 /* =========================================================
-   VALUE HELPER
-   Supports both:
-   "Task ID"
-   and
-   "taskId"
-========================================================= */
-
-function getTaskValue(
-    task,
-    keys,
-    fallback = ""
-) {
-
-    if (!task) {
-        return fallback;
-    }
-
-
-    for (
-        const key of keys
-    ) {
-
-        if (
-            task[key] !== undefined &&
-            task[key] !== null &&
-            String(
-                task[key]
-            ).trim() !== ""
-        ) {
-
-            return task[key];
-
-        }
-
-    }
-
-
-    return fallback;
-
-}
-
-
-/* =========================================================
-   NORMALIZE TASK DATA
-   THIS FIXES THE MAIN API / FRONTEND MISMATCH
+   NORMALIZE API DATA
 ========================================================= */
 
 function normalizeTasks(data) {
 
-    if (!Array.isArray(data)) {
+    if (
+        !Array.isArray(data)
+    ) {
+
         return [];
+
     }
 
 
     return data.map(
-        function (task, index) {
+        function (task) {
 
             return {
 
                 taskId:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Task ID",
-                                "taskId",
-                                "TaskID",
-                                "id"
-                            ],
-                            "T" +
-                            String(
-                                index + 1
-                            ).padStart(
-                                3,
-                                "0"
-                            )
-                        )
-                    ),
-
-
-                department:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Department",
-                                "department"
-                            ]
-                        )
-                    ),
-
+                    task.taskId ??
+                    task["Task ID"] ??
+                    "",
 
                 task:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Task",
-                                "task",
-                                "Title",
-                                "title"
-                            ]
-                        )
-                    ),
-
+                    task.task ??
+                    task["Task"] ??
+                    "",
 
                 description:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Description",
-                                "description"
-                            ]
-                        )
-                    ),
+                    task.description ??
+                    task["Description"] ??
+                    "",
 
+                department:
+                    task.department ??
+                    task["Department"] ??
+                    "",
 
                 assignedTo:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Assigned To",
-                                "assignedTo",
-                                "Assignee",
-                                "assignee"
-                            ]
-                        )
-                    ),
-
+                    task.assignedTo ??
+                    task["Assigned To"] ??
+                    "",
 
                 priority:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Priority",
-                                "priority"
-                            ],
-                            "Medium"
-                        )
-                    ),
-
+                    task.priority ??
+                    task["Priority"] ??
+                    "Medium",
 
                 status:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Status",
-                                "status"
-                            ],
-                            "Open"
-                        )
-                    ),
-
+                    task.status ??
+                    task["Status"] ??
+                    "Open",
 
                 createdDate:
                     formatDateForInput(
-                        getTaskValue(
-                            task,
-                            [
-                                "Created Date",
-                                "createdDate"
-                            ]
-                        )
+                        task.createdDate ??
+                        task["Created Date"] ??
+                        ""
                     ),
-
 
                 dueDate:
                     formatDateForInput(
-                        getTaskValue(
-                            task,
-                            [
-                                "Due Date",
-                                "dueDate"
-                            ]
-                        )
+                        task.dueDate ??
+                        task["Due Date"] ??
+                        ""
                     ),
-
 
                 followupDate:
                     formatDateForInput(
-                        getTaskValue(
-                            task,
-                            [
-                                "Follow-up Date",
-                                "followupDate",
-                                "Followup Date"
-                            ]
-                        )
+                        task.followupDate ??
+                        task["Follow-up Date"] ??
+                        ""
                     ),
-
 
                 lastAction:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Last Action / Follow-up",
-                                "Last Action",
-                                "lastAction",
-                                "Follow-up / Action Taken"
-                            ]
-                        )
-                    ),
-
+                    task.lastAction ??
+                    task["Last Action"] ??
+                    task["Last Action / Follow-up"] ??
+                    "",
 
                 remarks:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Remarks",
-                                "remarks"
-                            ]
-                        )
-                    ),
-
+                    task.remarks ??
+                    task["Remarks"] ??
+                    "",
 
                 updatedBy:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Updated By",
-                                "updatedBy"
-                            ]
-                        )
-                    ),
-
+                    task.updatedBy ??
+                    task["Updated By"] ??
+                    "",
 
                 updatedDate:
-                    String(
-                        getTaskValue(
-                            task,
-                            [
-                                "Updated Date",
-                                "updatedDate"
-                            ]
-                        )
+                    formatDateForInput(
+                        task.updatedDate ??
+                        task["Updated Date"] ??
+                        ""
                     )
 
             };
@@ -1032,32 +918,32 @@ function updateDashboard() {
 
     const open =
         tasks.filter(
-            function (task) {
-                return task.status === "Open";
+            function(t) {
+                return t.status === "Open";
             }
         ).length;
 
 
     const progress =
         tasks.filter(
-            function (task) {
-                return task.status === "In Progress";
+            function(t) {
+                return t.status === "In Progress";
             }
         ).length;
 
 
     const blocked =
         tasks.filter(
-            function (task) {
-                return task.status === "Blocked";
+            function(t) {
+                return t.status === "Blocked";
             }
         ).length;
 
 
     const completed =
         tasks.filter(
-            function (task) {
-                return task.status === "Completed";
+            function(t) {
+                return t.status === "Completed";
             }
         ).length;
 
@@ -1073,25 +959,30 @@ function updateDashboard() {
         total
     );
 
+
     setText(
         "openTasks",
         open
     );
+
 
     setText(
         "progressTasks",
         progress
     );
 
+
     setText(
         "blockedTasks",
         blocked
     );
 
+
     setText(
         "completedTasks",
         completed
     );
+
 
     setText(
         "overdueTasks",
@@ -1102,11 +993,8 @@ function updateDashboard() {
     setText(
         "highPriorityCount",
         tasks.filter(
-            function (task) {
-                return (
-                    task.priority ===
-                    "High"
-                );
+            function(t) {
+                return t.priority === "High";
             }
         ).length
     );
@@ -1115,11 +1003,8 @@ function updateDashboard() {
     setText(
         "mediumPriorityCount",
         tasks.filter(
-            function (task) {
-                return (
-                    task.priority ===
-                    "Medium"
-                );
+            function(t) {
+                return t.priority === "Medium";
             }
         ).length
     );
@@ -1128,11 +1013,8 @@ function updateDashboard() {
     setText(
         "lowPriorityCount",
         tasks.filter(
-            function (task) {
-                return (
-                    task.priority ===
-                    "Low"
-                );
+            function(t) {
+                return t.priority === "Low";
             }
         ).length
     );
@@ -1148,115 +1030,6 @@ function updateDashboard() {
 
 
 /* =========================================================
-   DEPARTMENT PERFORMANCE
-========================================================= */
-
-function renderDepartmentPerformance() {
-
-    const container =
-        document.getElementById(
-            "departmentPerformance"
-        );
-
-    if (!container) return;
-
-
-    container.innerHTML = "";
-
-
-    DEPARTMENTS.forEach(
-        function (department) {
-
-            const departmentTasks =
-                tasks.filter(
-                    function (task) {
-                        return (
-                            task.department ===
-                            department
-                        );
-                    }
-                );
-
-
-            const total =
-                departmentTasks.length;
-
-
-            const completed =
-                departmentTasks.filter(
-                    function (task) {
-                        return (
-                            task.status ===
-                            "Completed"
-                        );
-                    }
-                ).length;
-
-
-            const percentage =
-                total === 0
-                    ? 0
-                    : Math.round(
-                        completed /
-                        total *
-                        100
-                    );
-
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-            row.className =
-                "department-performance-row";
-
-
-            row.innerHTML = `
-
-                <div class="department-performance-name">
-
-                    <strong>
-                        ${escapeHTML(
-                            department
-                        )}
-                    </strong>
-
-                    <span>
-                        ${total} task(s)
-                    </span>
-
-                </div>
-
-
-                <div class="department-progress">
-
-                    <div
-                        class="department-progress-bar"
-                        style="width:${percentage}%"
-                    ></div>
-
-                </div>
-
-
-                <strong>
-                    ${percentage}%
-                </strong>
-
-            `;
-
-
-            container.appendChild(
-                row
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
    RECENT TASKS
 ========================================================= */
 
@@ -1267,6 +1040,7 @@ function renderRecentTasks() {
             "recentTasksTable"
         );
 
+
     if (!tbody) return;
 
 
@@ -1276,17 +1050,13 @@ function renderRecentTasks() {
     const recent =
         [...tasks]
             .sort(
-                function (a, b) {
+                function(a, b) {
 
                     return String(
-                        b.updatedDate ||
-                        b.createdDate ||
-                        ""
+                        b.updatedDate
                     ).localeCompare(
                         String(
-                            a.updatedDate ||
-                            a.createdDate ||
-                            ""
+                            a.updatedDate
                         )
                     );
 
@@ -1300,20 +1070,16 @@ function renderRecentTasks() {
 
     if (!recent.length) {
 
-        tbody.innerHTML = `
-
+        tbody.innerHTML =
+            `
             <tr>
-
-                <td
-                    colspan="7"
-                    class="empty-table"
-                >
+                <td colspan="7"
+                    class="empty-table">
                     No tasks available.
                 </td>
-
             </tr>
+            `;
 
-        `;
 
         return;
 
@@ -1321,7 +1087,7 @@ function renderRecentTasks() {
 
 
     recent.forEach(
-        function (task) {
+        function(task) {
 
             const row =
                 document.createElement(
@@ -1329,52 +1095,36 @@ function renderRecentTasks() {
                 );
 
 
-            row.innerHTML = `
-
+            row.innerHTML =
+                `
                 <td>
-                    ${escapeHTML(
-                        task.taskId
-                    )}
+                    ${escapeHTML(task.taskId)}
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.task
-                    )}
+                    ${escapeHTML(task.task)}
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.department
-                    )}
+                    ${escapeHTML(task.department)}
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.assignedTo
-                    )}
+                    ${escapeHTML(task.assignedTo)}
                 </td>
 
                 <td>
-                    ${priorityBadge(
-                        task.priority
-                    )}
+                    ${priorityBadge(task.priority)}
                 </td>
 
                 <td>
-                    ${statusBadge(
-                        task.status,
-                        task
-                    )}
+                    ${statusBadge(task.status, task)}
                 </td>
 
                 <td>
-                    ${displayDate(
-                        task.dueDate
-                    )}
+                    ${displayDate(task.dueDate)}
                 </td>
-
-            `;
+                `;
 
 
             tbody.appendChild(
@@ -1398,44 +1148,38 @@ function renderTasksTable() {
             "allTasksTable"
         );
 
+
     if (!tbody) return;
 
 
     const search =
-        (
-            document.getElementById(
-                "taskSearch"
-            )?.value ||
-            ""
-        )
-        .toLowerCase()
-        .trim();
+        document.getElementById(
+            "taskSearch"
+        )?.value
+        ?.toLowerCase() || "";
 
 
     const department =
         document.getElementById(
             "departmentFilter"
-        )?.value ||
-        "";
+        )?.value || "";
 
 
     const priority =
         document.getElementById(
             "priorityFilter"
-        )?.value ||
-        "";
+        )?.value || "";
 
 
     const status =
         document.getElementById(
             "statusFilter"
-        )?.value ||
-        "";
+        )?.value || "";
 
 
     const filtered =
         tasks.filter(
-            function (task) {
+            function(task) {
 
                 const text =
                     (
@@ -1458,7 +1202,9 @@ function renderTasksTable() {
                         search
                     )
                 ) {
+
                     return false;
+
                 }
 
 
@@ -1467,7 +1213,9 @@ function renderTasksTable() {
                     task.department !==
                     department
                 ) {
+
                     return false;
+
                 }
 
 
@@ -1476,32 +1224,31 @@ function renderTasksTable() {
                     task.priority !==
                     priority
                 ) {
+
                     return false;
+
                 }
 
 
-                if (status) {
+                if (
+                    status ===
+                    "Overdue"
+                ) {
 
-                    if (
-                        status ===
-                        "Overdue"
-                    ) {
+                    return isOverdue(
+                        task
+                    );
 
-                        if (
-                            !isOverdue(task)
-                        ) {
-                            return false;
-                        }
+                }
 
-                    }
-                    else if (
-                        task.status !==
-                        status
-                    ) {
 
-                        return false;
+                if (
+                    status &&
+                    task.status !==
+                    status
+                ) {
 
-                    }
+                    return false;
 
                 }
 
@@ -1517,20 +1264,16 @@ function renderTasksTable() {
 
     if (!filtered.length) {
 
-        tbody.innerHTML = `
-
+        tbody.innerHTML =
+            `
             <tr>
-
-                <td
-                    colspan="8"
-                    class="empty-table"
-                >
+                <td colspan="8"
+                    class="empty-table">
                     No matching tasks available.
                 </td>
-
             </tr>
+            `;
 
-        `;
 
         return;
 
@@ -1538,7 +1281,7 @@ function renderTasksTable() {
 
 
     filtered.forEach(
-        function (task) {
+        function(task) {
 
             const row =
                 document.createElement(
@@ -1546,67 +1289,46 @@ function renderTasksTable() {
                 );
 
 
-            row.innerHTML = `
-
+            row.innerHTML =
+                `
                 <td>
-                    ${escapeHTML(
-                        task.taskId
-                    )}
+                    ${escapeHTML(task.taskId)}
                 </td>
 
                 <td>
                     <strong>
-                        ${escapeHTML(
-                            task.task
-                        )}
+                        ${escapeHTML(task.task)}
                     </strong>
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.department
-                    )}
+                    ${escapeHTML(task.department)}
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.assignedTo
-                    )}
+                    ${escapeHTML(task.assignedTo)}
                 </td>
 
                 <td>
-                    ${priorityBadge(
-                        task.priority
-                    )}
+                    ${priorityBadge(task.priority)}
                 </td>
 
                 <td>
-                    ${statusBadge(
-                        task.status,
-                        task
-                    )}
+                    ${statusBadge(task.status, task)}
                 </td>
 
                 <td>
-                    ${displayDate(
-                        task.dueDate
-                    )}
+                    ${displayDate(task.dueDate)}
                 </td>
 
                 <td>
-
                     <button
                         class="table-action edit-task"
-                        data-id="${escapeHTML(
-                            task.taskId
-                        )}"
-                    >
+                        data-id="${escapeHTML(task.taskId)}">
                         Edit
                     </button>
-
                 </td>
-
-            `;
+                `;
 
 
             tbody.appendChild(
@@ -1622,11 +1344,11 @@ function renderTasksTable() {
             ".edit-task"
         )
         .forEach(
-            function (button) {
+            function(button) {
 
                 button.addEventListener(
                     "click",
-                    function () {
+                    function() {
 
                         editTask(
                             button.dataset.id
@@ -1642,20 +1364,132 @@ function renderTasksTable() {
 
 
 /* =========================================================
-   FOLLOW-UP SUMMARY
+   DEPARTMENT PERFORMANCE
+========================================================= */
+
+function renderDepartmentPerformance() {
+
+    const container =
+        document.getElementById(
+            "departmentPerformance"
+        );
+
+
+    if (!container) return;
+
+
+    container.innerHTML = "";
+
+
+    DEPARTMENTS.forEach(
+        function(department) {
+
+            const departmentTasks =
+                tasks.filter(
+                    function(task) {
+
+                        return (
+                            task.department ===
+                            department
+                        );
+
+                    }
+                );
+
+
+            const total =
+                departmentTasks.length;
+
+
+            const completed =
+                departmentTasks.filter(
+                    function(task) {
+
+                        return (
+                            task.status ===
+                            "Completed"
+                        );
+
+                    }
+                ).length;
+
+
+            const percentage =
+                total
+                    ? Math.round(
+                        completed /
+                        total *
+                        100
+                    )
+                    : 0;
+
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "department-performance-row";
+
+
+            row.innerHTML =
+                `
+                <div class="department-performance-name">
+                    <strong>
+                        ${escapeHTML(department)}
+                    </strong>
+
+                    <span>
+                        ${total} task(s)
+                    </span>
+                </div>
+
+                <div class="department-progress">
+                    <div
+                        class="department-progress-bar"
+                        style="width:${percentage}%">
+                    </div>
+                </div>
+
+                <strong>
+                    ${percentage}%
+                </strong>
+                `;
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FOLLOWUPS
 ========================================================= */
 
 function updateFollowupSummary() {
 
     const today =
-        startOfDay(
-            new Date()
-        );
+        new Date();
+
+
+    today.setHours(
+        0,
+        0,
+        0,
+        0
+    );
 
 
     const todayCount =
         tasks.filter(
-            function (task) {
+            function(task) {
 
                 return (
                     task.followupDate &&
@@ -1671,7 +1505,7 @@ function updateFollowupSummary() {
 
     const overdue =
         tasks.filter(
-            function (task) {
+            function(task) {
 
                 return (
                     task.followupDate &&
@@ -1686,13 +1520,12 @@ function updateFollowupSummary() {
 
     const upcoming =
         tasks.filter(
-            function (task) {
+            function(task) {
 
                 if (
                     !task.followupDate
-                ) {
+                )
                     return false;
-                }
 
 
                 const date =
@@ -1715,10 +1548,12 @@ function updateFollowupSummary() {
         todayCount
     );
 
+
     setText(
         "followupsOverdue",
         overdue
     );
+
 
     setText(
         "followupsUpcoming",
@@ -1731,10 +1566,12 @@ function updateFollowupSummary() {
         todayCount
     );
 
+
     setText(
         "followupPageOverdue",
         overdue
     );
+
 
     setText(
         "followupPageUpcoming",
@@ -1744,10 +1581,6 @@ function updateFollowupSummary() {
 }
 
 
-/* =========================================================
-   FOLLOW-UP TABLE
-========================================================= */
-
 function renderFollowups() {
 
     const tbody =
@@ -1755,20 +1588,22 @@ function renderFollowups() {
             "followupsTable"
         );
 
+
     if (!tbody) return;
+
+
+    tbody.innerHTML = "";
 
 
     const followups =
         tasks
             .filter(
-                function (task) {
-                    return Boolean(
-                        task.followupDate
-                    );
+                function(t) {
+                    return t.followupDate;
                 }
             )
             .sort(
-                function (a, b) {
+                function(a,b) {
 
                     return String(
                         a.followupDate
@@ -1782,25 +1617,18 @@ function renderFollowups() {
             );
 
 
-    tbody.innerHTML = "";
-
-
     if (!followups.length) {
 
-        tbody.innerHTML = `
-
+        tbody.innerHTML =
+            `
             <tr>
-
-                <td
-                    colspan="7"
-                    class="empty-table"
-                >
+                <td colspan="7"
+                    class="empty-table">
                     No follow-ups available.
                 </td>
-
             </tr>
+            `;
 
-        `;
 
         return;
 
@@ -1808,7 +1636,7 @@ function renderFollowups() {
 
 
     followups.forEach(
-        function (task) {
+        function(task) {
 
             const row =
                 document.createElement(
@@ -1816,36 +1644,26 @@ function renderFollowups() {
                 );
 
 
-            row.innerHTML = `
-
+            row.innerHTML =
+                `
                 <td>
-                    ${escapeHTML(
-                        task.taskId
-                    )}
+                    ${escapeHTML(task.taskId)}
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.task
-                    )}
+                    ${escapeHTML(task.task)}
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.department
-                    )}
+                    ${escapeHTML(task.department)}
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.assignedTo
-                    )}
+                    ${escapeHTML(task.assignedTo)}
                 </td>
 
                 <td>
-                    ${displayDate(
-                        task.followupDate
-                    )}
+                    ${displayDate(task.followupDate)}
                 </td>
 
                 <td>
@@ -1856,13 +1674,9 @@ function renderFollowups() {
                 </td>
 
                 <td>
-                    ${statusBadge(
-                        task.status,
-                        task
-                    )}
+                    ${statusBadge(task.status, task)}
                 </td>
-
-            `;
+                `;
 
 
             tbody.appendChild(
@@ -1876,7 +1690,7 @@ function renderFollowups() {
 
 
 /* =========================================================
-   DEPARTMENT
+   DEPARTMENTS
 ========================================================= */
 
 function openDepartment(
@@ -1885,6 +1699,7 @@ function openDepartment(
 
     currentDepartment =
         department;
+
 
     showDepartmentPage(
         department
@@ -1902,9 +1717,11 @@ function showDepartmentPage(
 
 
     document
-        .querySelectorAll(".page")
+        .querySelectorAll(
+            ".page"
+        )
         .forEach(
-            function (section) {
+            function(section) {
 
                 section.classList.remove(
                     "active-page"
@@ -1951,7 +1768,7 @@ function showDepartmentPage(
 
     const departmentTasks =
         tasks.filter(
-            function (task) {
+            function(task) {
 
                 return (
                     task.department ===
@@ -1970,37 +1787,41 @@ function showDepartmentPage(
 
     setText(
         "departmentOpen",
-        countStatus(
-            departmentTasks,
-            "Open"
-        )
+        departmentTasks.filter(
+            function(t) {
+                return t.status === "Open";
+            }
+        ).length
     );
 
 
     setText(
         "departmentProgress",
-        countStatus(
-            departmentTasks,
-            "In Progress"
-        )
+        departmentTasks.filter(
+            function(t) {
+                return t.status === "In Progress";
+            }
+        ).length
     );
 
 
     setText(
         "departmentBlocked",
-        countStatus(
-            departmentTasks,
-            "Blocked"
-        )
+        departmentTasks.filter(
+            function(t) {
+                return t.status === "Blocked";
+            }
+        ).length
     );
 
 
     setText(
         "departmentCompleted",
-        countStatus(
-            departmentTasks,
-            "Completed"
-        )
+        departmentTasks.filter(
+            function(t) {
+                return t.status === "Completed";
+            }
+        ).length
     );
 
 
@@ -2019,10 +1840,6 @@ function showDepartmentPage(
 }
 
 
-/* =========================================================
-   DEPARTMENT TASKS
-========================================================= */
-
 function renderDepartmentTasks(
     departmentTasks
 ) {
@@ -2031,6 +1848,7 @@ function renderDepartmentTasks(
         document.getElementById(
             "departmentTasksTable"
         );
+
 
     if (!tbody) return;
 
@@ -2042,20 +1860,16 @@ function renderDepartmentTasks(
         !departmentTasks.length
     ) {
 
-        tbody.innerHTML = `
-
+        tbody.innerHTML =
+            `
             <tr>
-
-                <td
-                    colspan="8"
-                    class="empty-table"
-                >
+                <td colspan="8"
+                    class="empty-table">
                     No department tasks available.
                 </td>
-
             </tr>
+            `;
 
-        `;
 
         return;
 
@@ -2063,7 +1877,7 @@ function renderDepartmentTasks(
 
 
     departmentTasks.forEach(
-        function (task) {
+        function(task) {
 
             const row =
                 document.createElement(
@@ -2071,65 +1885,44 @@ function renderDepartmentTasks(
                 );
 
 
-            row.innerHTML = `
-
+            row.innerHTML =
+                `
                 <td>
-                    ${escapeHTML(
-                        task.taskId
-                    )}
+                    ${escapeHTML(task.taskId)}
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.task
-                    )}
+                    ${escapeHTML(task.task)}
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        task.assignedTo
-                    )}
+                    ${escapeHTML(task.assignedTo)}
                 </td>
 
                 <td>
-                    ${priorityBadge(
-                        task.priority
-                    )}
+                    ${priorityBadge(task.priority)}
                 </td>
 
                 <td>
-                    ${statusBadge(
-                        task.status,
-                        task
-                    )}
+                    ${statusBadge(task.status, task)}
                 </td>
 
                 <td>
-                    ${displayDate(
-                        task.dueDate
-                    )}
+                    ${displayDate(task.dueDate)}
                 </td>
 
                 <td>
-                    ${displayDate(
-                        task.followupDate
-                    )}
+                    ${displayDate(task.followupDate)}
                 </td>
 
                 <td>
-
                     <button
                         class="table-action edit-department-task"
-                        data-id="${escapeHTML(
-                            task.taskId
-                        )}"
-                    >
+                        data-id="${escapeHTML(task.taskId)}">
                         Edit
                     </button>
-
                 </td>
-
-            `;
+                `;
 
 
             tbody.appendChild(
@@ -2145,11 +1938,11 @@ function renderDepartmentTasks(
             ".edit-department-task"
         )
         .forEach(
-            function (button) {
+            function(button) {
 
                 button.addEventListener(
                     "click",
-                    function () {
+                    function() {
 
                         editTask(
                             button.dataset.id
@@ -2175,6 +1968,7 @@ function renderDepartmentCards() {
             "departmentsGrid"
         );
 
+
     if (!container) return;
 
 
@@ -2182,11 +1976,11 @@ function renderDepartmentCards() {
 
 
     DEPARTMENTS.forEach(
-        function (department) {
+        function(department) {
 
             const departmentTasks =
                 tasks.filter(
-                    function (task) {
+                    function(task) {
 
                         return (
                             task.department ===
@@ -2198,17 +1992,29 @@ function renderDepartmentCards() {
 
 
             const completed =
-                countStatus(
-                    departmentTasks,
-                    "Completed"
-                );
+                departmentTasks.filter(
+                    function(task) {
+
+                        return (
+                            task.status ===
+                            "Completed"
+                        );
+
+                    }
+                ).length;
 
 
             const blocked =
-                countStatus(
-                    departmentTasks,
-                    "Blocked"
-                );
+                departmentTasks.filter(
+                    function(task) {
+
+                        return (
+                            task.status ===
+                            "Blocked"
+                        );
+
+                    }
+                ).length;
 
 
             const overdue =
@@ -2222,26 +2028,19 @@ function renderDepartmentCards() {
                     "div"
                 );
 
+
             card.className =
                 "department-card";
 
 
-            card.innerHTML = `
-
+            card.innerHTML =
+                `
                 <div class="department-card-code">
-
-                    ${escapeHTML(
-                        getDepartmentCode(
-                            department
-                        )
-                    )}
-
+                    ${getDepartmentCode(department)}
                 </div>
 
                 <h3>
-                    ${escapeHTML(
-                        department
-                    )}
+                    ${escapeHTML(department)}
                 </h3>
 
                 <div class="department-card-stats">
@@ -2276,14 +2075,10 @@ function renderDepartmentCards() {
 
                 </div>
 
-                <button
-                    class="secondary-button"
-                    type="button"
-                >
+                <button class="secondary-button">
                     View Department
                 </button>
-
-            `;
+                `;
 
 
             card
@@ -2292,7 +2087,7 @@ function renderDepartmentCards() {
                 )
                 .addEventListener(
                     "click",
-                    function () {
+                    function() {
 
                         openDepartment(
                             department
@@ -2323,6 +2118,7 @@ function renderAnalysis() {
             "analysisTable"
         );
 
+
     if (!tbody) return;
 
 
@@ -2330,11 +2126,11 @@ function renderAnalysis() {
 
 
     DEPARTMENTS.forEach(
-        function (department) {
+        function(department) {
 
             const data =
                 tasks.filter(
-                    function (task) {
+                    function(task) {
 
                         return (
                             task.department ===
@@ -2350,31 +2146,35 @@ function renderAnalysis() {
 
 
             const open =
-                countStatus(
-                    data,
-                    "Open"
-                );
+                data.filter(
+                    function(t) {
+                        return t.status === "Open";
+                    }
+                ).length;
 
 
             const progress =
-                countStatus(
-                    data,
-                    "In Progress"
-                );
+                data.filter(
+                    function(t) {
+                        return t.status === "In Progress";
+                    }
+                ).length;
 
 
             const blocked =
-                countStatus(
-                    data,
-                    "Blocked"
-                );
+                data.filter(
+                    function(t) {
+                        return t.status === "Blocked";
+                    }
+                ).length;
 
 
             const completed =
-                countStatus(
-                    data,
-                    "Completed"
-                );
+                data.filter(
+                    function(t) {
+                        return t.status === "Completed";
+                    }
+                ).length;
 
 
             const overdue =
@@ -2384,13 +2184,13 @@ function renderAnalysis() {
 
 
             const percentage =
-                total === 0
-                    ? 0
-                    : Math.round(
+                total
+                    ? Math.round(
                         completed /
                         total *
                         100
-                    );
+                    )
+                    : 0;
 
 
             const row =
@@ -2399,12 +2199,10 @@ function renderAnalysis() {
                 );
 
 
-            row.innerHTML = `
-
+            row.innerHTML =
+                `
                 <td>
-                    ${escapeHTML(
-                        department
-                    )}
+                    ${escapeHTML(department)}
                 </td>
 
                 <td>${total}</td>
@@ -2420,8 +2218,7 @@ function renderAnalysis() {
                 <td>${completed}</td>
 
                 <td>${percentage}%</td>
-
-            `;
+                `;
 
 
             tbody.appendChild(
@@ -2445,18 +2242,19 @@ function renderActivity() {
             "activityTimeline"
         );
 
+
     if (!container) return;
 
 
     if (!tasks.length) {
 
-        container.innerHTML = `
-
+        container.innerHTML =
+            `
             <div class="empty-state">
                 No activity recorded yet.
             </div>
+            `;
 
-        `;
 
         return;
 
@@ -2466,17 +2264,13 @@ function renderActivity() {
     const activities =
         [...tasks]
             .sort(
-                function (a, b) {
+                function(a,b) {
 
                     return String(
-                        b.updatedDate ||
-                        b.createdDate ||
-                        ""
+                        b.updatedDate
                     ).localeCompare(
                         String(
-                            a.updatedDate ||
-                            a.createdDate ||
-                            ""
+                            a.updatedDate
                         )
                     );
 
@@ -2492,37 +2286,32 @@ function renderActivity() {
 
 
     activities.forEach(
-        function (task) {
+        function(task) {
 
             const item =
                 document.createElement(
                     "div"
                 );
 
+
             item.className =
                 "activity-item";
 
 
-            item.innerHTML = `
-
+            item.innerHTML =
+                `
                 <div class="activity-dot"></div>
 
                 <div class="activity-content">
 
                     <strong>
-                        ${escapeHTML(
-                            task.task
-                        )}
+                        ${escapeHTML(task.task)}
                     </strong>
 
                     <p>
-                        ${escapeHTML(
-                            task.status
-                        )}
+                        ${escapeHTML(task.status)}
                         ·
-                        ${escapeHTML(
-                            task.department
-                        )}
+                        ${escapeHTML(task.department)}
                     </p>
 
                     <small>
@@ -2540,8 +2329,7 @@ function renderActivity() {
                     </small>
 
                 </div>
-
-            `;
+                `;
 
 
             container.appendChild(
@@ -2560,33 +2348,27 @@ function renderActivity() {
 
 function initializeTaskButtons() {
 
-    const buttonIds = [
-
+    [
         "topAddTask",
-
         "dashboardAddTask",
-
         "tasksAddButton",
-
         "departmentAddTaskButton"
-
-    ];
-
-
-    buttonIds.forEach(
-        function (id) {
+    ]
+    .forEach(
+        function(id) {
 
             const button =
                 document.getElementById(
                     id
                 );
 
+
             if (!button) return;
 
 
             button.addEventListener(
                 "click",
-                function () {
+                function() {
 
                     openTaskModal();
 
@@ -2609,24 +2391,18 @@ function initializeTaskButtons() {
         );
 
 
-    if (close) {
-
+    if (close)
         close.addEventListener(
             "click",
             closeTaskModal
         );
 
-    }
 
-
-    if (cancel) {
-
+    if (cancel)
         cancel.addEventListener(
             "click",
             closeTaskModal
         );
-
-    }
 
 }
 
@@ -2642,14 +2418,16 @@ function initializeTaskForm() {
             "taskForm"
         );
 
+
     if (!form) return;
 
 
     form.addEventListener(
         "submit",
-        async function (event) {
+        async function(event) {
 
             event.preventDefault();
+
 
             await saveTask();
 
@@ -2659,10 +2437,6 @@ function initializeTaskForm() {
 }
 
 
-/* =========================================================
-   OPEN TASK MODAL
-========================================================= */
-
 function openTaskModal(
     task = null
 ) {
@@ -2671,6 +2445,7 @@ function openTaskModal(
         document.getElementById(
             "taskModal"
         );
+
 
     if (!modal) return;
 
@@ -2687,22 +2462,31 @@ function openTaskModal(
 
     if (task) {
 
-        if (title) {
+        editingTaskId =
+            task.taskId;
+
+
+        if (title)
             title.textContent =
                 "Edit Task";
-        }
+
 
         populateTaskForm(
             task
         );
 
     }
+
     else {
 
-        if (title) {
+        editingTaskId =
+            "";
+
+
+        if (title)
             title.textContent =
                 "Add New Task";
-        }
+
 
         clearTaskForm();
 
@@ -2711,17 +2495,10 @@ function openTaskModal(
             currentDepartment
         ) {
 
-            const department =
-                document.getElementById(
-                    "taskDepartment"
-                );
-
-            if (department) {
-
-                department.value =
-                    currentDepartment;
-
-            }
+            setInput(
+                "taskDepartment",
+                currentDepartment
+            );
 
         }
 
@@ -2730,16 +2507,13 @@ function openTaskModal(
 }
 
 
-/* =========================================================
-   CLOSE TASK MODAL
-========================================================= */
-
 function closeTaskModal() {
 
     const modal =
         document.getElementById(
             "taskModal"
         );
+
 
     if (modal) {
 
@@ -2748,12 +2522,12 @@ function closeTaskModal() {
 
     }
 
+
+    editingTaskId =
+        "";
+
 }
 
-
-/* =========================================================
-   CLEAR TASK FORM
-========================================================= */
 
 function clearTaskForm() {
 
@@ -2762,20 +2536,14 @@ function clearTaskForm() {
             "taskForm"
         );
 
-    if (form) {
+
+    if (form)
         form.reset();
-    }
 
 
     setInput(
         "editTaskId",
         ""
-    );
-
-
-    setInput(
-        "taskStatus",
-        "Open"
     );
 
 
@@ -2786,16 +2554,12 @@ function clearTaskForm() {
 
 
     setInput(
-        "taskCreatedDate",
-        todayInput()
+        "taskStatus",
+        "Open"
     );
 
 }
 
-
-/* =========================================================
-   POPULATE TASK FORM
-========================================================= */
 
 function populateTaskForm(
     task
@@ -2806,50 +2570,60 @@ function populateTaskForm(
         task.taskId
     );
 
+
     setInput(
         "taskName",
         task.task
     );
+
 
     setInput(
         "taskDepartment",
         task.department
     );
 
+
     setInput(
         "taskAssignedTo",
         task.assignedTo
     );
+
 
     setInput(
         "taskPriority",
         task.priority
     );
 
+
     setInput(
         "taskStatus",
         task.status
     );
+
 
     setInput(
         "taskCreatedDate",
         task.createdDate
     );
 
+
     setInput(
         "taskDueDate",
         task.dueDate
     );
+
 
     setInput(
         "taskFollowupDate",
         task.followupDate
     );
 
+
     setInput(
         "taskFollowupAction",
         task.lastAction
     );
+
 
     setInput(
         "taskRemarks",
@@ -2876,14 +2650,19 @@ async function saveTask() {
         taskId:
             editId,
 
-        department:
-            getInput(
-                "taskDepartment"
-            ),
-
         task:
             getInput(
                 "taskName"
+            ),
+
+        description:
+            getInput(
+                "taskDescription"
+            ),
+
+        department:
+            getInput(
+                "taskDepartment"
             ),
 
         assignedTo:
@@ -2894,12 +2673,12 @@ async function saveTask() {
         priority:
             getInput(
                 "taskPriority"
-            ),
+            ) || "Medium",
 
         status:
             getInput(
                 "taskStatus"
-            ),
+            ) || "Open",
 
         createdDate:
             getInput(
@@ -2933,66 +2712,17 @@ async function saveTask() {
     };
 
 
-    if (
-        !task.task
-    ) {
+    if (!task.task) {
 
         showNotification(
             "Missing Information",
             "Please enter a task."
         );
 
-        return;
-
-    }
-
-
-    if (
-        !task.department
-    ) {
-
-        showNotification(
-            "Missing Information",
-            "Please select a department."
-        );
 
         return;
 
     }
-
-
-    if (
-        !task.assignedTo
-    ) {
-
-        showNotification(
-            "Missing Information",
-            "Please enter the assigned person."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !task.dueDate
-    ) {
-
-        showNotification(
-            "Missing Information",
-            "Please select a due date."
-        );
-
-        return;
-
-    }
-
-
-    showNotification(
-        "Saving",
-        "Saving task to Google Sheets..."
-    );
 
 
     let result;
@@ -3004,18 +2734,21 @@ async function saveTask() {
             await apiRequest(
                 "updateTask",
                 {
-                    task: task
+                    task:
+                        task
                 }
             );
 
     }
+
     else {
 
         result =
             await apiRequest(
-                "addTask",
+                "createTask",
                 {
-                    task: task
+                    task:
+                        task
                 }
             );
 
@@ -3032,6 +2765,7 @@ async function saveTask() {
             result?.message ||
             "Unable to save task."
         );
+
 
         return;
 
@@ -3052,25 +2786,17 @@ async function saveTask() {
 }
 
 
-/* =========================================================
-   EDIT TASK
-========================================================= */
-
 function editTask(
     taskId
 ) {
 
     const task =
         tasks.find(
-            function (item) {
+            function(t) {
 
                 return (
-                    String(
-                        item.taskId
-                    ) ===
-                    String(
-                        taskId
-                    )
+                    t.taskId ===
+                    taskId
                 );
 
             }
@@ -3083,6 +2809,7 @@ function editTask(
             "Error",
             "Task not found."
         );
+
 
         return;
 
@@ -3102,28 +2829,23 @@ function editTask(
 
 function initializeFilters() {
 
-    const ids = [
-
+    [
         "taskSearch",
-
         "departmentFilter",
-
         "priorityFilter",
-
         "statusFilter"
-
-    ];
-
-
-    ids.forEach(
-        function (id) {
+    ]
+    .forEach(
+        function(id) {
 
             const element =
                 document.getElementById(
                     id
                 );
 
-            if (!element) return;
+
+            if (!element)
+                return;
 
 
             element.addEventListener(
@@ -3164,44 +2886,8 @@ function initializeExports() {
 
     }
 
-
-    const exportExcel =
-        document.getElementById(
-            "exportExcelButton"
-        );
-
-
-    if (exportExcel) {
-
-        exportExcel.addEventListener(
-            "click",
-            exportTasksCSV
-        );
-
-    }
-
-
-    const exportAll =
-        document.getElementById(
-            "exportAllButton"
-        );
-
-
-    if (exportAll) {
-
-        exportAll.addEventListener(
-            "click",
-            exportTasksCSV
-        );
-
-    }
-
 }
 
-
-/* =========================================================
-   EXPORT CSV
-========================================================= */
 
 function exportTasksCSV() {
 
@@ -3212,47 +2898,33 @@ function exportTasksCSV() {
             "There are no tasks to export."
         );
 
+
         return;
 
     }
 
 
     const headers = [
-
         "Task ID",
-
         "Department",
-
         "Task",
-
         "Description",
-
         "Assigned To",
-
         "Priority",
-
         "Status",
-
         "Created Date",
-
         "Due Date",
-
         "Follow-up Date",
-
         "Last Action",
-
         "Remarks",
-
         "Updated By",
-
         "Updated Date"
-
     ];
 
 
     const rows =
         tasks.map(
-            function (task) {
+            function(task) {
 
                 return [
 
@@ -3296,7 +2968,7 @@ function exportTasksCSV() {
             ...rows
         ]
         .map(
-            function (row) {
+            function(row) {
 
                 return row
                     .map(
@@ -3339,15 +3011,7 @@ function exportTasksCSV() {
         "UsedBookR_Operations_Tasks.csv";
 
 
-    document.body.appendChild(
-        link
-    );
-
-
     link.click();
-
-
-    link.remove();
 
 
     URL.revokeObjectURL(
@@ -3361,93 +3025,31 @@ function exportTasksCSV() {
    DATE HELPERS
 ========================================================= */
 
-function startOfDay(
-    date
-) {
+function parseDate(value) {
 
-    const result =
-        new Date(date);
-
-    result.setHours(
-        0,
-        0,
-        0,
-        0
-    );
-
-    return result;
-
-}
-
-
-function parseDate(
-    value
-) {
-
-    if (!value) {
+    if (!value)
         return null;
-    }
 
 
     if (
         value instanceof Date
-    ) {
-
-        return isNaN(
-            value.getTime()
-        )
-            ? null
-            : value;
-
-    }
-
-
-    const text =
-        String(
-            value
-        ).trim();
-
-
-    if (
-        /^\d{4}-\d{2}-\d{2}$/.test(
-            text
-        )
-    ) {
-
-        const parts =
-            text.split(
-                "-"
-            );
-
-
-        const date =
-            new Date(
-                Number(parts[0]),
-                Number(parts[1]) - 1,
-                Number(parts[2])
-            );
-
-
-        return isNaN(
-            date.getTime()
-        )
-            ? null
-            : date;
-
-    }
+    )
+        return value;
 
 
     const date =
-        new Date(
-            text
-        );
+        new Date(value);
 
 
-    return isNaN(
-        date.getTime()
+    if (
+        isNaN(
+            date.getTime()
+        )
     )
-        ? null
-        : date;
+        return null;
+
+
+    return date;
 
 }
 
@@ -3456,24 +3058,33 @@ function formatDateForInput(
     value
 ) {
 
-    if (!value) {
+    if (!value)
         return "";
-    }
 
 
     const text =
-        String(
-            value
-        ).trim();
+        String(value);
 
 
-    if (
-        /^\d{4}-\d{2}-\d{2}$/.test(
-            text
-        )
-    ) {
+    /*
+     * Already yyyy-MM-dd
+     */
 
-        return text;
+    const direct =
+        text.match(
+            /^(\d{4})-(\d{2})-(\d{2})/
+        );
+
+
+    if (direct) {
+
+        return (
+            direct[1] +
+            "-" +
+            direct[2] +
+            "-" +
+            direct[3]
+        );
 
     }
 
@@ -3484,39 +3095,20 @@ function formatDateForInput(
         );
 
 
-    if (!date) {
+    if (!date)
         return "";
-    }
-
-
-    const year =
-        date.getFullYear();
-
-
-    const month =
-        String(
-            date.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    const day =
-        String(
-            date.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
 
 
     return (
-        year +
+        date.getFullYear() +
         "-" +
-        month +
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0") +
         "-" +
-        day
+        String(
+            date.getDate()
+        ).padStart(2, "0")
     );
 
 }
@@ -3526,9 +3118,8 @@ function displayDate(
     value
 ) {
 
-    if (!value) {
+    if (!value)
         return "-";
-    }
 
 
     const date =
@@ -3537,13 +3128,8 @@ function displayDate(
         );
 
 
-    if (!date) {
-
-        return String(
-            value
-        );
-
-    }
+    if (!date)
+        return value;
 
 
     return date.toLocaleDateString(
@@ -3560,20 +3146,12 @@ function displayDate(
 
 function todayInput() {
 
-    const today =
-        new Date();
-
-
     return formatDateForInput(
-        today
+        new Date()
     );
 
 }
 
-
-/* =========================================================
-   DATE CONDITIONS
-========================================================= */
 
 function sameDate(
     value,
@@ -3586,26 +3164,19 @@ function sameDate(
         );
 
 
-    if (!parsed) {
+    if (!parsed)
         return false;
-    }
 
 
     return (
-
         parsed.getFullYear() ===
-        date.getFullYear()
-
-        &&
+            date.getFullYear() &&
 
         parsed.getMonth() ===
-        date.getMonth()
-
-        &&
+            date.getMonth() &&
 
         parsed.getDate() ===
-        date.getDate()
-
+            date.getDate()
     );
 
 }
@@ -3621,20 +3192,32 @@ function dateBeforeToday(
         );
 
 
-    if (!date) {
+    if (!date)
         return false;
-    }
 
 
     const today =
-        startOfDay(
-            new Date()
-        );
+        new Date();
+
+
+    today.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    date.setHours(
+        0,
+        0,
+        0,
+        0
+    );
 
 
     return (
-        startOfDay(date) <
-        today
+        date < today
     );
 
 }
@@ -3645,7 +3228,6 @@ function isOverdue(
 ) {
 
     if (
-        !task ||
         !task.dueDate ||
         task.status ===
         "Completed"
@@ -3671,23 +3253,12 @@ function priorityBadge(
     priority
 ) {
 
-    const safePriority =
-        priority ||
-        "Medium";
-
-
     return `
-
-        <span
-            class="priority-badge priority-${String(
-                safePriority
-            ).toLowerCase()}"
-        >
-            ${escapeHTML(
-                safePriority
-            )}
+        <span class="priority-badge priority-${String(
+            priority
+        ).toLowerCase()}">
+            ${escapeHTML(priority)}
         </span>
-
     `;
 
 }
@@ -3699,14 +3270,12 @@ function statusBadge(
 ) {
 
     let displayStatus =
-        status ||
-        "Open";
+        status;
 
 
     if (
-        displayStatus !==
-        "Completed"
-        &&
+        status !==
+        "Completed" &&
         isOverdue(task)
     ) {
 
@@ -3716,34 +3285,24 @@ function statusBadge(
     }
 
 
-    const className =
-        String(
+    return `
+        <span class="status-badge status-${String(
             displayStatus
         )
         .toLowerCase()
         .replace(
             /\s+/g,
             "-"
-        );
-
-
-    return `
-
-        <span
-            class="status-badge status-${className}"
-        >
-            ${escapeHTML(
-                displayStatus
-            )}
+        )}">
+            ${escapeHTML(displayStatus)}
         </span>
-
     `;
 
 }
 
 
 /* =========================================================
-   DEPARTMENT CODE
+   HELPERS
 ========================================================= */
 
 function getDepartmentCode(
@@ -3798,41 +3357,12 @@ function getDepartmentCode(
 
 
     return (
-        codes[
-            department
-        ] ||
+        codes[department] ||
         "DP"
     );
 
 }
 
-
-/* =========================================================
-   COUNT STATUS
-========================================================= */
-
-function countStatus(
-    list,
-    status
-) {
-
-    return list.filter(
-        function (task) {
-
-            return (
-                task.status ===
-                status
-            );
-
-        }
-    ).length;
-
-}
-
-
-/* =========================================================
-   DOM HELPERS
-========================================================= */
 
 function setText(
     id,
@@ -3887,15 +3417,11 @@ function getInput(
 
 
     return element
-        ? element.value.trim()
+        ? element.value
         : "";
 
 }
 
-
-/* =========================================================
-   SECURITY
-========================================================= */
 
 function escapeHTML(
     value
@@ -3904,43 +3430,39 @@ function escapeHTML(
     if (
         value === null ||
         value === undefined
-    ) {
-
+    )
         return "";
 
-    }
 
+    return String(value)
 
-    return String(
-        value
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
-
-/* =========================================================
-   CSV HELPER
-========================================================= */
 
 function csvEscape(
     value
@@ -3948,8 +3470,7 @@ function csvEscape(
 
     const text =
         String(
-            value ??
-            ""
+            value ?? ""
         );
 
 
@@ -3992,25 +3513,18 @@ function showNotification(
         );
 
 
-    if (!notification) {
+    if (!notification)
         return;
-    }
 
 
-    if (titleElement) {
-
+    if (titleElement)
         titleElement.textContent =
             title;
 
-    }
 
-
-    if (messageElement) {
-
+    if (messageElement)
         messageElement.textContent =
             message;
-
-    }
 
 
     notification.classList.add(
@@ -4019,7 +3533,7 @@ function showNotification(
 
 
     setTimeout(
-        function () {
+        function() {
 
             notification.classList.remove(
                 "show"
@@ -4030,8 +3544,3 @@ function showNotification(
     );
 
 }
-
-
-/* =========================================================
-   END
-========================================================= */
