@@ -1,341 +1,3061 @@
-"use strict";
+/* =========================================================
+   USEDBOOKR OPERATIONS MANAGEMENT SYSTEM
+   STEP 3 - GOOGLE SHEETS API CONNECTION
+========================================================= */
 
-const API_URL = "https://script.google.com/macros/s/AKfycbyrOAQZ--7aDiAHv0ey60C8-xXuTKDAhOVDQjUOc-uiGdgNnpuJ97nL4m-ABkw0Znf3ig/exec";
-const LOGIN_PASSWORD = "admin123";
-const REFRESH_INTERVAL_MS = 60000;
+
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+
+const API_URL =
+    "https://script.google.com/macros/s/AKfycbyrOAQZ--7aDiAHv0ey60C8-xXuTKDAhOVDQjUOc-uiGdgNnpuJ97nL4m-ABkw0Znf3ig/exec";
+
+
+/*
+   Temporary frontend password.
+
+   IMPORTANT:
+   This is only frontend protection.
+   Later we will replace this with proper user authentication.
+*/
+
+const ADMIN_PASSWORD = "admin123";
+
+
+/* =========================================================
+   DEPARTMENTS
+========================================================= */
 
 const DEPARTMENTS = [
- "B2B / Sales","Customer Support","Warehouse","Scanning / Catalog",
- "Listing / Inventory","Digital Marketing","IT / Software Development",
- "Finance","Book Fair / Events","Books & Supply Procurement","HR",
- "Data Analysis","Software Testing","Product Development"
+
+    "B2B / Sales",
+    "Customer Support",
+    "Warehouse",
+    "Scanning / Catalog",
+    "Listing / Inventory",
+    "Digital Marketing",
+    "IT / Software Development",
+    "Finance",
+    "Book Fair / Events",
+    "Books & Supply Procurement",
+    "HR",
+    "Data Analysis",
+    "Software Testing",
+    "Product Development"
+
 ];
 
-const DEPARTMENT_CODES = {
- "B2B / Sales":"B2B","Customer Support":"CS","Warehouse":"WH",
- "Scanning / Catalog":"SC","Listing / Inventory":"LI","Digital Marketing":"DM",
- "IT / Software Development":"IT","Finance":"FN","Book Fair / Events":"BF",
- "Books & Supply Procurement":"BP","HR":"HR","Data Analysis":"DA",
- "Software Testing":"ST","Product Development":"PD"
-};
+
+/* =========================================================
+   APPLICATION STATE
+========================================================= */
 
 let tasks = [];
+
 let currentDepartment = "";
-let refreshTimer = null;
-let loading = false;
 
-const $ = id => document.getElementById(id);
-const text = (id,v) => { const e=$(id); if(e) e.textContent = v ?? ""; };
-const val = id => $(id)?.value ?? "";
-const setVal = (id,v) => { const e=$(id); if(e) e.value = v ?? ""; };
+let editingTaskId = null;
 
-function escapeHTML(v){
- return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;")
-   .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-}
+let apiOnline = false;
 
-function today(){
- const d=new Date();
- return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-function parseDate(v){
- if(!v) return null;
- if(v instanceof Date) return isNaN(v) ? null : v;
- const s=String(v).trim();
- let m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
- if(m) return new Date(+m[1],+m[2]-1,+m[3]);
- const d=new Date(s); return isNaN(d) ? null : d;
-}
-function inputDate(v){
- const d=parseDate(v); if(!d) return "";
- return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-function displayDate(v){
- const d=parseDate(v); if(!d) return v ? String(v) : "-";
- return d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
-}
-function overdue(t){
- if(!t?.dueDate || ["completed","cancelled"].includes(String(t.status).toLowerCase())) return false;
- const d=parseDate(t.dueDate), n=parseDate(today());
- return !!d && !!n && d<n;
-}
-function dueToday(v){
- const d=parseDate(v), n=parseDate(today());
- return !!d && !!n && d.getTime()===n.getTime();
-}
-function beforeToday(v){
- const d=parseDate(v), n=parseDate(today());
- return !!d && !!n && d<n;
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        initializeApplication();
+
+    }
+);
+
+
+function initializeApplication() {
+
+    setupLogin();
+
+    setupNavigation();
+
+    setupButtons();
+
+    setupFilters();
+
+    setupTaskModal();
+
+    setupLogout();
+
+    populateDepartmentSelectors();
+
+    updateCurrentDate();
+
+    checkExistingLogin();
+
 }
 
-function notify(title,msg){
- const n=$("notification"); if(!n) return;
- text("notificationTitle",title); text("notificationMessage",msg);
- n.classList.add("show"); clearTimeout(notify.timer);
- notify.timer=setTimeout(()=>n.classList.remove("show"),3500);
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function setupLogin() {
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    if (!loginForm) {
+        return;
+    }
+
+
+    loginForm.addEventListener(
+        "submit",
+        function (event) {
+
+            event.preventDefault();
+
+            const password =
+                document.getElementById("loginPassword").value.trim();
+
+
+            if (password === ADMIN_PASSWORD) {
+
+                sessionStorage.setItem(
+                    "usedbookr_logged_in",
+                    "true"
+                );
+
+                showApplication();
+
+            } else {
+
+                showLoginError();
+
+            }
+
+        }
+    );
+
 }
 
-function showLogin(){
- $("loginScreen")?.style && ($("loginScreen").style.display="flex");
- const app=$("app"); if(app) app.style.display="none";
-}
-function showApp(){
- const l=$("loginScreen"); if(l) l.style.display="none";
- const app=$("app"); if(app) app.style.display="flex";
-}
-function initLogin(){
- const form=$("loginForm"); if(!form) return;
- form.addEventListener("submit",e=>{
-   e.preventDefault();
-   const p=val("loginPassword").trim();
-   if(p===LOGIN_PASSWORD){
-     sessionStorage.setItem("usedbookrOperationsLogin","true");
-     $("loginError")?.classList.remove("show");
-     setVal("loginPassword","");
-     showApp(); loadTasks(true);
-   }else{
-     const er=$("loginError");
-     if(er){er.textContent="Incorrect password. Please try again.";er.classList.add("show");}
-     setVal("loginPassword",""); $("loginPassword")?.focus();
-   }
- });
-}
-function checkLogin(){
- if(sessionStorage.getItem("usedbookrOperationsLogin")==="true"){showApp();loadTasks(false)}
- else showLogin();
-}
-function initLogout(){
- $("logoutButton")?.addEventListener("click",()=>{
-   sessionStorage.removeItem("usedbookrOperationsLogin"); showLogin(); setVal("loginPassword",""); $("loginPassword")?.focus();
- });
+
+function checkExistingLogin() {
+
+    const loggedIn =
+        sessionStorage.getItem(
+            "usedbookr_logged_in"
+        );
+
+
+    if (loggedIn === "true") {
+
+        showApplication();
+
+    }
+
 }
 
-async function api(action,data={}){
- try{
-   const r=await fetch(API_URL,{
-     method:"POST",
-     headers:{"Content-Type":"text/plain;charset=utf-8"},
-     body:JSON.stringify({action,...data})
-   });
-   const raw=await r.text();
-   let json; try{json=JSON.parse(raw)}catch{throw new Error("API returned non-JSON data.")};
-   return json;
- }catch(e){
-   console.error(e); notify("Connection Error",e.message||"Unable to connect to Google Sheets.");
-   return {success:false,message:e.message};
- }
+
+function showApplication() {
+
+    const loginScreen =
+        document.getElementById("loginScreen");
+
+    const app =
+        document.getElementById("app");
+
+
+    if (loginScreen) {
+
+        loginScreen.style.display = "none";
+
+    }
+
+
+    if (app) {
+
+        app.style.display = "flex";
+
+    }
+
+
+    loadTasks();
+
 }
 
-function first(o,keys,f=""){
- for(const k of keys) if(o?.[k]!==undefined && o?.[k]!==null && String(o[k]).trim()!=="") return o[k];
- return f;
-}
-function normalizeRows(rows){
- return (Array.isArray(rows)?rows:[]).map((r,i)=>({
-  taskId:String(first(r,["Task ID","taskId","TaskID","id"],`T${String(i+1).padStart(3,"0")}`)),
-  department:String(first(r,["Department","department"])),
-  task:String(first(r,["Task","task","Title","title"])),
-  description:String(first(r,["Description","description"])),
-  assignedTo:String(first(r,["Assigned To","assignedTo","Assignee","assignee"])),
-  priority:String(first(r,["Priority","priority"],"Medium")),
-  status:String(first(r,["Status","status"],"Open")),
-  createdDate:inputDate(first(r,["Created Date","createdDate"])),
-  dueDate:inputDate(first(r,["Due Date","dueDate"])),
-  followupDate:inputDate(first(r,["Follow-up Date","followupDate","Followup Date"])),
-  lastAction:String(first(r,["Last Action / Follow-up","Last Action","lastAction","Follow-up / Action Taken"])),
-  remarks:String(first(r,["Remarks","remarks"])),
-  updatedBy:String(first(r,["Updated By","updatedBy"])),
-  updatedDate:String(first(r,["Updated Date","updatedDate"]))
- }));
+
+function showLoginError() {
+
+    const error =
+        document.getElementById("loginError");
+
+
+    if (error) {
+
+        error.style.display = "block";
+
+    }
+
 }
 
-async function loadTasks(showMsg=true){
- if(loading) return; loading=true;
- try{
-   if(showMsg) notify("Refreshing","Loading latest data from Google Sheets...");
-   const r=await api("getTasks");
-   if(!r.success){notify("Data Error",r.message||"Unable to load tasks.");return}
-   tasks=normalizeRows(r.tasks||[]);
-   updateAll();
-   text("dataSourceStatus","Google Sheets — Connected");
-   if(showMsg) notify("Updated",`${tasks.length} task(s) loaded from Google Sheets.`);
- }finally{loading=false}
+
+function setupLogout() {
+
+    const button =
+        document.getElementById("logoutButton");
+
+
+    if (!button) {
+        return;
+    }
+
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            sessionStorage.removeItem(
+                "usedbookr_logged_in"
+            );
+
+            location.reload();
+
+        }
+    );
+
 }
 
-function initDepartments(){
- const s=$("taskDepartment"), f=$("departmentFilter");
- if(s){s.innerHTML='<option value="">Select Department</option>';DEPARTMENTS.forEach(d=>s.add(new Option(d,d)))}
- if(f){f.innerHTML='<option value="">All Departments</option>';DEPARTMENTS.forEach(d=>f.add(new Option(d,d)))}
- renderDepartments();
-}
-function code(d){return DEPARTMENT_CODES[d]||"DP"}
 
-function badgePriority(p){
- const x=String(p||"Medium"), c=x.toLowerCase().replace(/\s+/g,"-");
- return `<span class="priority-badge priority-${c}">${escapeHTML(x)}</span>`;
-}
-function badgeStatus(s,t){
- let x=s||"Open"; if(!["Completed","Cancelled"].includes(x)&&overdue(t)) x="Overdue";
- const c=x.toLowerCase().replace(/\s+/g,"-");
- return `<span class="status-badge status-${c}">${escapeHTML(x)}</span>`;
-}
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
-function updateDashboard(){
- text("totalTasks",tasks.length);
- text("openTasks",tasks.filter(t=>t.status==="Open").length);
- text("progressTasks",tasks.filter(t=>t.status==="In Progress").length);
- text("blockedTasks",tasks.filter(t=>t.status==="Blocked").length);
- text("completedTasks",tasks.filter(t=>t.status==="Completed").length);
- text("overdueTasks",tasks.filter(overdue).length);
- text("highPriorityCount",tasks.filter(t=>t.priority==="High").length);
- text("mediumPriorityCount",tasks.filter(t=>t.priority==="Medium").length);
- text("lowPriorityCount",tasks.filter(t=>t.priority==="Low").length);
- const td=tasks.filter(t=>dueToday(t.followupDate)).length;
- const od=tasks.filter(t=>beforeToday(t.followupDate)).length;
- const up=tasks.filter(t=>{const d=parseDate(t.followupDate),n=parseDate(today());return d&&n&&d>n}).length;
- ["followupsToday","followupPageToday"].forEach(id=>text(id,td));
- ["followupsOverdue","followupPageOverdue"].forEach(id=>text(id,od));
- ["followupsUpcoming","followupPageUpcoming"].forEach(id=>text(id,up));
-}
+function setupNavigation() {
 
-function renderRecent(){
- const b=$("recentTasksTable"); if(!b)return;
- const a=[...tasks].sort((x,y)=>String(y.updatedDate).localeCompare(String(x.updatedDate))).slice(0,10);
- b.innerHTML=a.length?a.map(t=>`<tr><td>${escapeHTML(t.taskId)}</td><td>${escapeHTML(t.task)}</td><td>${escapeHTML(t.department)}</td><td>${escapeHTML(t.assignedTo)}</td><td>${badgePriority(t.priority)}</td><td>${badgeStatus(t.status,t)}</td><td>${displayDate(t.dueDate)}</td></tr>`).join(""):`<tr><td colspan="7" class="empty-table">No tasks available.</td></tr>`;
-}
+    const navItems =
+        document.querySelectorAll(".nav-item");
 
-function filteredTasks(){
- const q=val("taskSearch").trim().toLowerCase(), d=val("departmentFilter"), p=val("priorityFilter"), s=val("statusFilter");
- return tasks.filter(t=>{
-   const hay=[t.taskId,t.task,t.description,t.assignedTo,t.department,t.priority,t.status,t.lastAction,t.remarks].join(" ").toLowerCase();
-   if(q&&!hay.includes(q))return false; if(d&&t.department!==d)return false; if(p&&t.priority!==p)return false;
-   if(s==="Overdue")return overdue(t); if(s&&t.status!==s)return false; return true;
- });
-}
-function renderTasks(){
- const b=$("allTasksTable"); if(!b)return; const a=filteredTasks();
- b.innerHTML=a.length?a.map(t=>`<tr><td>${escapeHTML(t.taskId)}</td><td><strong>${escapeHTML(t.task)}</strong></td><td>${escapeHTML(t.department)}</td><td>${escapeHTML(t.assignedTo)}</td><td>${badgePriority(t.priority)}</td><td>${badgeStatus(t.status,t)}</td><td>${displayDate(t.dueDate)}</td><td><button class="table-action edit-task" data-id="${escapeHTML(t.taskId)}">Edit</button></td></tr>`).join(""):`<tr><td colspan="8" class="empty-table">No matching tasks available.</td></tr>`;
- b.querySelectorAll(".edit-task").forEach(x=>x.addEventListener("click",()=>editTask(x.dataset.id)));
+
+    navItems.forEach(
+        function (item) {
+
+            item.addEventListener(
+                "click",
+                function () {
+
+                    const department =
+                        item.dataset.department;
+
+
+                    const page =
+                        item.dataset.page;
+
+
+                    if (department) {
+
+                        openDepartment(
+                            department
+                        );
+
+                    } else if (page) {
+
+                        openPage(page);
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
 }
 
-function renderFollowups(){
- const b=$("followupsTable"); if(!b)return;
- const a=tasks.filter(t=>t.followupDate).sort((x,y)=>x.followupDate.localeCompare(y.followupDate));
- b.innerHTML=a.length?a.map(t=>`<tr><td>${escapeHTML(t.taskId)}</td><td>${escapeHTML(t.task)}</td><td>${escapeHTML(t.department)}</td><td>${escapeHTML(t.assignedTo)}</td><td>${displayDate(t.followupDate)}</td><td>${escapeHTML(t.lastAction||"-")}</td><td>${badgeStatus(t.status,t)}</td></tr>`).join(""):`<tr><td colspan="7" class="empty-table">No follow-ups available.</td></tr>`;
+
+function openPage(pageName) {
+
+    const pages =
+        document.querySelectorAll(".page");
+
+
+    pages.forEach(
+        function (page) {
+
+            page.classList.remove(
+                "active-page"
+            );
+
+        }
+    );
+
+
+    const target =
+        document.getElementById(
+            pageName + "Page"
+        );
+
+
+    if (target) {
+
+        target.classList.add(
+            "active-page"
+        );
+
+    }
+
+
+    const navItems =
+        document.querySelectorAll(".nav-item");
+
+
+    navItems.forEach(
+        function (item) {
+
+            item.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    const matchingNav =
+        document.querySelector(
+            '.nav-item[data-page="' +
+            pageName +
+            '"]'
+        );
+
+
+    if (matchingNav) {
+
+        matchingNav.classList.add(
+            "active"
+        );
+
+    }
+
+
+    updatePageHeader(
+        pageName
+    );
+
+
+    if (pageName === "dashboard") {
+
+        renderDashboard();
+
+    }
+
+
+    if (pageName === "tasks") {
+
+        renderTasks();
+
+    }
+
+
+    if (pageName === "followups") {
+
+        renderFollowups();
+
+    }
+
+
+    if (pageName === "reports") {
+
+        renderReports();
+
+    }
+
+
+    if (pageName === "activity") {
+
+        renderActivity();
+
+    }
+
+
+    if (pageName === "settings") {
+
+        updateDataSourceStatus();
+
+    }
+
 }
 
-function renderDepartments(){
- const b=$("departmentsGrid"); if(!b)return;
- b.innerHTML=DEPARTMENTS.map(d=>{
-  const a=tasks.filter(t=>t.department===d),c=a.filter(t=>t.status==="Completed").length,bl=a.filter(t=>t.status==="Blocked").length,o=a.filter(overdue).length;
-  return `<div class="department-card"><div class="department-card-code">${code(d)}</div><h3>${escapeHTML(d)}</h3><div class="department-card-stats"><div><strong>${a.length}</strong><span>Total</span></div><div><strong>${c}</strong><span>Completed</span></div><div><strong>${bl}</strong><span>Blocked</span></div><div><strong>${o}</strong><span>Overdue</span></div></div><button class="secondary-button department-view-button" data-department="${escapeHTML(d)}">View Department</button></div>`;
- }).join("");
- b.querySelectorAll(".department-view-button").forEach(x=>x.addEventListener("click",()=>openDepartment(x.dataset.department)));
-}
-function renderPerformance(){
- const b=$("departmentPerformance"); if(!b)return;
- b.innerHTML=DEPARTMENTS.map(d=>{
-  const a=tasks.filter(t=>t.department===d), pct=a.length?Math.round(a.filter(t=>t.status==="Completed").length/a.length*100):0;
-  return `<div class="department-performance-row"><div class="department-performance-name"><strong>${escapeHTML(d)}</strong><span>${a.length} task(s)</span></div><div class="department-progress"><div class="department-progress-bar" style="width:${pct}%"></div></div><strong>${pct}%</strong></div>`;
- }).join("");
-}
-function renderAnalysis(){
- const b=$("analysisTable"); if(!b)return;
- b.innerHTML=DEPARTMENTS.map(d=>{
-  const a=tasks.filter(t=>t.department===d), total=a.length, completed=a.filter(t=>t.status==="Completed").length;
-  return `<tr><td>${escapeHTML(d)}</td><td>${total}</td><td>${a.filter(t=>t.status==="Open").length}</td><td>${a.filter(t=>t.status==="In Progress").length}</td><td>${a.filter(t=>t.status==="Blocked").length}</td><td>${a.filter(overdue).length}</td><td>${completed}</td><td>${total?Math.round(completed/total*100):0}%</td></tr>`;
- }).join("");
-}
-function renderActivity(){
- const b=$("activityTimeline"); if(!b)return;
- const a=[...tasks].sort((x,y)=>String(y.updatedDate).localeCompare(String(x.updatedDate))).slice(0,30);
- b.innerHTML=a.length?a.map(t=>`<div class="activity-item"><div class="activity-dot"></div><div class="activity-content"><strong>${escapeHTML(t.task)}</strong><p>${escapeHTML(t.status)} · ${escapeHTML(t.department)}</p><small>Updated by ${escapeHTML(t.updatedBy||"System")} · ${escapeHTML(displayDate(t.updatedDate))}</small></div></div>`).join(""):`<div class="empty-state">No activity recorded yet.</div>`;
+
+function updatePageHeader(pageName) {
+
+    const title =
+        document.getElementById(
+            "pageTitle"
+        );
+
+    const subtitle =
+        document.getElementById(
+            "pageSubtitle"
+        );
+
+
+    const headers = {
+
+        dashboard: [
+            "Operations Dashboard",
+            "Centralized operational monitoring"
+        ],
+
+        tasks: [
+            "All Tasks",
+            "Manage tasks across all departments"
+        ],
+
+        followups: [
+            "Follow-ups",
+            "Monitor commitments and pending actions"
+        ],
+
+        reports: [
+            "Reports & Analysis",
+            "Analyze operational performance"
+        ],
+
+        activity: [
+            "Activity Log",
+            "Track operational changes"
+        ],
+
+        settings: [
+            "Settings",
+            "System configuration"
+        ]
+
+    };
+
+
+    if (headers[pageName]) {
+
+        title.textContent =
+            headers[pageName][0];
+
+        subtitle.textContent =
+            headers[pageName][1];
+
+    }
+
 }
 
-function renderDepartmentDetail(d){
- const a=tasks.filter(t=>t.department===d);
- text("departmentDetailCode",code(d));text("departmentDetailTitle",d);text("departmentDetailSubtitle","Department operational overview and task monitoring.");
- text("departmentTotal",a.length);text("departmentOpen",a.filter(t=>t.status==="Open").length);text("departmentProgress",a.filter(t=>t.status==="In Progress").length);text("departmentBlocked",a.filter(t=>t.status==="Blocked").length);text("departmentOverdue",a.filter(overdue).length);text("departmentCompleted",a.filter(t=>t.status==="Completed").length);
- const b=$("departmentTasksTable"); if(!b)return;
- b.innerHTML=a.length?a.map(t=>`<tr><td>${escapeHTML(t.taskId)}</td><td>${escapeHTML(t.task)}</td><td>${escapeHTML(t.assignedTo)}</td><td>${badgePriority(t.priority)}</td><td>${badgeStatus(t.status,t)}</td><td>${displayDate(t.dueDate)}</td><td>${displayDate(t.followupDate)}</td><td><button class="table-action edit-department-task" data-id="${escapeHTML(t.taskId)}">Edit</button></td></tr>`).join(""):`<tr><td colspan="8" class="empty-table">No department tasks available.</td></tr>`;
- b.querySelectorAll(".edit-department-task").forEach(x=>x.addEventListener("click",()=>editTask(x.dataset.id)));
-}
-function openDepartment(d){
- currentDepartment=d;
- document.querySelectorAll(".page").forEach(p=>p.classList.remove("active-page"));
- $("departmentDetailPage")?.classList.add("active-page");
- renderDepartmentDetail(d);
- document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active",n.dataset.department===d));
- text("pageTitle",d); text("pageSubtitle","Department operational overview and task monitoring");
+
+/* =========================================================
+   DEPARTMENT NAVIGATION
+========================================================= */
+
+function openDepartment(department) {
+
+    currentDepartment =
+        department;
+
+
+    const pages =
+        document.querySelectorAll(".page");
+
+
+    pages.forEach(
+        function (page) {
+
+            page.classList.remove(
+                "active-page"
+            );
+
+        }
+    );
+
+
+    const page =
+        document.getElementById(
+            "departmentDetailPage"
+        );
+
+
+    if (page) {
+
+        page.classList.add(
+            "active-page"
+        );
+
+    }
+
+
+    const title =
+        document.getElementById(
+            "pageTitle"
+        );
+
+
+    const subtitle =
+        document.getElementById(
+            "pageSubtitle"
+        );
+
+
+    title.textContent =
+        department;
+
+
+    subtitle.textContent =
+        "Department operational monitoring";
+
+
+    renderDepartmentDetail();
+
 }
 
-function showPage(page){
- currentDepartment="";
- document.querySelectorAll(".page").forEach(p=>p.classList.remove("active-page"));
- const p=$(page+"Page"); if(p)p.classList.add("active-page");
- document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active",(n.dataset.page||"")===page));
- const names={dashboard:["Operations Dashboard","Centralized operational monitoring"],tasks:["All Tasks","Manage tasks across all departments"],followups:["Follow-ups","Monitor commitments and pending actions"],reports:["Reports & Analysis","Analyze operational performance"],activity:["Activity Log","Track operational changes"],settings:["Settings","System configuration"],departments:["Departments","All 14 departments and their operational workload"]};
- if(names[page]){text("pageTitle",names[page][0]);text("pageSubtitle",names[page][1])}
-}
-function initNavigation(){
- document.querySelectorAll(".nav-item").forEach(n=>n.addEventListener("click",()=>{
-  if(n.dataset.department)return openDepartment(n.dataset.department);
-  if(n.dataset.page)showPage(n.dataset.page);
- }));
- $("menuToggle")?.addEventListener("click",()=>document.querySelector(".sidebar")?.classList.toggle("sidebar-open"));
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+function setupButtons() {
+
+    const buttons = [
+
+        "topAddTask",
+        "dashboardAddTask",
+        "tasksAddButton",
+        "departmentAddTaskButton"
+
+    ];
+
+
+    buttons.forEach(
+        function (id) {
+
+            const button =
+                document.getElementById(id);
+
+
+            if (!button) {
+                return;
+            }
+
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    openTaskModal();
+
+                }
+            );
+
+        }
+    );
+
+
+    const menuToggle =
+        document.getElementById(
+            "menuToggle"
+        );
+
+
+    if (menuToggle) {
+
+        menuToggle.addEventListener(
+            "click",
+            function () {
+
+                document.body.classList.toggle(
+                    "sidebar-open"
+                );
+
+            }
+        );
+
+    }
+
+
+    const exportTasks =
+        document.getElementById(
+            "exportTasksButton"
+        );
+
+
+    if (exportTasks) {
+
+        exportTasks.addEventListener(
+            "click",
+            exportTasksCSV
+        );
+
+    }
+
+
+    const exportAll =
+        document.getElementById(
+            "exportAllButton"
+        );
+
+
+    if (exportAll) {
+
+        exportAll.addEventListener(
+            "click",
+            exportTasksCSV
+        );
+
+    }
+
+
+    const exportExcel =
+        document.getElementById(
+            "exportExcelButton"
+        );
+
+
+    if (exportExcel) {
+
+        exportExcel.addEventListener(
+            "click",
+            exportTasksCSV
+        );
+
+    }
+
 }
 
-function clearForm(){
- $("taskForm")?.reset();setVal("editTaskId","");setVal("taskStatus","Open");setVal("taskPriority","Medium");setVal("taskCreatedDate",today());
+
+/* =========================================================
+   DEPARTMENT SELECTORS
+========================================================= */
+
+function populateDepartmentSelectors() {
+
+    const selectors = [
+
+        document.getElementById(
+            "taskDepartment"
+        ),
+
+        document.getElementById(
+            "departmentFilter"
+        )
+
+    ];
+
+
+    selectors.forEach(
+        function (select) {
+
+            if (!select) {
+                return;
+            }
+
+
+            DEPARTMENTS.forEach(
+                function (department) {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+
+                    option.value =
+                        department;
+
+                    option.textContent =
+                        department;
+
+
+                    select.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    const departmentsGrid =
+        document.getElementById(
+            "departmentsGrid"
+        );
+
+
+    if (departmentsGrid) {
+
+        departmentsGrid.innerHTML = "";
+
+
+        DEPARTMENTS.forEach(
+            function (department) {
+
+                const card =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                card.type =
+                    "button";
+
+                card.className =
+                    "department-card";
+
+
+                card.innerHTML = `
+
+                    <strong>
+                        ${escapeHTML(department)}
+                    </strong>
+
+                    <span>
+                        View department
+                    </span>
+
+                `;
+
+
+                card.addEventListener(
+                    "click",
+                    function () {
+
+                        openDepartment(
+                            department
+                        );
+
+                    }
+                );
+
+
+                departmentsGrid.appendChild(
+                    card
+                );
+
+            }
+        );
+
+    }
+
 }
-function populate(t){
- setVal("editTaskId",t.taskId);setVal("taskName",t.task);setVal("taskDepartment",t.department);setVal("taskAssignedTo",t.assignedTo);
- setVal("taskPriority",t.priority);setVal("taskStatus",t.status);setVal("taskCreatedDate",t.createdDate);setVal("taskDueDate",t.dueDate);
- setVal("taskFollowupDate",t.followupDate);setVal("taskFollowupAction",t.lastAction);setVal("taskRemarks",t.remarks);
+
+
+/* =========================================================
+   API CONNECTION
+========================================================= */
+
+async function loadTasks() {
+
+    setDataSourceStatus(
+        "Connecting..."
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "?action=getTasks",
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "API RESPONSE:",
+            data
+        );
+
+
+        if (
+            !data ||
+            data.success !== true
+        ) {
+
+            throw new Error(
+                data.message ||
+                "API returned an error"
+            );
+
+        }
+
+
+        tasks =
+            Array.isArray(data.tasks)
+                ? data.tasks
+                : [];
+
+
+        apiOnline = true;
+
+
+        setDataSourceStatus(
+            "Google Sheets Connected"
+        );
+
+
+        renderEverything();
+
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load tasks:",
+            error
+        );
+
+
+        apiOnline = false;
+
+
+        tasks = [];
+
+
+        setDataSourceStatus(
+            "Connection Error"
+        );
+
+
+        showNotification(
+            "Connection Error",
+            "Could not load tasks from Google Sheets."
+        );
+
+
+        renderEverything();
+
+    }
+
 }
-function openModal(t=null){
- const m=$("taskModal");if(!m)return;m.style.display="flex";
- text("taskModalTitle",t?"Edit Task":"Add New Task");
- if(t)populate(t);else{clearForm();if(currentDepartment)setVal("taskDepartment",currentDepartment)}
+
+
+/* =========================================================
+   RENDER EVERYTHING
+========================================================= */
+
+function renderEverything() {
+
+    renderDashboard();
+
+    renderTasks();
+
+    renderFollowups();
+
+    renderDepartmentDetail();
+
+    renderReports();
+
+    renderActivity();
+
 }
-function closeModal(){const m=$("taskModal");if(m)m.style.display="none"}
-async function saveTask(){
- const edit=val("editTaskId");
- const t={taskId:edit,department:val("taskDepartment"),task:val("taskName").trim(),assignedTo:val("taskAssignedTo").trim(),priority:val("taskPriority"),status:val("taskStatus"),createdDate:val("taskCreatedDate")||today(),dueDate:val("taskDueDate"),followupDate:val("taskFollowupDate"),lastAction:val("taskFollowupAction"),remarks:val("taskRemarks"),updatedBy:"Operations Head"};
- if(!t.task||!t.department||!t.assignedTo||!t.dueDate){notify("Missing Information","Please complete Task, Department, Assigned To and Due Date.");return}
- const r=await api(edit?"updateTask":"addTask",{task:t});
- if(!r.success){notify("Save Error",r.message||"Unable to save task.");return}
- closeModal();notify("Saved","Task saved to Google Sheets successfully.");await loadTasks(false);
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function renderDashboard() {
+
+    const total =
+        tasks.length;
+
+
+    const open =
+        countStatus(
+            "Open"
+        );
+
+
+    const progress =
+        countStatus(
+            "In Progress"
+        );
+
+
+    const blocked =
+        countStatus(
+            "Blocked"
+        );
+
+
+    const completed =
+        countStatus(
+            "Completed"
+        );
+
+
+    const overdue =
+        countOverdue();
+
+
+    setText(
+        "totalTasks",
+        total
+    );
+
+
+    setText(
+        "openTasks",
+        open
+    );
+
+
+    setText(
+        "progressTasks",
+        progress
+    );
+
+
+    setText(
+        "blockedTasks",
+        blocked
+    );
+
+
+    setText(
+        "completedTasks",
+        completed
+    );
+
+
+    setText(
+        "overdueTasks",
+        overdue
+    );
+
+
+    setText(
+        "highPriorityCount",
+        countPriority("High")
+    );
+
+
+    setText(
+        "mediumPriorityCount",
+        countPriority("Medium")
+    );
+
+
+    setText(
+        "lowPriorityCount",
+        countPriority("Low")
+    );
+
+
+    const followups =
+        getFollowupCounts();
+
+
+    setText(
+        "followupsToday",
+        followups.today
+    );
+
+
+    setText(
+        "followupsOverdue",
+        followups.overdue
+    );
+
+
+    setText(
+        "followupsUpcoming",
+        followups.upcoming
+    );
+
+
+    renderDepartmentPerformance();
+
+    renderRecentTasks();
+
 }
-function editTask(id){const t=tasks.find(x=>String(x.taskId)===String(id));if(t)openModal(t);else notify("Error","Task not found.");}
-function initModal(){
- ["topAddTask","dashboardAddTask","tasksAddButton","departmentAddTaskButton"].forEach(id=>$(id)?.addEventListener("click",()=>openModal()));
- $("closeTaskModal")?.addEventListener("click",closeModal);$("cancelTaskButton")?.addEventListener("click",closeModal);
- $("taskModal")?.addEventListener("click",e=>{if(e.target===$("taskModal"))closeModal()});
- $("taskForm")?.addEventListener("submit",e=>{e.preventDefault();saveTask()});
+
+
+/* =========================================================
+   RECENT TASKS
+========================================================= */
+
+function renderRecentTasks() {
+
+    const tbody =
+        document.getElementById(
+            "recentTasksTable"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    if (!tasks.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="empty-table"
+                >
+                    No tasks available.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    const recent =
+        tasks.slice(
+            0,
+            10
+        );
+
+
+    tbody.innerHTML =
+        recent.map(
+            taskRowDashboard
+        ).join("");
+
 }
-function initFilters(){
- ["taskSearch","departmentFilter","priorityFilter","statusFilter"].forEach(id=>{const e=$(id);if(e){e.addEventListener("input",renderTasks);e.addEventListener("change",renderTasks)}});
+
+
+function taskRowDashboard(task) {
+
+    return `
+
+        <tr>
+
+            <td>
+                ${escapeHTML(task.taskId)}
+            </td>
+
+            <td>
+                ${escapeHTML(task.task)}
+            </td>
+
+            <td>
+                ${escapeHTML(task.department)}
+            </td>
+
+            <td>
+                ${escapeHTML(task.assignedTo)}
+            </td>
+
+            <td>
+                ${statusBadge(task.priority)}
+            </td>
+
+            <td>
+                ${statusBadge(task.status)}
+            </td>
+
+            <td>
+                ${escapeHTML(formatDate(task.dueDate))}
+            </td>
+
+        </tr>
+
+    `;
+
 }
-function initExport(){
- const btn=$("exportTasksButton")||$("exportAllButton")||$("exportExcelButton"); if(btn)btn.addEventListener("click",exportCSV);
+
+
+/* =========================================================
+   ALL TASKS
+========================================================= */
+
+function renderTasks() {
+
+    const tbody =
+        document.getElementById(
+            "allTasksTable"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    const filtered =
+        getFilteredTasks();
+
+
+    if (!filtered.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty-table"
+                >
+                    No tasks found.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        filtered.map(
+            taskRowAllTasks
+        ).join("");
+
 }
-function exportCSV(){
- if(!tasks.length){notify("Export","There are no tasks to export.");return}
- const h=["Task ID","Department","Task","Description","Assigned To","Priority","Status","Created Date","Due Date","Follow-up Date","Last Action","Remarks","Updated By","Updated Date"];
- const rows=tasks.map(t=>[t.taskId,t.department,t.task,t.description,t.assignedTo,t.priority,t.status,t.createdDate,t.dueDate,t.followupDate,t.lastAction,t.remarks,t.updatedBy,t.updatedDate]);
- const csv=[h,...rows].map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
- const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download="UsedBookR_Operations_Tasks.csv";document.body.appendChild(a);a.click();a.remove();
+
+
+function taskRowAllTasks(task) {
+
+    return `
+
+        <tr>
+
+            <td>
+                ${escapeHTML(task.taskId)}
+            </td>
+
+            <td>
+                ${escapeHTML(task.task)}
+            </td>
+
+            <td>
+                ${escapeHTML(task.department)}
+            </td>
+
+            <td>
+                ${escapeHTML(task.assignedTo)}
+            </td>
+
+            <td>
+                ${statusBadge(task.priority)}
+            </td>
+
+            <td>
+                ${statusBadge(task.status)}
+            </td>
+
+            <td>
+                ${escapeHTML(formatDate(task.dueDate))}
+            </td>
+
+            <td>
+
+                <button
+                    class="table-action-button"
+                    type="button"
+                    onclick="editTask('${escapeAttribute(task.taskId)}')"
+                >
+                    Edit
+                </button>
+
+            </td>
+
+        </tr>
+
+    `;
+
 }
-function initRefresh(){
- let b=$("refreshDataButton"); if(!b){const r=document.querySelector(".topbar-right");if(r){b=document.createElement("button");b.id="refreshDataButton";b.className="secondary-button";b.textContent="↻ Refresh";r.insertBefore(b,r.firstChild)}} b?.addEventListener("click",()=>loadTasks(true));
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+function setupFilters() {
+
+    const ids = [
+
+        "taskSearch",
+        "departmentFilter",
+        "priorityFilter",
+        "statusFilter"
+
+    ];
+
+
+    ids.forEach(
+        function (id) {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+
+            if (!element) {
+                return;
+            }
+
+
+            element.addEventListener(
+                "input",
+                renderTasks
+            );
+
+
+            element.addEventListener(
+                "change",
+                renderTasks
+            );
+
+        }
+    );
+
 }
-function updateAll(){
- updateDashboard();renderRecent();renderTasks();renderFollowups();renderDepartments();renderPerformance();renderAnalysis();renderActivity();
- if(currentDepartment)renderDepartmentDetail(currentDepartment);
+
+
+function getFilteredTasks() {
+
+    const search =
+        getValue(
+            "taskSearch"
+        ).toLowerCase();
+
+
+    const department =
+        getValue(
+            "departmentFilter"
+        );
+
+
+    const priority =
+        getValue(
+            "priorityFilter"
+        );
+
+
+    const status =
+        getValue(
+            "statusFilter"
+        );
+
+
+    return tasks.filter(
+        function (task) {
+
+            const searchable = [
+
+                task.taskId,
+                task.task,
+                task.description,
+                task.department,
+                task.assignedTo,
+                task.remarks
+
+            ]
+            .join(" ")
+            .toLowerCase();
+
+
+            if (
+                search &&
+                !searchable.includes(
+                    search
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                department &&
+                task.department !== department
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                priority &&
+                task.priority !== priority
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                status &&
+                task.status !== status
+            ) {
+
+                return false;
+
+            }
+
+
+            return true;
+
+        }
+    );
+
 }
-document.addEventListener("DOMContentLoaded",()=>{
- initDepartments();initNavigation();initModal();initFilters();initExport();initRefresh();initLogout();initLogin();checkLogin();
- setInterval(()=>{if(sessionStorage.getItem("usedbookrOperationsLogin")==="true")loadTasks(false)},REFRESH_INTERVAL_MS);
-});
-window.UsedBookROperations={reload:()=>loadTasks(true),getTasks:()=>tasks,openDepartment,editTask};
+
+
+/* =========================================================
+   FOLLOW UPS
+========================================================= */
+
+function renderFollowups() {
+
+    const counts =
+        getFollowupCounts();
+
+
+    setText(
+        "followupPageToday",
+        counts.today
+    );
+
+
+    setText(
+        "followupPageOverdue",
+        counts.overdue
+    );
+
+
+    setText(
+        "followupPageUpcoming",
+        counts.upcoming
+    );
+
+
+    const tbody =
+        document.getElementById(
+            "followupsTable"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    const followups =
+        tasks.filter(
+            function (task) {
+
+                return Boolean(
+                    task.followupDate
+                );
+
+            }
+        );
+
+
+    if (!followups.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="empty-table"
+                >
+                    No follow-ups available.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        followups.map(
+            function (task) {
+
+                return `
+
+                    <tr>
+
+                        <td>
+                            ${escapeHTML(task.taskId)}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(task.task)}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(task.department)}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(task.assignedTo)}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                formatDate(
+                                    task.followupDate
+                                )
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                task.lastAction ||
+                                ""
+                            )}
+                        </td>
+
+                        <td>
+                            ${statusBadge(task.status)}
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* =========================================================
+   DEPARTMENT PERFORMANCE
+========================================================= */
+
+function renderDepartmentPerformance() {
+
+    const container =
+        document.getElementById(
+            "departmentPerformance"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML =
+        DEPARTMENTS.map(
+            function (department) {
+
+                const departmentTasks =
+                    tasks.filter(
+                        function (task) {
+
+                            return (
+                                task.department ===
+                                department
+                            );
+
+                        }
+                    );
+
+
+                const total =
+                    departmentTasks.length;
+
+
+                const completed =
+                    departmentTasks.filter(
+                        function (task) {
+
+                            return (
+                                task.status ===
+                                "Completed"
+                            );
+
+                        }
+                    ).length;
+
+
+                const percentage =
+                    total
+                        ? Math.round(
+                            completed /
+                            total *
+                            100
+                        )
+                        : 0;
+
+
+                return `
+
+                    <div class="department-performance-row">
+
+                        <div>
+
+                            <strong>
+                                ${escapeHTML(department)}
+                            </strong>
+
+                            <span>
+                                ${total} task${total === 1 ? "" : "s"}
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                ${percentage}%
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* =========================================================
+   DEPARTMENT DETAIL
+========================================================= */
+
+function renderDepartmentDetail() {
+
+    if (!currentDepartment) {
+        return;
+    }
+
+
+    const departmentTasks =
+        tasks.filter(
+            function (task) {
+
+                return (
+                    task.department ===
+                    currentDepartment
+                );
+
+            }
+        );
+
+
+    setText(
+        "departmentDetailTitle",
+        currentDepartment
+    );
+
+
+    setText(
+        "departmentDetailSubtitle",
+        "Operational tasks for " +
+        currentDepartment
+    );
+
+
+    setText(
+        "departmentTotal",
+        departmentTasks.length
+    );
+
+
+    setText(
+        "departmentOpen",
+        countStatusForTasks(
+            departmentTasks,
+            "Open"
+        )
+    );
+
+
+    setText(
+        "departmentProgress",
+        countStatusForTasks(
+            departmentTasks,
+            "In Progress"
+        )
+    );
+
+
+    setText(
+        "departmentBlocked",
+        countStatusForTasks(
+            departmentTasks,
+            "Blocked"
+        )
+    );
+
+
+    setText(
+        "departmentCompleted",
+        countStatusForTasks(
+            departmentTasks,
+            "Completed"
+        )
+    );
+
+
+    setText(
+        "departmentOverdue",
+        countOverdueForTasks(
+            departmentTasks
+        )
+    );
+
+
+    const tbody =
+        document.getElementById(
+            "departmentTasksTable"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    if (!departmentTasks.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty-table"
+                >
+                    No department tasks available.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        departmentTasks.map(
+            function (task) {
+
+                return `
+
+                    <tr>
+
+                        <td>
+                            ${escapeHTML(task.taskId)}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(task.task)}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(task.assignedTo)}
+                        </td>
+
+                        <td>
+                            ${statusBadge(task.priority)}
+                        </td>
+
+                        <td>
+                            ${statusBadge(task.status)}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                formatDate(task.dueDate)
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                formatDate(task.followupDate)
+                            )}
+                        </td>
+
+                        <td>
+
+                            <button
+                                class="table-action-button"
+                                type="button"
+                                onclick="editTask('${escapeAttribute(task.taskId)}')"
+                            >
+                                Edit
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* =========================================================
+   TASK MODAL
+========================================================= */
+
+function setupTaskModal() {
+
+    const close =
+        document.getElementById(
+            "closeTaskModal"
+        );
+
+
+    const cancel =
+        document.getElementById(
+            "cancelTaskButton"
+        );
+
+
+    const form =
+        document.getElementById(
+            "taskForm"
+        );
+
+
+    if (close) {
+
+        close.addEventListener(
+            "click",
+            closeTaskModal
+        );
+
+    }
+
+
+    if (cancel) {
+
+        cancel.addEventListener(
+            "click",
+            closeTaskModal
+        );
+
+    }
+
+
+    if (form) {
+
+        form.addEventListener(
+            "submit",
+            saveTask
+        );
+
+    }
+
+}
+
+
+function openTaskModal(task = null) {
+
+    const modal =
+        document.getElementById(
+            "taskModal"
+        );
+
+
+    if (!modal) {
+        return;
+    }
+
+
+    editingTaskId =
+        task
+            ? task.taskId
+            : null;
+
+
+    setText(
+        "taskModalTitle",
+        task
+            ? "Edit Task"
+            : "Add New Task"
+    );
+
+
+    if (task) {
+
+        setValue(
+            "editTaskId",
+            task.taskId
+        );
+
+        setValue(
+            "taskName",
+            task.task
+        );
+
+        setValue(
+            "taskDepartment",
+            task.department
+        );
+
+        setValue(
+            "taskAssignedTo",
+            task.assignedTo
+        );
+
+        setValue(
+            "taskPriority",
+            task.priority || "Medium"
+        );
+
+        setValue(
+            "taskStatus",
+            task.status || "Open"
+        );
+
+        setValue(
+            "taskCreatedDate",
+            normalizeDateInput(
+                task.createdDate
+            )
+        );
+
+        setValue(
+            "taskDueDate",
+            normalizeDateInput(
+                task.dueDate
+            )
+        );
+
+        setValue(
+            "taskFollowupDate",
+            normalizeDateInput(
+                task.followupDate
+            )
+        );
+
+        setValue(
+            "taskFollowupAction",
+            task.lastAction || ""
+        );
+
+        setValue(
+            "taskRemarks",
+            task.remarks || ""
+        );
+
+    } else {
+
+        clearTaskForm();
+
+        setValue(
+            "taskCreatedDate",
+            todayISO()
+        );
+
+    }
+
+
+    modal.style.display =
+        "flex";
+
+}
+
+
+function closeTaskModal() {
+
+    const modal =
+        document.getElementById(
+            "taskModal"
+        );
+
+
+    if (modal) {
+
+        modal.style.display =
+            "none";
+
+    }
+
+
+    editingTaskId =
+        null;
+
+}
+
+
+function clearTaskForm() {
+
+    const form =
+        document.getElementById(
+            "taskForm"
+        );
+
+
+    if (form) {
+
+        form.reset();
+
+    }
+
+
+    setValue(
+        "editTaskId",
+        ""
+    );
+
+}
+
+
+function editTask(taskId) {
+
+    const task =
+        tasks.find(
+            function (item) {
+
+                return (
+                    String(item.taskId) ===
+                    String(taskId)
+                );
+
+            }
+        );
+
+
+    if (!task) {
+
+        showNotification(
+            "Error",
+            "Task not found."
+        );
+
+        return;
+
+    }
+
+
+    openTaskModal(
+        task
+    );
+
+}
+
+
+/* =========================================================
+   SAVE TASK
+========================================================= */
+
+async function saveTask(event) {
+
+    event.preventDefault();
+
+
+    const taskData = {
+
+        taskId:
+            getValue("editTaskId"),
+
+        task:
+            getValue("taskName"),
+
+        department:
+            getValue("taskDepartment"),
+
+        assignedTo:
+            getValue("taskAssignedTo"),
+
+        priority:
+            getValue("taskPriority"),
+
+        status:
+            getValue("taskStatus"),
+
+        createdDate:
+            getValue("taskCreatedDate"),
+
+        dueDate:
+            getValue("taskDueDate"),
+
+        followupDate:
+            getValue("taskFollowupDate"),
+
+        lastAction:
+            getValue("taskFollowupAction"),
+
+        remarks:
+            getValue("taskRemarks"),
+
+        updatedBy:
+            "Operations Head"
+
+    };
+
+
+    if (!taskData.task) {
+
+        showNotification(
+            "Error",
+            "Please enter a task."
+        );
+
+        return;
+
+    }
+
+
+    if (!taskData.department) {
+
+        showNotification(
+            "Error",
+            "Please select a department."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        showNotification(
+            "Saving",
+            "Saving task to Google Sheets..."
+        );
+
+
+        const action =
+            taskData.taskId
+                ? "updateTask"
+                : "createTask";
+
+
+        const response =
+            await fetch(
+                API_URL,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            action: action,
+                            ...taskData
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "SAVE RESPONSE:",
+            data
+        );
+
+
+        if (
+            !data ||
+            data.success !== true
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to save task"
+            );
+
+        }
+
+
+        closeTaskModal();
+
+
+        showNotification(
+            "Success",
+            "Task saved successfully."
+        );
+
+
+        await loadTasks();
+
+
+    } catch (error) {
+
+        console.error(
+            "Save error:",
+            error
+        );
+
+
+        showNotification(
+            "Error",
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   REPORTS
+========================================================= */
+
+function renderReports() {
+
+    const tbody =
+        document.getElementById(
+            "analysisTable"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    tbody.innerHTML =
+        DEPARTMENTS.map(
+            function (department) {
+
+                const departmentTasks =
+                    tasks.filter(
+                        function (task) {
+
+                            return (
+                                task.department ===
+                                department
+                            );
+
+                        }
+                    );
+
+
+                const total =
+                    departmentTasks.length;
+
+
+                const open =
+                    countStatusForTasks(
+                        departmentTasks,
+                        "Open"
+                    );
+
+
+                const progress =
+                    countStatusForTasks(
+                        departmentTasks,
+                        "In Progress"
+                    );
+
+
+                const blocked =
+                    countStatusForTasks(
+                        departmentTasks,
+                        "Blocked"
+                    );
+
+
+                const completed =
+                    countStatusForTasks(
+                        departmentTasks,
+                        "Completed"
+                    );
+
+
+                const overdue =
+                    countOverdueForTasks(
+                        departmentTasks
+                    );
+
+
+                const percentage =
+                    total
+                        ? Math.round(
+                            completed /
+                            total *
+                            100
+                        )
+                        : 0;
+
+
+                return `
+
+                    <tr>
+
+                        <td>
+                            ${escapeHTML(department)}
+                        </td>
+
+                        <td>
+                            ${total}
+                        </td>
+
+                        <td>
+                            ${open}
+                        </td>
+
+                        <td>
+                            ${progress}
+                        </td>
+
+                        <td>
+                            ${blocked}
+                        </td>
+
+                        <td>
+                            ${overdue}
+                        </td>
+
+                        <td>
+                            ${completed}
+                        </td>
+
+                        <td>
+                            ${percentage}%
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* =========================================================
+   ACTIVITY
+========================================================= */
+
+function renderActivity() {
+
+    const container =
+        document.getElementById(
+            "activityTimeline"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (!tasks.length) {
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+                No activity recorded yet.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        tasks.slice(
+            0,
+            20
+        ).map(
+            function (task) {
+
+                return `
+
+                    <div class="activity-item">
+
+                        <strong>
+                            ${escapeHTML(task.taskId)}
+                        </strong>
+
+                        <span>
+                            ${escapeHTML(task.task)}
+                        </span>
+
+                        <small>
+                            ${escapeHTML(
+                                task.updatedBy || ""
+                            )}
+                            -
+                            ${escapeHTML(
+                                formatDate(
+                                    task.updatedDate
+                                )
+                            )}
+                        </small>
+
+                    </div>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* =========================================================
+   COUNTERS
+========================================================= */
+
+function countStatus(status) {
+
+    return tasks.filter(
+        function (task) {
+
+            return (
+                task.status ===
+                status
+            );
+
+        }
+    ).length;
+
+}
+
+
+function countStatusForTasks(
+    taskList,
+    status
+) {
+
+    return taskList.filter(
+        function (task) {
+
+            return (
+                task.status ===
+                status
+            );
+
+        }
+    ).length;
+
+}
+
+
+function countPriority(priority) {
+
+    return tasks.filter(
+        function (task) {
+
+            return (
+                task.priority ===
+                priority
+            );
+
+        }
+    ).length;
+
+}
+
+
+function countOverdue() {
+
+    return countOverdueForTasks(
+        tasks
+    );
+
+}
+
+
+function countOverdueForTasks(
+    taskList
+) {
+
+    const today =
+        todayISO();
+
+
+    return taskList.filter(
+        function (task) {
+
+            if (
+                task.status ===
+                "Completed"
+            ) {
+
+                return false;
+
+            }
+
+
+            if (!task.dueDate) {
+
+                return false;
+
+            }
+
+
+            return (
+                normalizeDateInput(
+                    task.dueDate
+                ) < today
+            );
+
+        }
+    ).length;
+
+}
+
+
+/* =========================================================
+   FOLLOW-UP COUNTS
+========================================================= */
+
+function getFollowupCounts() {
+
+    const today =
+        todayISO();
+
+
+    let todayCount = 0;
+
+    let overdueCount = 0;
+
+    let upcomingCount = 0;
+
+
+    tasks.forEach(
+        function (task) {
+
+            if (!task.followupDate) {
+                return;
+            }
+
+
+            const date =
+                normalizeDateInput(
+                    task.followupDate
+                );
+
+
+            if (date === today) {
+
+                todayCount++;
+
+            } else if (
+                date < today &&
+                task.status !== "Completed"
+            ) {
+
+                overdueCount++;
+
+            } else if (
+                date > today
+            ) {
+
+                upcomingCount++;
+
+            }
+
+        }
+    );
+
+
+    return {
+
+        today:
+            todayCount,
+
+        overdue:
+            overdueCount,
+
+        upcoming:
+            upcomingCount
+
+    };
+
+}
+
+
+/* =========================================================
+   DATA SOURCE STATUS
+========================================================= */
+
+function setDataSourceStatus(
+    message
+) {
+
+    setText(
+        "dataSourceStatus",
+        message
+    );
+
+}
+
+
+function updateDataSourceStatus() {
+
+    setDataSourceStatus(
+        apiOnline
+            ? "Google Sheets Connected"
+            : "Not Connected"
+    );
+
+}
+
+
+/* =========================================================
+   EXPORT CSV
+========================================================= */
+
+function exportTasksCSV() {
+
+    if (!tasks.length) {
+
+        showNotification(
+            "Export",
+            "There are no tasks to export."
+        );
+
+        return;
+
+    }
+
+
+    const headers = [
+
+        "Task ID",
+        "Task",
+        "Department",
+        "Assigned To",
+        "Priority",
+        "Status",
+        "Created Date",
+        "Due Date",
+        "Follow-up Date",
+        "Last Action",
+        "Remarks",
+        "Updated By",
+        "Updated Date"
+
+    ];
+
+
+    const rows =
+        tasks.map(
+            function (task) {
+
+                return [
+
+                    task.taskId,
+                    task.task,
+                    task.department,
+                    task.assignedTo,
+                    task.priority,
+                    task.status,
+                    task.createdDate,
+                    task.dueDate,
+                    task.followupDate,
+                    task.lastAction,
+                    task.remarks,
+                    task.updatedBy,
+                    task.updatedDate
+
+                ];
+
+            }
+        );
+
+
+    const csv = [
+
+        headers,
+        ...rows
+
+    ]
+    .map(
+        function (row) {
+
+            return row.map(
+                function (value) {
+
+                    return '"' +
+                        String(
+                            value ?? ""
+                        )
+                        .replace(
+                            /"/g,
+                            '""'
+                        ) +
+                        '"';
+
+                }
+            ).join(",");
+
+        }
+    ).join("\n");
+
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        "UsedBookR_Operations_Tasks.csv";
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    document.body.removeChild(
+        link
+    );
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function updateCurrentDate() {
+
+    const element =
+        document.getElementById(
+            "currentDate"
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        new Date().toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+}
+
+
+function todayISO() {
+
+    const now =
+        new Date();
+
+
+    const year =
+        now.getFullYear();
+
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
+
+}
+
+
+function normalizeDateInput(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    const string =
+        String(value);
+
+
+    if (
+        /^\d{4}-\d{2}-\d{2}$/.test(
+            string
+        )
+    ) {
+
+        return string;
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    return (
+
+        date.getFullYear() +
+        "-" +
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0") +
+        "-" +
+        String(
+            date.getDate()
+        ).padStart(2, "0")
+
+    );
+
+}
+
+
+function formatDate(
+    value
+) {
+
+    const normalized =
+        normalizeDateInput(
+            value
+        );
+
+
+    if (!normalized) {
+        return "";
+    }
+
+
+    const parts =
+        normalized.split("-");
+
+
+    if (parts.length !== 3) {
+        return normalized;
+    }
+
+
+    return (
+        parts[2] +
+        "/" +
+        parts[1] +
+        "/" +
+        parts[0]
+    );
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (element) {
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+function setValue(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (element) {
+
+        element.value =
+            value ?? "";
+
+    }
+
+}
+
+
+function getValue(
+    id
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    return element
+        ? element.value.trim()
+        : "";
+
+}
+
+
+function statusBadge(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    const safe =
+        escapeHTML(
+            value
+        );
+
+
+    return `
+        <span class="status-badge">
+            ${safe}
+        </span>
+    `;
+
+}
+
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+function escapeAttribute(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /\\/g,
+        "\\\\"
+    )
+    .replace(
+        /'/g,
+        "\\'"
+    );
+
+}
+
+
+/* =========================================================
+   NOTIFICATION
+========================================================= */
+
+function showNotification(
+    title,
+    message
+) {
+
+    const notification =
+        document.getElementById(
+            "notification"
+        );
+
+
+    const titleElement =
+        document.getElementById(
+            "notificationTitle"
+        );
+
+
+    const messageElement =
+        document.getElementById(
+            "notificationMessage"
+        );
+
+
+    if (!notification) {
+        return;
+    }
+
+
+    if (titleElement) {
+
+        titleElement.textContent =
+            title;
+
+    }
+
+
+    if (messageElement) {
+
+        messageElement.textContent =
+            message;
+
+    }
+
+
+    notification.classList.add(
+        "show"
+    );
+
+
+    setTimeout(
+        function () {
+
+            notification.classList.remove(
+                "show"
+            );
+
+        },
+        3500
+    );
+
+}
+
+
+/* =========================================================
+   GLOBAL ACCESS
+========================================================= */
+
+window.editTask =
+    editTask;
+
+window.openDepartment =
+    openDepartment;
+
+window.openPage =
+    openPage;
