@@ -17,16 +17,16 @@ const LOGIN_PASSWORD =
 
 
 const DEPARTMENTS = [
-    "B2B / Sales",
+    "B2B - Sales",
     "Customer Support",
     "Warehouse",
-    "Scanning / Catalog",
-    "Listing / Inventory",
+    "Scanning - Catalog",
+    "Listing - Inventory",
     "Digital Marketing",
-    "IT / Software Development",
+    "IT - Software Development",
     "Finance",
-    "Book Fair / Events",
-    "Books & Supply Procurement",
+    "Book Fair - Events",
+    "Books and Supply Procurement",
     "HR",
     "Data Analysis",
     "Software Testing",
@@ -3303,15 +3303,13 @@ function statusBadge(
 
 /* =========================================================
    HELPERS
-========================================================= */
+   ========================================================= */
 
-function getDepartmentCode(
-    department
-) {
+function getDepartmentCode(department) {
 
     const codes = {
 
-        "B2B / Sales":
+        "B2B - Sales":
             "B2B",
 
         "Customer Support":
@@ -3320,25 +3318,25 @@ function getDepartmentCode(
         "Warehouse":
             "WH",
 
-        "Scanning / Catalog":
+        "Scanning - Catalog":
             "SC",
 
-        "Listing / Inventory":
+        "Listing - Inventory":
             "LI",
 
         "Digital Marketing":
             "DM",
 
-        "IT / Software Development":
+        "IT - Software Development":
             "IT",
 
         "Finance":
             "FN",
 
-        "Book Fair / Events":
+        "Book Fair - Events":
             "BF",
 
-        "Books & Supply Procurement":
+        "Books and Supply Procurement":
             "BP",
 
         "HR":
@@ -3355,12 +3353,10 @@ function getDepartmentCode(
 
     };
 
-
     return (
         codes[department] ||
         "DP"
     );
-
 }
 
 
