@@ -1,240 +1,92 @@
 /* =====================================================
-   OPERATIONS LOGIN SYSTEM
+   USEDBOOKR OPERATIONS CONTROL TOWER
 ===================================================== */
 
-// Universal Operations Password
-const OPERATIONS_PASSWORD = "UsedBookR@2026";
 
+/* ================= CONFIG ================= */
 
-/* -----------------------------------------------------
-   LOGIN ELEMENTS
------------------------------------------------------ */
-
-const loginScreen = document.getElementById("loginScreen");
-const operationsApp = document.getElementById("operationsApp");
-
-const loginForm = document.getElementById("loginForm");
-const loginPassword = document.getElementById("loginPassword");
-const loginError = document.getElementById("loginError");
-
-const logoutButton = document.getElementById("logoutButton");
-
-
-/* -----------------------------------------------------
-   CHECK LOGIN SESSION
------------------------------------------------------ */
-
-function checkLoginSession() {
-
-    const loggedIn =
-        sessionStorage.getItem("operationsLoggedIn");
-
-    if (loggedIn === "true") {
-
-        showOperationsApp();
-
-    } else {
-
-        showLoginScreen();
-
-    }
-
-}
-
-
-/* -----------------------------------------------------
-   SHOW LOGIN SCREEN
------------------------------------------------------ */
-
-function showLoginScreen() {
-
-    if (loginScreen) {
-        loginScreen.style.display = "flex";
-    }
-
-    if (operationsApp) {
-        operationsApp.style.display = "none";
-    }
-
-}
-
-
-/* -----------------------------------------------------
-   SHOW OPERATIONS APPLICATION
------------------------------------------------------ */
-
-function showOperationsApp() {
-
-    if (loginScreen) {
-        loginScreen.style.display = "none";
-    }
-
-    if (operationsApp) {
-        operationsApp.style.display = "block";
-    }
-
-}
-
-
-/* -----------------------------------------------------
-   LOGIN
------------------------------------------------------ */
-
-if (loginForm) {
-
-    loginForm.addEventListener("submit", function(event) {
-
-        event.preventDefault();
-
-
-        const enteredPassword =
-            loginPassword.value;
-
-
-        if (enteredPassword === OPERATIONS_PASSWORD) {
-
-            // Save login for this browser session
-            sessionStorage.setItem(
-                "operationsLoggedIn",
-                "true"
-            );
-
-
-            // Hide error
-            loginError.classList.remove("show");
-
-
-            // Clear password
-            loginPassword.value = "";
-
-
-            // Open operations system
-            showOperationsApp();
-
-
-        } else {
-
-            // Show error
-            loginError.classList.add("show");
-
-
-            // Clear incorrect password
-            loginPassword.value = "";
-
-
-            // Put cursor back into password field
-            loginPassword.focus();
-
-        }
-
-    });
-
-}
-
-
-/* -----------------------------------------------------
-   LOGOUT
------------------------------------------------------ */
-
-if (logoutButton) {
-
-    logoutButton.addEventListener("click", function() {
-
-        sessionStorage.removeItem(
-            "operationsLoggedIn"
-        );
-
-
-        showLoginScreen();
-
-
-        if (loginPassword) {
-            loginPassword.value = "";
-            loginPassword.focus();
-        }
-
-    });
-
-}
-
-
-/* -----------------------------------------------------
-   START LOGIN CHECK
------------------------------------------------------ */
-
-checkLoginSession();
-/* =========================================================
-   USEDBOOKR OPERATIONS CONTROL TOWER
-   JAVASCRIPT - V1
-========================================================= */
-
-
-/* =========================================================
-   SYSTEM DATA
-========================================================= */
-
-const DEPARTMENTS = [
-    "Projects / Operations",
-    "Software / IT",
-    "Digital Marketing",
-    "B2B",
-    "Warehouse",
-    "Finance",
-    "Scanning / Catalog",
-    "Pricing",
-    "Listing / Inventory"
-];
-
-
-const PRIORITIES = [
-    "P0",
-    "P1",
-    "P2",
-    "P3"
-];
-
-
-const STATUSES = [
-    "Not Started",
-    "Planned",
-    "In Progress",
-    "Waiting",
-    "Blocked",
-    "Review",
-    "Verified",
-    "Completed",
-    "Cancelled"
-];
-
-
-const TASK_TYPES = [
-    "Operational Task",
-    "Issue",
-    "Follow-up",
-    "Project",
-    "Customer",
-    "Vendor",
-    "Internal",
-    "Management",
-    "System",
-    "Other"
-];
-
-
-/* =========================================================
-   STORAGE
-========================================================= */
+const PASSWORD = "UsedBookR@2026";
 
 const STORAGE_KEY =
-    "usedbookr_operations_tasks_v1";
+    "usedbookr_operations_tasks";
+
+const ACTIVITY_KEY =
+    "usedbookr_operations_activity";
 
 
-let tasks = loadTasks();
+/* ================= DEPARTMENTS ================= */
+
+const DEPARTMENTS = [
+
+    "Operations",
+
+    "B2B / Sales",
+
+    "Customer Support",
+
+    "Warehouse",
+
+    "Scanning / Catalog",
+
+    "Pricing",
+
+    "Listing / Inventory",
+
+    "Digital Marketing",
+
+    "IT / Software",
+
+    "Finance",
+
+    "Book Fair / Events",
+
+    "Management"
+
+];
 
 
-/* =========================================================
-   DOM HELPERS
-========================================================= */
+/* ================= PRIORITIES ================= */
+
+const PRIORITIES = [
+
+    "P0 - Critical",
+
+    "P1 - High",
+
+    "P2 - Normal",
+
+    "P3 - Low"
+
+];
+
+
+/* ================= STATUS ================= */
+
+const STATUSES = [
+
+    "Open",
+
+    "In Progress",
+
+    "Waiting",
+
+    "Blocked",
+
+    "Completed",
+
+    "Cancelled"
+
+];
+
+
+/* ================= VARIABLES ================= */
+
+let tasks = [];
+
+let activity = [];
+
+
+/* ================= HELPERS ================= */
 
 function $(id) {
 
@@ -243,43 +95,44 @@ function $(id) {
 }
 
 
-/* =========================================================
-   DATE HELPERS
-========================================================= */
+function today() {
 
-function todayString() {
+    return new Date()
+        .toISOString()
+        .slice(0, 10);
 
-    const date = new Date();
-
-    const year = date.getFullYear();
-
-    const month =
-        String(date.getMonth() + 1)
-        .padStart(2, "0");
-
-    const day =
-        String(date.getDate())
-        .padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
 }
 
 
-function formatDate(dateString) {
+function taskID() {
 
-    if (!dateString) {
-        return "-";
-    }
+    return "TASK-" +
+        Date.now()
+        .toString(36)
+        .toUpperCase();
 
-    const date = new Date(
-        dateString + "T00:00:00"
-    );
+}
 
-    if (Number.isNaN(date.getTime())) {
-        return dateString;
-    }
 
-    return date.toLocaleDateString(
+function escapeHTML(value) {
+
+    return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+function dateDisplay(date) {
+
+    if (!date) return "—";
+
+    return new Date(
+        date + "T00:00:00"
+    ).toLocaleDateString(
         "en-IN",
         {
             day: "2-digit",
@@ -287,147 +140,114 @@ function formatDate(dateString) {
             year: "numeric"
         }
     );
+
 }
 
 
-function isOverdue(task) {
+function overdue(task) {
 
-    if (!task.deadline) {
-        return false;
-    }
+    return (
+        task.deadline &&
+        task.deadline < today() &&
+        ![
+            "Completed",
+            "Cancelled"
+        ].includes(task.status)
+    );
 
-    if (
-        task.status === "Completed" ||
-        task.status === "Cancelled"
-    ) {
-        return false;
-    }
-
-    return task.deadline < todayString();
 }
 
 
-function isDueToday(task) {
+function dueToday(task) {
 
-    if (!task.deadline) {
-        return false;
-    }
+    return (
+        task.deadline === today() &&
+        ![
+            "Completed",
+            "Cancelled"
+        ].includes(task.status)
+    );
 
-    if (
-        task.status === "Completed" ||
-        task.status === "Cancelled"
-    ) {
-        return false;
-    }
-
-    return task.deadline === todayString();
 }
 
 
-function isFollowupDue(task) {
+function followupDue(task) {
 
-    if (!task.followup) {
-        return false;
-    }
+    return (
+        task.followup &&
+        task.followup <= today() &&
+        ![
+            "Completed",
+            "Cancelled"
+        ].includes(task.status)
+    );
 
-    if (
-        task.status === "Completed" ||
-        task.status === "Cancelled"
-    ) {
-        return false;
-    }
-
-    return task.followup <= todayString();
 }
 
 
-/* =========================================================
-   STORAGE FUNCTIONS
-========================================================= */
+/* ================= STORAGE ================= */
 
-function loadTasks() {
-
-    try {
-
-        const saved =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
-
-        if (!saved) {
-            return createDemoTasks();
-        }
-
-        const parsed =
-            JSON.parse(saved);
-
-        if (!Array.isArray(parsed)) {
-            return createDemoTasks();
-        }
-
-        return parsed;
-
-    } catch (error) {
-
-        console.error(
-            "Unable to load tasks:",
-            error
-        );
-
-        return createDemoTasks();
-    }
-}
-
-
-function saveTasks() {
+function saveData() {
 
     localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(tasks)
     );
 
-    renderAll();
-}
-
-
-/* =========================================================
-   TASK ID
-========================================================= */
-
-function generateTaskId() {
-
-    const now = new Date();
-
-    const year =
-        String(now.getFullYear());
-
-    const number =
-        tasks.length + 1;
-
-    return `OPS-${year}-${String(number).padStart(4, "0")}`;
-}
-
-
-/* =========================================================
-   DEMO DATA
-========================================================= */
-
-function createDemoTasks() {
-
-    const today =
-        todayString();
-
-    const yesterday =
-        new Date();
-
-    yesterday.setDate(
-        yesterday.getDate() - 1
+    localStorage.setItem(
+        ACTIVITY_KEY,
+        JSON.stringify(activity)
     );
 
-    const yesterdayString =
-        yesterday.toISOString()
-            .split("T")[0];
+}
 
+
+function loadData() {
+
+    tasks = JSON.parse(
+        localStorage.getItem(STORAGE_KEY)
+        || "[]"
+    );
+
+    activity = JSON.parse(
+        localStorage.getItem(ACTIVITY_KEY)
+        || "[]"
+    );
+
+
+    if (!tasks.length) {
+
+        createSampleData();
+
+    }
+
+}
+
+
+function logActivity(message) {
+
+    activity.unshift({
+
+        time:
+            new Date().toISOString(),
+
+        message
+
+    });
+
+
+    activity =
+        activity.slice(0, 300);
+
+
+    saveData();
+
+}
+
+
+/* ================= SAMPLE DATA ================= */
+
+function createSampleData() {
 
     const tomorrow =
         new Date();
@@ -436,1137 +256,733 @@ function createDemoTasks() {
         tomorrow.getDate() + 1
     );
 
-    const tomorrowString =
-        tomorrow.toISOString()
-            .split("T")[0];
+
+    const date =
+        tomorrow
+        .toISOString()
+        .slice(0, 10);
 
 
-    const demoTasks = [
+    tasks = [
 
         {
-            id: "OPS-2026-0001",
-            taskName:
-                "Review pending warehouse book intake",
+
+            id: taskID(),
+
+            task:
+                "Verify warehouse incoming stock",
+
             department:
                 "Warehouse",
+
             area:
-                "Book Intake",
-            taskType:
-                "Operational Task",
-            priority:
-                "P1",
+                "Stock Intake",
+
             owner:
                 "Warehouse Head",
+
             coordinator:
                 "Operations",
-            raised:
-                yesterdayString,
-            deadline:
-                today,
+
+            priority:
+                "P1 - High",
+
             status:
                 "In Progress",
+
+            raised:
+                today(),
+
+            deadline:
+                date,
+
             progress:
                 60,
-            dependency:
-                "Warehouse stock verification",
+
             followup:
-                today,
+                today(),
+
+            dependency:
+                "",
+
             nextAction:
-                "Verify remaining stock and update register",
+                "Complete remaining stock count",
+
             escalation:
                 "Monitor",
+
             verification:
                 "Pending",
-            verificationOwner:
-                "Operations Head",
-            source:
-                "Daily Operations",
-            outcome:
-                "",
+
             notes:
-                "Initial intake completed."
+                "Daily warehouse monitoring."
+
         },
 
-        {
-            id: "OPS-2026-0002",
-            taskName:
-                "Resolve website inventory sync issue",
-            department:
-                "Software / IT",
-            area:
-                "Inventory System",
-            taskType:
-                "Issue",
-            priority:
-                "P0",
-            owner:
-                "IT Head",
-            coordinator:
-                "Operations",
-            raised:
-                yesterdayString,
-            deadline:
-                yesterdayString,
-            status:
-                "Blocked",
-            progress:
-                30,
-            dependency:
-                "Developer investigation",
-            followup:
-                today,
-            nextAction:
-                "Confirm root cause and provide resolution ETA",
-            escalation:
-                "Management Attention",
-            verification:
-                "Pending",
-            verificationOwner:
-                "Operations Head",
-            source:
-                "Management Review",
-            outcome:
-                "",
-            notes:
-                "High priority system issue."
-        },
 
         {
-            id: "OPS-2026-0003",
-            taskName:
-                "Prepare B2B customer follow-up list",
-            department:
-                "B2B",
-            area:
-                "Customer Follow-up",
-            taskType:
-                "Follow-up",
-            priority:
-                "P1",
-            owner:
-                "B2B Head",
-            coordinator:
-                "Operations",
-            raised:
-                today,
-            deadline:
-                tomorrowString,
-            status:
-                "Waiting",
-            progress:
-                40,
-            dependency:
-                "Customer response",
-            followup:
-                tomorrowString,
-            nextAction:
-                "Contact pending customers",
-            escalation:
-                "None",
-            verification:
-                "Not Required",
-            verificationOwner:
-                "",
-            source:
-                "B2B Review",
-            outcome:
-                "",
-            notes:
-                ""
-        },
 
-        {
-            id: "OPS-2026-0004",
-            taskName:
-                "Complete monthly pricing review",
-            department:
-                "Pricing",
-            area:
-                "Pricing",
-            taskType:
-                "Operational Task",
-            priority:
-                "P2",
-            owner:
-                "Pricing Head",
-            coordinator:
-                "Operations",
-            raised:
-                yesterdayString,
-            deadline:
-                tomorrowString,
-            status:
-                "Review",
-            progress:
-                85,
-            dependency:
-                "",
-            followup:
-                tomorrowString,
-            nextAction:
-                "Submit final pricing sheet for verification",
-            escalation:
-                "None",
-            verification:
-                "Pending",
-            verificationOwner:
-                "Operations Head",
-            source:
-                "Monthly Review",
-            outcome:
-                "",
-            notes:
-                ""
-        },
+            id: taskID(),
 
-        {
-            id: "OPS-2026-0005",
-            taskName:
-                "Complete pending catalogue scanning",
-            department:
-                "Scanning / Catalog",
-            area:
-                "Catalogue",
-            taskType:
-                "Project",
-            priority:
-                "P2",
-            owner:
-                "Scanning Head",
-            coordinator:
-                "Operations",
-            raised:
-                today,
-            deadline:
-                tomorrowString,
-            status:
-                "In Progress",
-            progress:
-                70,
-            dependency:
-                "",
-            followup:
-                tomorrowString,
-            nextAction:
-                "Complete remaining batch",
-            escalation:
-                "None",
-            verification:
-                "Pending",
-            verificationOwner:
-                "",
-            source:
-                "Daily Review",
-            outcome:
-                "",
-            notes:
-                ""
-        },
+            task:
+                "Update website stock listings",
 
-        {
-            id: "OPS-2026-0006",
-            taskName:
-                "Verify completed inventory listings",
             department:
                 "Listing / Inventory",
+
             area:
-                "Website Listing",
-            taskType:
-                "Verification",
-            priority:
-                "P3",
+                "Website",
+
             owner:
-                "Listing Head",
+                "Catalog Team",
+
             coordinator:
                 "Operations",
-            raised:
-                yesterdayString,
-            deadline:
-                yesterdayString,
+
+            priority:
+                "P1 - High",
+
             status:
-                "Completed",
+                "Open",
+
+            raised:
+                today(),
+
+            deadline:
+                date,
+
             progress:
-                100,
-            dependency:
-                "",
+                25,
+
             followup:
-                "",
+                date,
+
+            dependency:
+                "Verified stock",
+
             nextAction:
-                "Archive completed task",
+                "Publish next listing batch",
+
             escalation:
                 "None",
+
             verification:
-                "Verified",
-            verificationOwner:
-                "Operations Head",
-            source:
-                "Listing Review",
-            outcome:
-                "Listings verified.",
+                "Pending",
+
             notes:
                 ""
+
+        },
+
+
+        {
+
+            id: taskID(),
+
+            task:
+                "Follow up on B2B quotation",
+
+            department:
+                "B2B / Sales",
+
+            area:
+                "Customer Follow-up",
+
+            owner:
+                "Sales Head",
+
+            coordinator:
+                "Operations",
+
+            priority:
+                "P1 - High",
+
+            status:
+                "Waiting",
+
+            raised:
+                today(),
+
+            deadline:
+                date,
+
+            progress:
+                50,
+
+            followup:
+                today(),
+
+            dependency:
+                "Customer confirmation",
+
+            nextAction:
+                "Contact customer",
+
+            escalation:
+                "Management Attention",
+
+            verification:
+                "Pending",
+
+            notes:
+                ""
+
         }
 
     ];
 
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(demoTasks)
+
+    logActivity(
+        "Operations Control Tower initialized."
     );
 
-    return demoTasks;
 }
 
 
-/* =========================================================
-   NAVIGATION
-========================================================= */
+/* ================= BADGES ================= */
 
-document
-    .querySelectorAll(".nav-item")
-    .forEach(button => {
+function priorityBadge(priority) {
 
-        button.addEventListener(
-            "click",
-            () => {
+    let cls = "p2";
 
-                const view =
-                    button.dataset.view;
+    if (priority.startsWith("P0"))
+        cls = "p0";
 
-                showView(view);
+    else if (priority.startsWith("P1"))
+        cls = "p1";
 
-            }
-        );
-
-    });
+    else if (priority.startsWith("P3"))
+        cls = "p3";
 
 
-function showView(view) {
-
-    document
-        .querySelectorAll(".nav-item")
-        .forEach(button => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.view === view
-            );
-
-        });
-
-
-    document
-        .querySelectorAll(".page-section")
-        .forEach(section => {
-
-            section.classList.remove(
-                "active-section"
-            );
-
-        });
-
-
-    const selected =
-        $(view);
-
-    if (selected) {
-
-        selected.classList.add(
-            "active-section"
-        );
-
-    }
-
-
-    const titles = {
-
-        dashboard:
-            [
-                "Operations Dashboard",
-                "Observe → Understand → Coordinate → Follow up → Escalate → Verify → Close"
-            ],
-
-        tasks:
-            [
-                "All Tasks",
-                "Central task register"
-            ],
-
-        mytasks:
-            [
-                "My Department Tasks",
-                "Department-level task monitoring"
-            ],
-
-        followups:
-            [
-                "Follow-up Queue",
-                "Follow-ups due today or overdue"
-            ],
-
-        departments:
-            [
-                "Department Overview",
-                "Workload and exception monitoring"
-            ],
-
-        analysis:
-            [
-                "Operations Analysis",
-                "Understand workload, status and exceptions"
-            ],
-
-        excel:
-            [
-                "Excel / Data",
-                "Import and export operational data"
-            ],
-
-        settings:
-            [
-                "System Settings",
-                "Manage the Operations Control Tower"
-            ]
-
-    };
-
-
-    if (titles[view]) {
-
-        $("page-title").textContent =
-            titles[view][0];
-
-        $("page-description").textContent =
-            titles[view][1];
-
-    }
+    return `
+        <span class="badge ${cls}">
+            ${escapeHTML(priority)}
+        </span>
+    `;
 
 }
 
 
-/* =========================================================
-   FORM DROPDOWNS
-========================================================= */
+function statusBadge(status) {
 
-function populateDropdowns() {
-
-    const departmentSelects = [
-        $("departmentFilter"),
-        $("myDepartment"),
-        $("taskDepartment")
-    ];
+    const cls =
+        status
+        .toLowerCase()
+        .replace(" ", "-");
 
 
-    departmentSelects.forEach(
-        select => {
-
-            if (!select) {
-                return;
-            }
-
-            const current =
-                select.value;
-
-            const firstOption =
-                select.id === "taskDepartment"
-                    ? `<option value="">Select Department</option>`
-                    : `<option value="">All Departments</option>`;
-
-            select.innerHTML =
-                firstOption +
-                DEPARTMENTS
-                    .map(
-                        department =>
-                            `<option value="${escapeHtml(department)}">${escapeHtml(department)}</option>`
-                    )
-                    .join("");
-
-
-            if (
-                DEPARTMENTS.includes(current)
-            ) {
-
-                select.value =
-                    current;
-
-            }
-
-        }
-    );
-
-
-    $("priorityFilter").innerHTML =
-        `<option value="">All Priorities</option>` +
-        PRIORITIES
-            .map(
-                priority =>
-                    `<option value="${priority}">${priority}</option>`
-            )
-            .join("");
-
-
-    $("statusFilter").innerHTML =
-        `<option value="">All Statuses</option>` +
-        STATUSES
-            .map(
-                status =>
-                    `<option value="${escapeHtml(status)}">${escapeHtml(status)}</option>`
-            )
-            .join("");
-
-
-    $("taskPriority").innerHTML =
-        PRIORITIES
-            .map(
-                priority =>
-                    `<option value="${priority}">${priority}</option>`
-            )
-            .join("");
-
-
-    $("taskStatus").innerHTML =
-        STATUSES
-            .map(
-                status =>
-                    `<option value="${escapeHtml(status)}">${escapeHtml(status)}</option>`
-            )
-            .join("");
-
-
-    $("taskType").innerHTML =
-        TASK_TYPES
-            .map(
-                type =>
-                    `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`
-            )
-            .join("");
+    return `
+        <span class="badge ${cls}">
+            ${escapeHTML(status)}
+        </span>
+    `;
 
 }
 
 
-/* =========================================================
-   DASHBOARD
-========================================================= */
+/* ================= DASHBOARD ================= */
 
 function renderDashboard() {
 
     const active =
         tasks.filter(
-            task =>
-                task.status !== "Completed" &&
-                task.status !== "Cancelled"
+            t =>
+                ![
+                    "Completed",
+                    "Cancelled"
+                ].includes(t.status)
         ).length;
 
 
-    const overdue =
-        tasks.filter(
-            isOverdue
-        ).length;
+    const overdueCount =
+        tasks.filter(overdue).length;
 
 
-    const dueToday =
-        tasks.filter(
-            isDueToday
-        ).length;
+    const todayCount =
+        tasks.filter(dueToday).length;
 
 
     const blocked =
         tasks.filter(
-            task =>
-                task.status === "Blocked"
-        ).length;
-
-
-    const waiting =
-        tasks.filter(
-            task =>
-                task.status === "Waiting"
-        ).length;
-
-
-    const critical =
-        tasks.filter(
-            task =>
-                task.priority === "P0" &&
-                task.status !== "Completed" &&
-                task.status !== "Cancelled"
-        ).length;
-
-
-    const completed =
-        tasks.filter(
-            task =>
-                task.status === "Completed"
+            t => t.status === "Blocked"
         ).length;
 
 
     const followups =
+        tasks.filter(followupDue).length;
+
+
+    const completed =
         tasks.filter(
-            isFollowupDue
+            t => t.status === "Completed"
         ).length;
 
 
-    $("activeCount").textContent =
-        active;
-
-    $("overdueCount").textContent =
-        overdue;
-
-    $("dueTodayCount").textContent =
-        dueToday;
-
-    $("blockedCount").textContent =
-        blocked;
-
-    $("waitingCount").textContent =
-        waiting;
-
-    $("criticalCount").textContent =
-        critical;
-
-    $("completedCount").textContent =
-        completed;
-
-    $("followupCount").textContent =
-        followups;
-
-
-    renderDepartmentHealth();
-
-    renderAttentionList();
-
-}
-
-
-/* =========================================================
-   DEPARTMENT HEALTH
-========================================================= */
-
-function getDepartmentStats(
-    department
-) {
-
-    const departmentTasks =
+    const attention =
         tasks.filter(
-            task =>
-                task.department === department
+            t =>
+                overdue(t) ||
+                t.status === "Blocked" ||
+                t.priority.startsWith("P0")
         );
 
 
-    return {
+    $("view-dashboard").innerHTML = `
 
-        open:
-            departmentTasks.filter(
-                task =>
-                    task.status !== "Completed" &&
-                    task.status !== "Cancelled"
-            ).length,
+        <div class="kpi-grid">
 
-        overdue:
-            departmentTasks.filter(
-                isOverdue
-            ).length,
+            ${kpi(
+                "ACTIVE TASKS",
+                active,
+                "Currently active"
+            )}
 
-        blocked:
-            departmentTasks.filter(
-                task =>
-                    task.status === "Blocked"
-            ).length,
+            ${kpi(
+                "OVERDUE",
+                overdueCount,
+                "Past deadline"
+            )}
 
-        waiting:
-            departmentTasks.filter(
-                task =>
-                    task.status === "Waiting"
-            ).length,
+            ${kpi(
+                "DUE TODAY",
+                todayCount,
+                "Requires action"
+            )}
 
-        completed:
-            departmentTasks.filter(
-                task =>
-                    task.status === "Completed"
-            ).length
+            ${kpi(
+                "BLOCKED",
+                blocked,
+                "Needs intervention"
+            )}
 
-    };
+            ${kpi(
+                "FOLLOW-UPS",
+                followups,
+                "Due today / overdue"
+            )}
 
-}
-
-
-function renderDepartmentHealth() {
-
-    const table =
-        $("departmentHealthTable");
-
-    table.innerHTML = "";
+        </div>
 
 
-    DEPARTMENTS.forEach(
-        department => {
-
-            const stats =
-                getDepartmentStats(
-                    department
-                );
+        <div class="grid-2">
 
 
-            const row =
-                document.createElement("tr");
+            <div class="panel">
 
+                <div class="panel-head">
 
-            row.innerHTML = `
+                    <div>
 
-                <td>
-                    <strong>
-                        ${escapeHtml(department)}
-                    </strong>
-                </td>
+                        <h3>
+                            Department Health
+                        </h3>
 
-                <td>
-                    ${stats.open}
-                </td>
-
-                <td>
-                    ${
-                        stats.overdue > 0
-                            ? `<span class="badge priority-p0">${stats.overdue}</span>`
-                            : stats.overdue
-                    }
-                </td>
-
-                <td>
-                    ${
-                        stats.blocked > 0
-                            ? `<span class="badge status-blocked">${stats.blocked}</span>`
-                            : stats.blocked
-                    }
-                </td>
-
-                <td>
-                    ${
-                        stats.waiting > 0
-                            ? `<span class="badge status-waiting">${stats.waiting}</span>`
-                            : stats.waiting
-                    }
-                </td>
-
-                <td>
-                    ${
-                        stats.completed > 0
-                            ? `<span class="badge status-completed">${stats.completed}</span>`
-                            : stats.completed
-                    }
-                </td>
-
-            `;
-
-
-            table.appendChild(row);
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   NEEDS ATTENTION
-========================================================= */
-
-function renderAttentionList() {
-
-    const container =
-        $("attentionList");
-
-
-    const attentionTasks =
-        tasks
-            .filter(
-                task => {
-
-                    return (
-
-                        task.priority === "P0" ||
-                        isOverdue(task) ||
-                        task.status === "Blocked"
-
-                    );
-
-                }
-            )
-            .sort(
-                sortByUrgency
-            )
-            .slice(
-                0,
-                8
-            );
-
-
-    if (!attentionTasks.length) {
-
-        container.innerHTML = `
-            <div class="empty-state">
-                No urgent tasks.
-            </div>
-        `;
-
-        return;
-    }
-
-
-    container.innerHTML =
-        attentionTasks
-            .map(
-                task => `
-
-                    <div
-                        class="attention-item"
-                        onclick="editTask('${task.id}')"
-                        style="cursor:pointer"
-                    >
-
-                        <div class="attention-title">
-
-                            ${escapeHtml(task.taskName)}
-
-                        </div>
-
-                        <div class="attention-meta">
-
-                            ${priorityBadge(task.priority)}
-
-                            ${statusBadge(task.status)}
-
-                            <span>
-                                ${escapeHtml(task.department)}
-                            </span>
-
-                            ${
-                                isOverdue(task)
-                                    ? `<span class="badge overdue-badge">OVERDUE</span>`
-                                    : ""
-                            }
-
-                        </div>
+                        <p>
+                            Current workload by department
+                        </p>
 
                     </div>
 
-                `
-            )
-            .join("");
-
-}
+                </div>
 
 
-/* =========================================================
-   TASK TABLE
-========================================================= */
+                <div class="table-wrap">
 
-function getFilteredTasks() {
+                    <table class="table">
 
-    const search =
-        $("taskSearch")
-            .value
-            .trim()
-            .toLowerCase();
+                        <thead>
 
+                            <tr>
 
-    const department =
-        $("departmentFilter")
-            .value;
+                                <th>
+                                    Department
+                                </th>
 
+                                <th>
+                                    Active
+                                </th>
 
-    const priority =
-        $("priorityFilter")
-            .value;
+                                <th>
+                                    Overdue
+                                </th>
 
+                                <th>
+                                    Blocked
+                                </th>
 
-    const status =
-        $("statusFilter")
-            .value;
+                                <th>
+                                    Waiting
+                                </th>
 
+                                <th>
+                                    Completed
+                                </th>
 
-    return tasks.filter(
-        task => {
+                            </tr>
 
-            const searchMatch =
-                !search ||
-                [
-                    task.id,
-                    task.taskName,
-                    task.department,
-                    task.owner,
-                    task.area,
-                    task.nextAction
-                ]
-                    .join(" ")
-                    .toLowerCase()
-                    .includes(search);
+                        </thead>
 
 
-            const departmentMatch =
-                !department ||
-                task.department === department;
+                        <tbody>
+
+                            ${DEPARTMENTS
+                                .map(department => {
+
+                                    const list =
+                                        tasks.filter(
+                                            t =>
+                                                t.department ===
+                                                department
+                                        );
 
 
-            const priorityMatch =
-                !priority ||
-                task.priority === priority;
+                                    return `
 
+                                    <tr>
 
-            const statusMatch =
-                !status ||
-                task.status === status;
+                                        <td>
+                                            <strong>
+                                                ${escapeHTML(
+                                                    department
+                                                )}
+                                            </strong>
+                                        </td>
 
+                                        <td>
+                                            ${
+                                                list.filter(
+                                                    t =>
+                                                        ![
+                                                            "Completed",
+                                                            "Cancelled"
+                                                        ].includes(
+                                                            t.status
+                                                        )
+                                                ).length
+                                            }
+                                        </td>
 
-            return (
-                searchMatch &&
-                departmentMatch &&
-                priorityMatch &&
-                statusMatch
-            );
+                                        <td>
+                                            ${
+                                                list.filter(
+                                                    overdue
+                                                ).length
+                                            }
+                                        </td>
 
-        }
-    );
+                                        <td>
+                                            ${
+                                                list.filter(
+                                                    t =>
+                                                        t.status ===
+                                                        "Blocked"
+                                                ).length
+                                            }
+                                        </td>
 
-}
+                                        <td>
+                                            ${
+                                                list.filter(
+                                                    t =>
+                                                        t.status ===
+                                                        "Waiting"
+                                                ).length
+                                            }
+                                        </td>
 
+                                        <td>
+                                            ${
+                                                list.filter(
+                                                    t =>
+                                                        t.status ===
+                                                        "Completed"
+                                                ).length
+                                            }
+                                        </td>
 
-function renderTaskTable() {
+                                    </tr>
 
-    const table =
-        $("taskTable");
+                                    `;
 
-
-    const filtered =
-        getFilteredTasks();
-
-
-    if (!filtered.length) {
-
-        table.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="9"
-                    style="text-align:center;padding:30px"
-                >
-
-                    <span class="empty-state">
-                        No tasks found.
-                    </span>
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-    }
-
-
-    table.innerHTML =
-        filtered
-            .sort(sortByUrgency)
-            .map(
-                task => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${escapeHtml(task.id)}
-                            </strong>
-                        </td>
-
-                        <td>
-                            <strong>
-                                ${escapeHtml(task.taskName)}
-                            </strong>
-
-                            ${
-                                task.area
-                                    ? `
-                                        <br>
-                                        <small
-                                            style="color:#718096"
-                                        >
-                                            ${escapeHtml(task.area)}
-                                        </small>
-                                      `
-                                    : ""
-                            }
-                        </td>
-
-                        <td>
-                            ${escapeHtml(task.department)}
-                        </td>
-
-                        <td>
-                            ${priorityBadge(task.priority)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(task.owner)}
-                        </td>
-
-                        <td>
-
-                            ${formatDate(task.deadline)}
-
-                            ${
-                                isOverdue(task)
-                                    ? `<span class="badge overdue-badge">OVERDUE</span>`
-                                    : isDueToday(task)
-                                        ? `<span class="badge status-waiting">TODAY</span>`
-                                        : ""
+                                })
+                                .join("")
                             }
 
-                        </td>
+                        </tbody>
 
-                        <td>
-                            ${statusBadge(task.status)}
-                        </td>
+                    </table>
 
-                        <td>
-                            ${progressBar(task.progress)}
-                        </td>
-
-                        <td>
-
-                            <button
-                                class="secondary-button"
-                                onclick="editTask('${task.id}')"
-                            >
-                                Edit
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `
-            )
-            .join("");
-
-}
-
-
-/* =========================================================
-   PRIORITY BADGE
-========================================================= */
-
-function priorityBadge(priority) {
-
-    const classes = {
-
-        P0: "priority-p0",
-        P1: "priority-p1",
-        P2: "priority-p2",
-        P3: "priority-p3"
-
-    };
-
-
-    return `
-        <span class="badge ${classes[priority] || "status-neutral"}">
-            ${escapeHtml(priority)}
-        </span>
-    `;
-
-}
-
-
-/* =========================================================
-   STATUS BADGE
-========================================================= */
-
-function statusBadge(status) {
-
-    let className =
-        "status-neutral";
-
-
-    if (
-        status === "Blocked"
-    ) {
-
-        className =
-            "status-blocked";
-
-    } else if (
-        status === "Waiting"
-    ) {
-
-        className =
-            "status-waiting";
-
-    } else if (
-        status === "In Progress"
-    ) {
-
-        className =
-            "status-progress";
-
-    } else if (
-        status === "Completed" ||
-        status === "Verified"
-    ) {
-
-        className =
-            "status-completed";
-
-    } else if (
-        status === "Review"
-    ) {
-
-        className =
-            "status-review";
-
-    }
-
-
-    return `
-        <span class="badge ${className}">
-            ${escapeHtml(status)}
-        </span>
-    `;
-
-}
-
-
-/* =========================================================
-   PROGRESS BAR
-========================================================= */
-
-function progressBar(progress) {
-
-    const value =
-        Math.max(
-            0,
-            Math.min(
-                100,
-                Number(progress) || 0
-            )
-        );
-
-
-    return `
-
-        <div class="progress-wrapper">
-
-            <div class="progress-bar">
-
-                <div
-                    class="progress-fill"
-                    style="width:${value}%"
-                ></div>
+                </div>
 
             </div>
 
-            <span class="progress-number">
-                ${value}%
-            </span>
+
+            <div class="panel">
+
+                <div class="panel-head">
+
+                    <div>
+
+                        <h3>
+                            Needs Attention
+                        </h3>
+
+                        <p>
+                            Critical operational exceptions
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel-body">
+
+                    ${
+                        attention.length
+
+                        ?
+
+                        attention
+                            .slice(0, 8)
+                            .map(t => `
+
+                                <div class="attention">
+
+                                    <strong>
+                                        ${escapeHTML(
+                                            t.task
+                                        )}
+                                    </strong>
+
+                                    <div>
+
+                                        ${escapeHTML(
+                                            t.department
+                                        )}
+
+                                        ·
+
+                                        ${escapeHTML(
+                                            t.owner
+                                        )}
+
+                                        <br>
+
+                                        ${statusBadge(
+                                            t.status
+                                        )}
+
+                                        ${
+                                            overdue(t)
+                                            ?
+                                            `
+                                            <span class="badge overdue">
+                                                Overdue
+                                            </span>
+                                            `
+                                            :
+                                            ""
+                                        }
+
+                                    </div>
+
+                                </div>
+
+                            `)
+                            .join("")
+
+                        :
+
+                        `
+                        <div class="empty">
+                            No critical exceptions.
+                        </div>
+                        `
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="grid-3">
+
+
+            <div class="panel">
+
+                <div class="panel-head">
+
+                    <div>
+
+                        <h3>
+                            Completion
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="panel-body">
+
+                    <strong
+                        style="
+                        font-size:34px;
+                        "
+                    >
+                        ${
+                            tasks.length
+                            ?
+                            Math.round(
+                                completed /
+                                tasks.length *
+                                100
+                            )
+                            :
+                            0
+                        }%
+                    </strong>
+
+                    <p class="muted">
+                        ${completed}
+                        of
+                        ${tasks.length}
+                        tasks completed
+                    </p>
+
+                    <div class="bar">
+
+                        <span
+                            style="
+                            width:
+                            ${
+                                tasks.length
+                                ?
+                                completed /
+                                tasks.length *
+                                100
+                                :
+                                0
+                            }%
+                            "
+                        ></span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-head">
+
+                    <div>
+
+                        <h3>
+                            Operational Rule
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="panel-body">
+
+                    <div class="info">
+
+                        Every task should have:
+
+                        <br><br>
+
+                        <b>
+                            Owner
+                        </b>
+                        →
+
+                        <b>
+                            Deadline
+                        </b>
+                        →
+
+                        <b>
+                            Status
+                        </b>
+                        →
+
+                        <b>
+                            Next Action
+                        </b>
+                        →
+
+                        <b>
+                            Follow-up
+                        </b>
+                        →
+
+                        <b>
+                            Verification
+                        </b>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-head">
+
+                    <div>
+
+                        <h3>
+                            Current Exceptions
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="panel-body">
+
+                    <div class="info">
+
+                        <b>
+                            ${overdueCount}
+                        </b>
+                        overdue
+
+                        <br>
+
+                        <b>
+                            ${blocked}
+                        </b>
+                        blocked
+
+                        <br>
+
+                        <b>
+                            ${
+                                tasks.filter(
+                                    t =>
+                                        t.status ===
+                                        "Waiting"
+                                ).length
+                            }
+                        </b>
+                        waiting
+
+                    </div>
+
+                </div>
+
+            </div>
 
         </div>
 
@@ -1575,719 +991,471 @@ function progressBar(progress) {
 }
 
 
-/* =========================================================
-   SORTING
-========================================================= */
+function kpi(
+    title,
+    value,
+    subtitle
+) {
 
-function sortByUrgency(a, b) {
+    return `
 
-    const priorityOrder = {
+        <div class="kpi">
 
-        P0: 0,
-        P1: 1,
-        P2: 2,
-        P3: 3
+            <div class="kpi-label">
+                ${title}
+            </div>
+
+            <div class="kpi-value">
+                ${value}
+            </div>
+
+            <div class="kpi-sub">
+                ${subtitle}
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ================= TASK PAGE ================= */
+
+function renderTasks() {
+
+    $("view-tasks").innerHTML = `
+
+        <div class="panel">
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h3>
+                        Central Task Register
+                    </h3>
+
+                    <p>
+                        Every department's operational tasks.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="filters">
+
+                <input
+                    id="searchTask"
+                    placeholder="Search task, owner..."
+                >
+
+
+                <select id="filterDepartment">
+
+                    <option value="">
+                        All Departments
+                    </option>
+
+                    ${DEPARTMENTS
+                        .map(
+                            d =>
+                                `<option>
+                                    ${escapeHTML(d)}
+                                </option>`
+                        )
+                        .join("")
+                    }
+
+                </select>
+
+
+                <select id="filterPriority">
+
+                    <option value="">
+                        All Priorities
+                    </option>
+
+                    ${PRIORITIES
+                        .map(
+                            p =>
+                                `<option>
+                                    ${escapeHTML(p)}
+                                </option>`
+                        )
+                        .join("")
+                    }
+
+                </select>
+
+
+                <select id="filterStatus">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    ${STATUSES
+                        .map(
+                            s =>
+                                `<option>
+                                    ${s}
+                                </option>`
+                        )
+                        .join("")
+                    }
+
+                </select>
+
+
+                <select id="filterTiming">
+
+                    <option value="">
+                        All Timing
+                    </option>
+
+                    <option value="overdue">
+                        Overdue
+                    </option>
+
+                    <option value="today">
+                        Due Today
+                    </option>
+
+                    <option value="followup">
+                        Follow-up Due
+                    </option>
+
+                </select>
+
+
+                <button
+                    id="clearFilters"
+                    class="btn secondary"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+                <table class="table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                ID
+                            </th>
+
+                            <th>
+                                Task
+                            </th>
+
+                            <th>
+                                Department
+                            </th>
+
+                            <th>
+                                Priority
+                            </th>
+
+                            <th>
+                                Owner
+                            </th>
+
+                            <th>
+                                Deadline
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Progress
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="taskTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    renderTaskTable();
+
+
+    [
+
+        "searchTask",
+        "filterDepartment",
+        "filterPriority",
+        "filterStatus",
+        "filterTiming"
+
+    ].forEach(
+        id =>
+            $(id).addEventListener(
+                "input",
+                renderTaskTable
+            )
+    );
+
+
+    $("clearFilters").onclick = () => {
+
+        $("searchTask").value = "";
+
+        $("filterDepartment").value = "";
+
+        $("filterPriority").value = "";
+
+        $("filterStatus").value = "";
+
+        $("filterTiming").value = "";
+
+        renderTaskTable();
 
     };
 
-
-    const priorityDifference =
-        (
-            priorityOrder[a.priority] ?? 99
-        ) -
-        (
-            priorityOrder[b.priority] ?? 99
-        );
-
-
-    if (
-        priorityDifference !== 0
-    ) {
-
-        return priorityDifference;
-
-    }
-
-
-    const aOverdue =
-        isOverdue(a);
-
-    const bOverdue =
-        isOverdue(b);
-
-
-    if (
-        aOverdue !== bOverdue
-    ) {
-
-        return aOverdue
-            ? -1
-            : 1;
-
-    }
-
-
-    return (
-        a.deadline || "9999-12-31"
-    )
-        .localeCompare(
-            b.deadline || "9999-12-31"
-        );
-
 }
 
 
-/* =========================================================
-   MY TASKS
-========================================================= */
+function renderTaskTable() {
 
-function renderMyTasks() {
+    const search =
+        (
+            $("searchTask")?.value ||
+            ""
+        ).toLowerCase();
+
 
     const department =
-        $("myDepartment")
-            .value;
+        $("filterDepartment")?.value ||
+        "";
 
 
-    const table =
-        $("myTaskTable");
+    const priority =
+        $("filterPriority")?.value ||
+        "";
 
 
-    let filtered =
-        tasks;
+    const status =
+        $("filterStatus")?.value ||
+        "";
 
 
-    if (department) {
-
-        filtered =
-            tasks.filter(
-                task =>
-                    task.department === department
-            );
-
-    }
+    const timing =
+        $("filterTiming")?.value ||
+        "";
 
 
-    if (!filtered.length) {
+    const list =
+        tasks.filter(t => {
 
-        table.innerHTML = `
+            const text = [
+
+                t.task,
+
+                t.owner,
+
+                t.department,
+
+                t.area,
+
+                t.id
+
+            ]
+                .join(" ")
+                .toLowerCase();
+
+
+            if (
+                search &&
+                !text.includes(search)
+            )
+                return false;
+
+
+            if (
+                department &&
+                t.department !==
+                department
+            )
+                return false;
+
+
+            if (
+                priority &&
+                t.priority !==
+                priority
+            )
+                return false;
+
+
+            if (
+                status &&
+                t.status !==
+                status
+            )
+                return false;
+
+
+            if (
+                timing === "overdue" &&
+                !overdue(t)
+            )
+                return false;
+
+
+            if (
+                timing === "today" &&
+                !dueToday(t)
+            )
+                return false;
+
+
+            if (
+                timing === "followup" &&
+                !followupDue(t)
+            )
+                return false;
+
+
+            return true;
+
+        });
+
+
+    if (!list.length) {
+
+        $("taskTable").innerHTML = `
 
             <tr>
 
-                <td
-                    colspan="8"
-                    style="text-align:center;padding:30px"
-                >
+                <td colspan="9">
 
-                    No tasks for this department.
+                    <div class="empty">
 
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-    }
-
-
-    table.innerHTML =
-        filtered
-            .sort(sortByUrgency)
-            .map(
-                task => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${escapeHtml(task.id)}
-                            </strong>
-                        </td>
-
-                        <td>
-                            ${escapeHtml(task.taskName)}
-                        </td>
-
-                        <td>
-                            ${priorityBadge(task.priority)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(task.owner)}
-                        </td>
-
-                        <td>
-                            ${formatDate(task.deadline)}
-
-                            ${
-                                isOverdue(task)
-                                    ? `<span class="badge overdue-badge">OVERDUE</span>`
-                                    : ""
-                            }
-
-                        </td>
-
-                        <td>
-                            ${statusBadge(task.status)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(task.nextAction || "-")}
-                        </td>
-
-                        <td>
-
-                            <button
-                                class="secondary-button"
-                                onclick="editTask('${task.id}')"
-                            >
-                                Edit
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `
-            )
-            .join("");
-
-}
-
-
-/* =========================================================
-   FOLLOW-UP TABLE
-========================================================= */
-
-function renderFollowups() {
-
-    const table =
-        $("followupTable");
-
-
-    const followups =
-        tasks
-            .filter(
-                isFollowupDue
-            )
-            .sort(
-                (a, b) =>
-                    (
-                        a.followup || "9999-12-31"
-                    )
-                        .localeCompare(
-                            b.followup || "9999-12-31"
-                        )
-            );
-
-
-    if (!followups.length) {
-
-        table.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="7"
-                    style="text-align:center;padding:30px"
-                >
-
-                    No follow-ups currently due.
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-    }
-
-
-    table.innerHTML =
-        followups
-            .map(
-                task => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${escapeHtml(task.taskName)}
-                            </strong>
-                        </td>
-
-                        <td>
-                            ${escapeHtml(task.department)}
-                        </td>
-
-                        <td>
-                            ${priorityBadge(task.priority)}
-                        </td>
-
-                        <td>
-
-                            ${formatDate(task.followup)}
-
-                            ${
-                                task.followup < todayString()
-                                    ? `<span class="badge overdue-badge">OVERDUE</span>`
-                                    : `<span class="badge status-waiting">TODAY</span>`
-                            }
-
-                        </td>
-
-                        <td>
-                            ${escapeHtml(task.nextAction || "-")}
-                        </td>
-
-                        <td>
-                            ${statusBadge(task.status)}
-                        </td>
-
-                        <td>
-
-                            <button
-                                class="secondary-button"
-                                onclick="editTask('${task.id}')"
-                            >
-                                Open
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `
-            )
-            .join("");
-
-}
-
-
-/* =========================================================
-   DEPARTMENT ANALYSIS
-========================================================= */
-
-function renderDepartmentAnalysis() {
-
-    const table =
-        $("departmentTable");
-
-
-    table.innerHTML = "";
-
-
-    DEPARTMENTS.forEach(
-        department => {
-
-            const departmentTasks =
-                tasks.filter(
-                    task =>
-                        task.department === department
-                );
-
-
-            const open =
-                departmentTasks.filter(
-                    task =>
-                        task.status !== "Completed" &&
-                        task.status !== "Cancelled"
-                ).length;
-
-
-            const p0 =
-                departmentTasks.filter(
-                    task =>
-                        task.priority === "P0" &&
-                        task.status !== "Completed" &&
-                        task.status !== "Cancelled"
-                ).length;
-
-
-            const overdue =
-                departmentTasks.filter(
-                    isOverdue
-                ).length;
-
-
-            const blocked =
-                departmentTasks.filter(
-                    task =>
-                        task.status === "Blocked"
-                ).length;
-
-
-            const waiting =
-                departmentTasks.filter(
-                    task =>
-                        task.status === "Waiting"
-                ).length;
-
-
-            const completed =
-                departmentTasks.filter(
-                    task =>
-                        task.status === "Completed"
-                ).length;
-
-
-            table.innerHTML += `
-
-                <tr>
-
-                    <td>
-                        <strong>
-                            ${escapeHtml(department)}
-                        </strong>
-                    </td>
-
-                    <td>${open}</td>
-
-                    <td>
-                        ${
-                            p0
-                                ? `<span class="badge priority-p0">${p0}</span>`
-                                : 0
-                        }
-                    </td>
-
-                    <td>
-                        ${
-                            overdue
-                                ? `<span class="badge priority-p0">${overdue}</span>`
-                                : 0
-                        }
-                    </td>
-
-                    <td>
-                        ${
-                            blocked
-                                ? `<span class="badge status-blocked">${blocked}</span>`
-                                : 0
-                        }
-                    </td>
-
-                    <td>
-                        ${
-                            waiting
-                                ? `<span class="badge status-waiting">${waiting}</span>`
-                                : 0
-                        }
-                    </td>
-
-                    <td>
-                        ${
-                            completed
-                                ? `<span class="badge status-completed">${completed}</span>`
-                                : 0
-                        }
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   ANALYSIS
-========================================================= */
-
-function renderAnalysis() {
-
-    renderPriorityAnalysis();
-
-    renderStatusAnalysis();
-
-    renderExceptions();
-
-}
-
-
-/* =========================================================
-   PRIORITY ANALYSIS
-========================================================= */
-
-function renderPriorityAnalysis() {
-
-    const table =
-        $("priorityAnalysisTable");
-
-
-    table.innerHTML = "";
-
-
-    PRIORITIES.forEach(
-        priority => {
-
-            const priorityTasks =
-                tasks.filter(
-                    task =>
-                        task.priority === priority
-                );
-
-
-            const open =
-                priorityTasks.filter(
-                    task =>
-                        task.status !== "Completed" &&
-                        task.status !== "Cancelled"
-                ).length;
-
-
-            const overdue =
-                priorityTasks.filter(
-                    isOverdue
-                ).length;
-
-
-            const blocked =
-                priorityTasks.filter(
-                    task =>
-                        task.status === "Blocked"
-                ).length;
-
-
-            const completed =
-                priorityTasks.filter(
-                    task =>
-                        task.status === "Completed"
-                ).length;
-
-
-            table.innerHTML += `
-
-                <tr>
-
-                    <td>
-                        ${priorityBadge(priority)}
-                    </td>
-
-                    <td>${open}</td>
-
-                    <td>
-                        ${
-                            overdue
-                                ? `<span class="badge priority-p0">${overdue}</span>`
-                                : 0
-                        }
-                    </td>
-
-                    <td>
-                        ${
-                            blocked
-                                ? `<span class="badge status-blocked">${blocked}</span>`
-                                : 0
-                        }
-                    </td>
-
-                    <td>
-                        ${
-                            completed
-                                ? `<span class="badge status-completed">${completed}</span>`
-                                : 0
-                        }
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   STATUS ANALYSIS
-========================================================= */
-
-function renderStatusAnalysis() {
-
-    const table =
-        $("statusAnalysisTable");
-
-
-    table.innerHTML = "";
-
-
-    const total =
-        tasks.length;
-
-
-    STATUSES.forEach(
-        status => {
-
-            const count =
-                tasks.filter(
-                    task =>
-                        task.status === status
-                ).length;
-
-
-            const percentage =
-                total
-                    ? Math.round(
-                        (
-                            count / total
-                        ) * 100
-                    )
-                    : 0;
-
-
-            table.innerHTML += `
-
-                <tr>
-
-                    <td>
-                        ${statusBadge(status)}
-                    </td>
-
-                    <td>
-                        ${count}
-                    </td>
-
-                    <td>
-                        ${percentage}%
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   EXCEPTIONS
-========================================================= */
-
-function renderExceptions() {
-
-    const container =
-        $("exceptionList");
-
-
-    const exceptions = [
-
-        {
-            title:
-                "Tasks without an owner",
-
-            count:
-                tasks.filter(
-                    task =>
-                        !task.owner ||
-                        !task.owner.trim()
-                ).length
-        },
-
-        {
-            title:
-                "Tasks without a next action",
-
-            count:
-                tasks.filter(
-                    task =>
-                        task.status !== "Completed" &&
-                        task.status !== "Cancelled" &&
-                        (
-                            !task.nextAction ||
-                            !task.nextAction.trim()
-                        )
-                ).length
-        },
-
-        {
-            title:
-                "Open tasks without deadline",
-
-            count:
-                tasks.filter(
-                    task =>
-                        task.status !== "Completed" &&
-                        task.status !== "Cancelled" &&
-                        !task.deadline
-                ).length
-        },
-
-        {
-            title:
-                "Blocked tasks without dependency",
-
-            count:
-                tasks.filter(
-                    task =>
-                        task.status === "Blocked" &&
-                        (
-                            !task.dependency ||
-                            !task.dependency.trim()
-                        )
-                ).length
-        },
-
-        {
-            title:
-                "Completed tasks awaiting verification",
-
-            count:
-                tasks.filter(
-                    task =>
-                        task.status === "Completed" &&
-                        task.verification === "Pending"
-                ).length
-        }
-
-    ];
-
-
-    const activeExceptions =
-        exceptions.filter(
-            item =>
-                item.count > 0
-        );
-
-
-    if (!activeExceptions.length) {
-
-        container.innerHTML = `
-
-            <div class="empty-state">
-                No operational exceptions detected.
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    container.innerHTML =
-        activeExceptions
-            .map(
-                item => `
-
-                    <div class="exception-item">
-
-                        <div class="exception-title">
-                            ${escapeHtml(item.title)}
-                        </div>
-
-                        <div class="exception-number">
-                            ${item.count}
-                        </div>
+                        No tasks found.
 
                     </div>
 
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    $("taskTable").innerHTML =
+
+        list
+            .map(
+                t => `
+
+                <tr>
+
+                    <td>
+                        ${escapeHTML(t.id)}
+                    </td>
+
+
+                    <td>
+
+                        <strong>
+                            ${escapeHTML(t.task)}
+                        </strong>
+
+                        <div class="muted">
+                            ${escapeHTML(t.area)}
+                        </div>
+
+                    </td>
+
+
+                    <td>
+                        ${escapeHTML(t.department)}
+                    </td>
+
+
+                    <td>
+                        ${priorityBadge(t.priority)}
+                    </td>
+
+
+                    <td>
+                        ${escapeHTML(t.owner)}
+                    </td>
+
+
+                    <td>
+
+                        ${dateDisplay(t.deadline)}
+
+                        ${
+                            overdue(t)
+                            ?
+                            `
+                            <span class="badge overdue">
+                                OVERDUE
+                            </span>
+                            `
+                            :
+                            ""
+                        }
+
+                    </td>
+
+
+                    <td>
+                        ${statusBadge(t.status)}
+                    </td>
+
+
+                    <td>
+                        ${t.progress || 0}%
+                    </td>
+
+
+                    <td>
+
+                        <button
+                            class="action-btn"
+                            data-edit="${t.id}"
+                        >
+                            Edit
+                        </button>
+
+                    </td>
+
+                </tr>
+
                 `
             )
             .join("");
@@ -2295,206 +1463,1365 @@ function renderExceptions() {
 }
 
 
-/* =========================================================
-   OPEN TASK MODAL
-========================================================= */
+/* ================= DEPARTMENTS ================= */
 
-$("newTaskButton")
-    .addEventListener(
-        "click",
-        () => openNewTaskModal()
-    );
+function renderDepartments() {
 
+    $("view-departments").innerHTML = `
 
-$("newTaskButton2")
-    .addEventListener(
-        "click",
-        () => openNewTaskModal()
-    );
+        <div class="dept-grid">
 
+            ${
+                DEPARTMENTS
+                    .map(department => {
 
-function openNewTaskModal() {
-
-    $("taskForm").reset();
-
-    $("taskId").value = "";
-
-    $("taskRaised").value =
-        todayString();
-
-    $("taskProgress").value =
-        0;
-
-    $("taskPriority").value =
-        "P2";
-
-    $("taskStatus").value =
-        "Not Started";
-
-    $("taskType").value =
-        "Operational Task";
-
-    $("taskEscalation").value =
-        "None";
-
-    $("taskVerification").value =
-        "Not Required";
+                        const list =
+                            tasks.filter(
+                                t =>
+                                    t.department ===
+                                    department
+                            );
 
 
-    $("modalTitle").textContent =
-        "Create New Task";
+                        const active =
+                            list.filter(
+                                t =>
+                                    ![
+                                        "Completed",
+                                        "Cancelled"
+                                    ].includes(
+                                        t.status
+                                    )
+                            ).length;
 
 
-    $("taskModal")
-        .classList
-        .add("show");
-
-}
-
-
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
-
-$("closeTaskModal")
-    .addEventListener(
-        "click",
-        closeTaskModal
-    );
+                        const completed =
+                            list.filter(
+                                t =>
+                                    t.status ===
+                                    "Completed"
+                            ).length;
 
 
-$("cancelTask")
-    .addEventListener(
-        "click",
-        closeTaskModal
-    );
+                        const blocked =
+                            list.filter(
+                                t =>
+                                    t.status ===
+                                    "Blocked"
+                            ).length;
 
 
-$("taskModal")
-    .addEventListener(
-        "click",
-        event => {
+                        const over =
+                            list.filter(
+                                overdue
+                            ).length;
 
-            if (
-                event.target ===
-                $("taskModal")
-            ) {
 
-                closeTaskModal();
+                        const percent =
+                            list.length
+                            ?
+                            Math.round(
+                                completed /
+                                list.length *
+                                100
+                            )
+                            :
+                            0;
 
+
+                        return `
+
+                        <div class="dept-card">
+
+                            <div class="dept-title">
+
+                                <h3>
+                                    ${escapeHTML(
+                                        department
+                                    )}
+                                </h3>
+
+                                <span class="badge p2">
+                                    ${list.length}
+                                    tasks
+                                </span>
+
+                            </div>
+
+
+                            <div class="stat-row">
+
+                                <div class="stat">
+
+                                    <strong>
+                                        ${active}
+                                    </strong>
+
+                                    <span>
+                                        ACTIVE
+                                    </span>
+
+                                </div>
+
+
+                                <div class="stat">
+
+                                    <strong>
+                                        ${over}
+                                    </strong>
+
+                                    <span>
+                                        OVERDUE
+                                    </span>
+
+                                </div>
+
+
+                                <div class="stat">
+
+                                    <strong>
+                                        ${blocked}
+                                    </strong>
+
+                                    <span>
+                                        BLOCKED
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="bar">
+
+                                <span
+                                    style="
+                                    width:${percent}%
+                                    "
+                                ></span>
+
+                            </div>
+
+
+                            <div
+                                class="muted"
+                                style="
+                                margin-top:7px;
+                                "
+                            >
+                                ${percent}%
+                                completed
+                            </div>
+
+                        </div>
+
+                        `;
+
+                    })
+                    .join("")
             }
 
-        }
-    );
+        </div>
 
-
-function closeTaskModal() {
-
-    $("taskModal")
-        .classList
-        .remove("show");
+    `;
 
 }
 
 
-/* =========================================================
-   EDIT TASK
-========================================================= */
+/* ================= FOLLOW UPS ================= */
 
-function editTask(id) {
+function renderFollowups() {
 
-    const task =
-        tasks.find(
-            item =>
-                item.id === id
+    const list =
+        tasks.filter(
+            followupDue
         );
 
 
-    if (!task) {
-        return;
-    }
+    $("view-followups").innerHTML = `
+
+        <div class="panel">
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h3>
+                        Follow-up Queue
+                    </h3>
+
+                    <p>
+                        Tasks requiring follow-up.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+                <table class="table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Task
+                            </th>
+
+                            <th>
+                                Department
+                            </th>
+
+                            <th>
+                                Owner
+                            </th>
+
+                            <th>
+                                Priority
+                            </th>
+
+                            <th>
+                                Follow-up
+                            </th>
+
+                            <th>
+                                Next Action
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        ${
+                            list.length
+
+                            ?
+
+                            list
+                                .map(
+                                    t => `
+
+                                    <tr>
+
+                                        <td>
+                                            <strong>
+                                                ${escapeHTML(
+                                                    t.task
+                                                )}
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            ${escapeHTML(
+                                                t.department
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            ${escapeHTML(
+                                                t.owner
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            ${priorityBadge(
+                                                t.priority
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            ${dateDisplay(
+                                                t.followup
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            ${escapeHTML(
+                                                t.nextAction
+                                            )}
+                                        </td>
+
+                                        <td>
+
+                                            <button
+                                                class="action-btn"
+                                                data-edit="${t.id}"
+                                            >
+                                                Edit
+                                            </button>
+
+                                        </td>
+
+                                    </tr>
+
+                                    `
+                                )
+                                .join("")
+
+                            :
+
+                            `
+
+                            <tr>
+
+                                <td colspan="7">
+
+                                    <div class="empty">
+
+                                        No follow-ups due.
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                            `
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ================= ANALYTICS ================= */
+
+function renderAnalytics() {
+
+    const total =
+        tasks.length || 1;
+
+
+    $("view-analytics").innerHTML = `
+
+        <div class="grid-2">
+
+            <div class="panel">
+
+                <div class="panel-head">
+
+                    <div>
+
+                        <h3>
+                            Status Analysis
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel-body">
+
+                    <div class="chart">
+
+                        ${
+                            STATUSES
+                                .map(status => {
+
+                                    const count =
+                                        tasks.filter(
+                                            t =>
+                                                t.status ===
+                                                status
+                                        ).length;
+
+
+                                    return `
+
+                                    <div class="chart-row">
+
+                                        <span>
+                                            ${status}
+                                        </span>
+
+                                        <div
+                                            class="chart-track"
+                                        >
+
+                                            <div
+                                                class="chart-fill"
+                                                style="
+                                                width:
+                                                ${
+                                                    count /
+                                                    total *
+                                                    100
+                                                }%
+                                                "
+                                            ></div>
+
+                                        </div>
+
+                                        <strong>
+                                            ${count}
+                                        </strong>
+
+                                    </div>
+
+                                    `;
+
+                                })
+                                .join("")
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-head">
+
+                    <div>
+
+                        <h3>
+                            Priority Analysis
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel-body">
+
+                    <div class="chart">
+
+                        ${
+                            PRIORITIES
+                                .map(priority => {
+
+                                    const count =
+                                        tasks.filter(
+                                            t =>
+                                                t.priority ===
+                                                priority
+                                        ).length;
+
+
+                                    return `
+
+                                    <div class="chart-row">
+
+                                        <span>
+                                            ${priority}
+                                        </span>
+
+                                        <div
+                                            class="chart-track"
+                                        >
+
+                                            <div
+                                                class="chart-fill"
+                                                style="
+                                                width:
+                                                ${
+                                                    count /
+                                                    total *
+                                                    100
+                                                }%
+                                                "
+                                            ></div>
+
+                                        </div>
+
+                                        <strong>
+                                            ${count}
+                                        </strong>
+
+                                    </div>
+
+                                    `;
+
+                                })
+                                .join("")
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="panel">
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h3>
+                        Operational Health
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel-body">
+
+                <div class="grid-3">
+
+                    <div class="info">
+
+                        <b>
+                            ${tasks.filter(overdue).length}
+                        </b>
+
+                        overdue tasks
+
+                    </div>
+
+
+                    <div class="info">
+
+                        <b>
+                            ${
+                                tasks.filter(
+                                    t =>
+                                        t.status ===
+                                        "Blocked"
+                                ).length
+                            }
+                        </b>
+
+                        blocked tasks
+
+                    </div>
+
+
+                    <div class="info">
+
+                        <b>
+                            ${
+                                tasks.filter(
+                                    t =>
+                                        !t.owner ||
+                                        !t.deadline ||
+                                        !t.nextAction
+                                ).length
+                            }
+                        </b>
+
+                        tasks with missing information
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ================= ACTIVITY ================= */
+
+function renderActivity() {
+
+    $("view-activity").innerHTML = `
+
+        <div class="panel">
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h3>
+                        Activity Log
+                    </h3>
+
+                    <p>
+                        Recent operational changes.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel-body">
+
+                <div class="activity">
+
+                    ${
+                        activity.length
+
+                        ?
+
+                        activity
+                            .slice(0, 100)
+                            .map(
+                                item => `
+
+                                <div class="activity-row">
+
+                                    <div class="activity-time">
+
+                                        ${
+                                            new Date(
+                                                item.time
+                                            )
+                                            .toLocaleString(
+                                                "en-IN"
+                                            )
+                                        }
+
+                                    </div>
+
+
+                                    <div class="activity-text">
+
+                                        ${escapeHTML(
+                                            item.message
+                                        )}
+
+                                    </div>
+
+                                </div>
+
+                                `
+                            )
+                            .join("")
+
+                        :
+
+                        `
+                        <div class="empty">
+                            No activity yet.
+                        </div>
+                        `
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ================= DATA ================= */
+
+function renderData() {
+
+    $("view-data").innerHTML = `
+
+        <div class="grid-2">
+
+            <div class="panel">
+
+                <div class="panel-head">
+
+                    <div>
+
+                        <h3>
+                            Excel / Data
+                        </h3>
+
+                        <p>
+                            Backup and exchange operational data.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel-body">
+
+                    <div class="data-buttons">
+
+                        <button
+                            id="exportExcel"
+                            class="btn primary"
+                        >
+                            Export Excel
+                        </button>
+
+
+                        <button
+                            id="exportCSV"
+                            class="btn secondary"
+                        >
+                            Export CSV
+                        </button>
+
+
+                        <button
+                            id="importExcel"
+                            class="btn secondary"
+                        >
+                            Import Excel
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-head">
+
+                    <h3>
+                        Current Database
+                    </h3>
+
+                </div>
+
+
+                <div class="panel-body">
+
+                    <div class="info">
+
+                        <b>
+                            ${tasks.length}
+                        </b>
+                        tasks
+
+                        <br>
+
+                        <b>
+                            ${DEPARTMENTS.length}
+                        </b>
+                        departments
+
+                        <br><br>
+
+                        Website storage:
+
+                        <b>
+                            Browser Local Storage
+                        </b>
+
+                        <br><br>
+
+                        For true multi-user access,
+                        connect this interface to a shared backend.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    $("exportExcel")
+        .onclick =
+        exportExcel;
+
+
+    $("exportCSV")
+        .onclick =
+        exportCSV;
+
+
+    $("importExcel")
+        .onclick =
+        () =>
+            $("importFile").click();
+
+}
+
+
+/* ================= SETTINGS ================= */
+
+function renderSettings() {
+
+    $("view-settings").innerHTML = `
+
+        <div class="panel">
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h3>
+                        System Settings
+                    </h3>
+
+                    <p>
+                        Operations Control Tower configuration.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel-body">
+
+                <div class="info">
+
+                    <b>
+                        Universal Password
+                    </b>
+
+                    <br>
+
+                    Password is currently configured
+                    inside app.js.
+
+                    <br><br>
+
+                    <b>
+                        Departments
+                    </b>
+
+                    <br>
+
+                    ${DEPARTMENTS.length}
+
+                    departments configured.
+
+                    <br><br>
+
+                    <b>
+                        Storage
+                    </b>
+
+                    <br>
+
+                    Browser Local Storage.
+
+                </div>
+
+
+                <br>
+
+
+                <button
+                    id="resetData"
+                    class="btn danger"
+                >
+                    Reset Sample Data
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    $("resetData").onclick =
+        () => {
+
+            if (
+                confirm(
+                    "Reset all current tasks?"
+                )
+            ) {
+
+                localStorage.removeItem(
+                    STORAGE_KEY
+                );
+
+                localStorage.removeItem(
+                    ACTIVITY_KEY
+                );
+
+                loadData();
+
+                renderAll();
+
+            }
+
+        };
+
+}
+
+
+/* ================= TASK MODAL ================= */
+
+function setupForm() {
+
+    $("fDepartment").innerHTML =
+
+        DEPARTMENTS
+            .map(
+                d =>
+                    `<option>
+                        ${escapeHTML(d)}
+                    </option>`
+            )
+            .join("");
+
+
+    $("fPriority").innerHTML =
+
+        PRIORITIES
+            .map(
+                p =>
+                    `<option>
+                        ${escapeHTML(p)}
+                    </option>`
+            )
+            .join("");
+
+
+    $("fStatus").innerHTML =
+
+        STATUSES
+            .map(
+                s =>
+                    `<option>
+                        ${s}
+                    </option>`
+            )
+            .join("");
+
+}
+
+
+function openNewTask() {
+
+    $("modalTitle")
+        .textContent =
+        "New Task";
+
+
+    $("taskForm").reset();
+
+
+    $("taskId").value = "";
+
+
+    $("fRaised").value =
+        today();
+
+
+    $("fPriority").value =
+        "P2 - Normal";
+
+
+    $("fStatus").value =
+        "Open";
+
+
+    $("fProgress").value =
+        0;
+
+
+    $("modal")
+        .classList
+        .remove("hidden");
+
+}
+
+
+function openEditTask(id) {
+
+    const task =
+        tasks.find(
+            t => t.id === id
+        );
+
+
+    if (!task) return;
+
+
+    $("modalTitle")
+        .textContent =
+        "Edit Task";
 
 
     $("taskId").value =
         task.id;
 
-    $("taskName").value =
-        task.taskName || "";
 
-    $("taskDepartment").value =
-        task.department || "";
-
-    $("taskArea").value =
-        task.area || "";
-
-    $("taskType").value =
-        task.taskType || "Operational Task";
-
-    $("taskPriority").value =
-        task.priority || "P2";
-
-    $("taskOwner").value =
-        task.owner || "";
-
-    $("taskCoordinator").value =
-        task.coordinator || "";
-
-    $("taskRaised").value =
-        task.raised || "";
-
-    $("taskDeadline").value =
-        task.deadline || "";
-
-    $("taskStatus").value =
-        task.status || "Not Started";
-
-    $("taskProgress").value =
-        task.progress || 0;
-
-    $("taskDependency").value =
-        task.dependency || "";
-
-    $("taskFollowup").value =
-        task.followup || "";
-
-    $("taskNextAction").value =
-        task.nextAction || "";
-
-    $("taskEscalation").value =
-        task.escalation || "None";
-
-    $("taskVerification").value =
-        task.verification || "Not Required";
-
-    $("taskVerificationOwner").value =
-        task.verificationOwner || "";
-
-    $("taskSource").value =
-        task.source || "";
-
-    $("taskOutcome").value =
-        task.outcome || "";
-
-    $("taskNotes").value =
-        task.notes || "";
+    $("fTask").value =
+        task.task;
 
 
-    $("modalTitle").textContent =
-        `Edit Task — ${task.id}`;
+    $("fDepartment").value =
+        task.department;
 
 
-    $("taskModal")
+    $("fArea").value =
+        task.area;
+
+
+    $("fOwner").value =
+        task.owner;
+
+
+    $("fCoordinator").value =
+        task.coordinator;
+
+
+    $("fPriority").value =
+        task.priority;
+
+
+    $("fStatus").value =
+        task.status;
+
+
+    $("fRaised").value =
+        task.raised;
+
+
+    $("fDeadline").value =
+        task.deadline;
+
+
+    $("fProgress").value =
+        task.progress;
+
+
+    $("fFollowup").value =
+        task.followup;
+
+
+    $("fDependency").value =
+        task.dependency;
+
+
+    $("fNextAction").value =
+        task.nextAction;
+
+
+    $("fEscalation").value =
+        task.escalation;
+
+
+    $("fVerification").value =
+        task.verification;
+
+
+    $("fNotes").value =
+        task.notes;
+
+
+    $("modal")
         .classList
-        .add("show");
+        .remove("hidden");
 
 }
 
 
-/* =========================================================
-   SAVE TASK
-========================================================= */
+function closeModal() {
+
+    $("modal")
+        .classList
+        .add("hidden");
+
+}
+
+
+/* ================= SAVE TASK ================= */
 
 $("taskForm")
+    .addEventListener(
+        "submit",
+        function(event) {
+
+            event.preventDefault();
+
+
+            const id =
+                $("taskId").value ||
+                taskID();
+
+
+            const data = {
+
+                id,
+
+                task:
+                    $("fTask").value.trim(),
+
+                department:
+                    $("fDepartment").value,
+
+                area:
+                    $("fArea").value.trim(),
+
+                owner:
+                    $("fOwner").value.trim(),
+
+                coordinator:
+                    $("fCoordinator").value.trim(),
+
+                priority:
+                    $("fPriority").value,
+
+                status:
+                    $("fStatus").value,
+
+                raised:
+                    $("fRaised").value ||
+                    today(),
+
+                deadline:
+                    $("fDeadline").value,
+
+                progress:
+                    Number(
+                        $("fProgress").value
+                    ) || 0,
+
+                followup:
+                    $("fFollowup").value,
+
+                dependency:
+                    $("fDependency").value.trim(),
+
+                nextAction:
+                    $("fNextAction")
+                        .value
+                        .trim(),
+
+                escalation:
+                    $("fEscalation").value,
+
+                verification:
+                    $("fVerification").value,
+
+                notes:
+                    $("fNotes")
+                        .value
+                        .trim()
+
+            };
+
+
+            const existing =
+                tasks.findIndex(
+                    t =>
+                        t.id === id
+                );
+
+
+            if (existing >= 0) {
+
+                tasks[existing] =
+                    data;
+
+
+                logActivity(
+                    `Updated task: ${data.task}`
+                );
+
+            }
+
+            else {
+
+                tasks.unshift(
+                    data
+                );
+
+
+                logActivity(
+                    `Created task: ${data.task}`
+                );
+
+            }
+
+
+            saveData();
+
+
+            closeModal();
+
+
+            renderAll();
+
+        }
+    );
+
+
+/* ================= GLOBAL CLICKS ================= */
+
+document.addEventListener(
+    "click",
+    event => {
+
+        const edit =
+            event.target.closest(
+                "[data-edit]"
+            );
+
+
+        if (edit) {
+
+            openEditTask(
+                edit.dataset.edit
+            );
+
+        }
+
+
+        if (
+            event.target.matches(
+                "[data-close-modal]"
+            )
+        ) {
+
+            closeModal();
+
+        }
+
+    }
+);
+
+
+/* ================= NAVIGATION ================= */
+
+$("navigation")
+    .addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    ".nav[data-view]"
+                );
+
+
+            if (!button)
+                return;
+
+
+            const view =
+                button.dataset.view;
+
+
+            document
+                .querySelectorAll(
+                    ".nav"
+                )
+                .forEach(
+                    n =>
+                        n.classList
+                        .remove(
+                            "active"
+                        )
+                );
+
+
+            button.classList
+                .add("active");
+
+
+            document
+                .querySelectorAll(
+                    ".view"
+                )
+                .forEach(
+                    section =>
+                        section.classList
+                        .remove(
+                            "active"
+                        )
+                );
+
+
+            $("view-" + view)
+                .classList
+                .add("active");
+
+
+            const titles = {
+
+                dashboard: [
+                    "Dashboard",
+                    "Monitor everything from one place."
+                ],
+
+                tasks: [
+                    "All Tasks",
+                    "Central task register."
+                ],
+
+                departments: [
+                    "Departments",
+                    "Department workload and performance."
+                ],
+
+                followups: [
+                    "Follow-ups",
+                    "Tasks requiring action or follow-up."
+                ],
+
+                analytics: [
+                    "Analytics",
+                    "Operational performance analysis."
+                ],
+
+                activity: [
+                    "Activity Log",
+                    "Recent operational changes."
+                ],
+
+                data: [
+                    "Excel / Data",
+                    "Import and export operational information."
+                ],
+
+                settings: [
+                    "Settings",
+                    "System configuration."
+                ]
+
+            };
+
+
+            $("pageTitle")
+                .textContent =
+                titles[view][0];
+
+
+            $("pageSubtitle")
+                .textContent =
+                titles[view][1];
+
+        }
+    );
+
+
+/* ================= LOGIN ================= */
+
+$("loginForm")
     .addEventListener(
         "submit",
         event => {
@@ -2502,209 +2829,117 @@ $("taskForm")
             event.preventDefault();
 
 
-            const existingId =
-                $("taskId").value;
-
-
-            const taskData = {
-
-                id:
-                    existingId ||
-                    generateTaskId(),
-
-                taskName:
-                    $("taskName").value.trim(),
-
-                department:
-                    $("taskDepartment").value,
-
-                area:
-                    $("taskArea").value.trim(),
-
-                taskType:
-                    $("taskType").value,
-
-                priority:
-                    $("taskPriority").value,
-
-                owner:
-                    $("taskOwner").value.trim(),
-
-                coordinator:
-                    $("taskCoordinator").value.trim(),
-
-                raised:
-                    $("taskRaised").value,
-
-                deadline:
-                    $("taskDeadline").value,
-
-                status:
-                    $("taskStatus").value,
-
-                progress:
-                    Number(
-                        $("taskProgress").value
-                    ) || 0,
-
-                dependency:
-                    $("taskDependency").value.trim(),
-
-                followup:
-                    $("taskFollowup").value,
-
-                nextAction:
-                    $("taskNextAction").value.trim(),
-
-                escalation:
-                    $("taskEscalation").value,
-
-                verification:
-                    $("taskVerification").value,
-
-                verificationOwner:
-                    $("taskVerificationOwner").value.trim(),
-
-                source:
-                    $("taskSource").value.trim(),
-
-                outcome:
-                    $("taskOutcome").value.trim(),
-
-                notes:
-                    $("taskNotes").value.trim()
-
-            };
-
-
             if (
-                taskData.status ===
-                "Completed"
+                $("loginPassword")
+                    .value ===
+                PASSWORD
             ) {
 
-                taskData.progress =
-                    100;
-
-            }
-
-
-            if (existingId) {
-
-                const index =
-                    tasks.findIndex(
-                        task =>
-                            task.id === existingId
-                    );
-
-
-                if (index !== -1) {
-
-                    tasks[index] =
-                        taskData;
-
-                }
-
-            } else {
-
-                tasks.push(
-                    taskData
+                sessionStorage.setItem(
+                    "operationsLoggedIn",
+                    "true"
                 );
 
+
+                $("loginScreen")
+                    .classList
+                    .add("hidden");
+
+
+                $("app")
+                    .classList
+                    .remove("hidden");
+
+
+                $("loginError")
+                    .classList
+                    .remove("show");
+
+
+                $("loginPassword")
+                    .value = "";
+
+
+                loadData();
+
+                renderAll();
+
             }
 
+            else {
 
-            saveTasks();
-
-            closeTaskModal();
-
-
-            showView(
-                "tasks"
-            );
-
-        }
-    );
+                $("loginError")
+                    .classList
+                    .add("show");
 
 
-/* =========================================================
-   FILTER EVENTS
-========================================================= */
+                $("loginPassword")
+                    .select();
 
-$("taskSearch")
-    .addEventListener(
-        "input",
-        renderTaskTable
-    );
-
-
-$("departmentFilter")
-    .addEventListener(
-        "change",
-        renderTaskTable
-    );
-
-
-$("priorityFilter")
-    .addEventListener(
-        "change",
-        renderTaskTable
-    );
-
-
-$("statusFilter")
-    .addEventListener(
-        "change",
-        renderTaskTable
-    );
-
-
-$("clearFilters")
-    .addEventListener(
-        "click",
-        () => {
-
-            $("taskSearch").value =
-                "";
-
-            $("departmentFilter").value =
-                "";
-
-            $("priorityFilter").value =
-                "";
-
-            $("statusFilter").value =
-                "";
-
-            renderTaskTable();
+            }
 
         }
     );
 
 
-$("myDepartment")
-    .addEventListener(
-        "change",
-        renderMyTasks
-    );
+/* ================= LOGOUT ================= */
+
+$("logoutBtn")
+    .onclick =
+    () => {
+
+        sessionStorage.removeItem(
+            "operationsLoggedIn"
+        );
 
 
-/* =========================================================
-   EXPORT CSV
-========================================================= */
-
-$("exportTasks")
-    .addEventListener(
-        "click",
-        exportTasksToCSV
-    );
+        $("app")
+            .classList
+            .add("hidden");
 
 
-function exportTasksToCSV() {
+        $("loginScreen")
+            .classList
+            .remove("hidden");
 
-    if (!tasks.length) {
+
+        $("loginPassword")
+            .focus();
+
+    };
+
+
+/* ================= NEW TASK ================= */
+
+$("newTaskBtn")
+    .onclick =
+    openNewTask;
+
+
+/* ================= REFRESH ================= */
+
+$("refreshBtn")
+    .onclick =
+    () => {
+
+        loadData();
+
+        renderAll();
+
+    };
+
+
+/* ================= EXCEL EXPORT ================= */
+
+function exportExcel() {
+
+    if (
+        typeof XLSX ===
+        "undefined"
+    ) {
 
         alert(
-            "There are no tasks to export."
+            "Excel library could not load."
         );
 
         return;
@@ -2712,28 +2947,133 @@ function exportTasksToCSV() {
     }
 
 
+    const rows =
+        tasks.map(
+            t => ({
+
+                "Task ID":
+                    t.id,
+
+                "Task":
+                    t.task,
+
+                "Department":
+                    t.department,
+
+                "Area":
+                    t.area,
+
+                "Owner":
+                    t.owner,
+
+                "Coordinator":
+                    t.coordinator,
+
+                "Priority":
+                    t.priority,
+
+                "Status":
+                    t.status,
+
+                "Date Raised":
+                    t.raised,
+
+                "Deadline":
+                    t.deadline,
+
+                "Progress %":
+                    t.progress,
+
+                "Next Follow-up":
+                    t.followup,
+
+                "Dependency":
+                    t.dependency,
+
+                "Next Action":
+                    t.nextAction,
+
+                "Escalation":
+                    t.escalation,
+
+                "Verification":
+                    t.verification,
+
+                "Notes":
+                    t.notes
+
+            })
+        );
+
+
+    const workbook =
+        XLSX.utils.book_new();
+
+
+    const sheet =
+        XLSX.utils.json_to_sheet(
+            rows
+        );
+
+
+    XLSX.utils.book_append_sheet(
+        workbook,
+        sheet,
+        "Master Tasks"
+    );
+
+
+    XLSX.writeFile(
+        workbook,
+        "UsedBookR_Operations.xlsx"
+    );
+
+
+    logActivity(
+        "Exported operations data to Excel."
+    );
+
+}
+
+
+/* ================= CSV ================= */
+
+function exportCSV() {
+
     const headers = [
 
         "Task ID",
-        "Task / Issue",
+
+        "Task",
+
         "Department",
-        "Area / Project",
-        "Task Type",
-        "Priority",
+
+        "Area",
+
         "Owner",
+
         "Coordinator",
-        "Date Raised",
-        "Deadline",
+
+        "Priority",
+
         "Status",
+
+        "Date Raised",
+
+        "Deadline",
+
         "Progress %",
-        "Dependency / Waiting For",
+
         "Next Follow-up",
+
+        "Dependency",
+
         "Next Action",
+
         "Escalation",
+
         "Verification",
-        "Verification Owner",
-        "Source",
-        "Result / Outcome",
+
         "Notes"
 
     ];
@@ -2741,73 +3081,77 @@ function exportTasksToCSV() {
 
     const rows =
         tasks.map(
-            task => [
+            t => [
 
-                task.id,
-                task.taskName,
-                task.department,
-                task.area,
-                task.taskType,
-                task.priority,
-                task.owner,
-                task.coordinator,
-                task.raised,
-                task.deadline,
-                task.status,
-                task.progress,
-                task.dependency,
-                task.followup,
-                task.nextAction,
-                task.escalation,
-                task.verification,
-                task.verificationOwner,
-                task.source,
-                task.outcome,
-                task.notes
+                t.id,
+
+                t.task,
+
+                t.department,
+
+                t.area,
+
+                t.owner,
+
+                t.coordinator,
+
+                t.priority,
+
+                t.status,
+
+                t.raised,
+
+                t.deadline,
+
+                t.progress,
+
+                t.followup,
+
+                t.dependency,
+
+                t.nextAction,
+
+                t.escalation,
+
+                t.verification,
+
+                t.notes
 
             ]
         );
 
 
-    const csvRows = [
+    const csv = [
 
         headers,
 
         ...rows
 
-    ];
-
-
-    const csv =
-        csvRows
-            .map(
-                row =>
-                    row
-                        .map(
-                            value =>
-                                csvEscape(value)
-                        )
-                        .join(",")
-            )
-            .join("\n");
+    ]
+        .map(
+            row =>
+                row
+                    .map(
+                        value =>
+                            `"${String(
+                                value || ""
+                            ).replaceAll(
+                                '"',
+                                '""'
+                            )}"`
+                    )
+                    .join(",")
+        )
+        .join("\n");
 
 
     const blob =
         new Blob(
-            [
-                "\uFEFF" +
-                csv
-            ],
+            ["\ufeff" + csv],
             {
                 type:
-                    "text/csv;charset=utf-8;"
+                    "text/csv;charset=utf-8"
             }
-        );
-
-
-    const url =
-        URL.createObjectURL(
-            blob
         );
 
 
@@ -2818,171 +3162,291 @@ function exportTasksToCSV() {
 
 
     link.href =
-        url;
+        URL.createObjectURL(
+            blob
+        );
+
 
     link.download =
-        `UsedBookR_Operations_Tasks_${todayString()}.csv`;
+        "UsedBookR_Operations.csv";
 
-
-    document.body.appendChild(
-        link
-    );
 
     link.click();
 
-    document.body.removeChild(
-        link
-    );
-
-
-    URL.revokeObjectURL(
-        url
-    );
-
 }
 
 
-/* =========================================================
-   CSV ESCAPE
-========================================================= */
+/* ================= IMPORT ================= */
 
-function csvEscape(value) {
-
-    const stringValue =
-        value === null ||
-        value === undefined
-            ? ""
-            : String(value);
-
-
-    return `"${stringValue
-        .replace(/"/g, '""')}"`;
-
-}
-
-
-/* =========================================================
-   RESET DEMO DATA
-========================================================= */
-
-$("resetData")
+$("importFile")
     .addEventListener(
-        "click",
-        () => {
+        "change",
+        event => {
 
-            const confirmed =
-                confirm(
-                    "Reset all current task data and restore the demo data?"
-                );
+            const file =
+                event.target.files[0];
 
 
-            if (!confirmed) {
+            if (!file)
                 return;
-            }
 
 
-            tasks =
-                createDemoTasks();
+            const reader =
+                new FileReader();
 
 
-            renderAll();
+            reader.onload =
+                function(e) {
 
-            alert(
-                "Demo data has been restored."
+                    try {
+
+                        const workbook =
+                            XLSX.read(
+                                e.target.result,
+                                {
+                                    type:
+                                        "array"
+                                }
+                            );
+
+
+                        const sheet =
+                            workbook
+                            .Sheets[
+                                workbook
+                                .SheetNames[0]
+                            ];
+
+
+                        const rows =
+                            XLSX.utils
+                            .sheet_to_json(
+                                sheet,
+                                {
+                                    defval: ""
+                                }
+                            );
+
+
+                        const imported =
+                            rows
+                                .map(
+                                    row => ({
+
+                                        id:
+                                            row[
+                                                "Task ID"
+                                            ] ||
+                                            taskID(),
+
+                                        task:
+                                            row[
+                                                "Task"
+                                            ],
+
+                                        department:
+                                            row[
+                                                "Department"
+                                            ] ||
+                                            "Operations",
+
+                                        area:
+                                            row[
+                                                "Area"
+                                            ] || "",
+
+                                        owner:
+                                            row[
+                                                "Owner"
+                                            ] || "",
+
+                                        coordinator:
+                                            row[
+                                                "Coordinator"
+                                            ] || "",
+
+                                        priority:
+                                            row[
+                                                "Priority"
+                                            ] ||
+                                            "P2 - Normal",
+
+                                        status:
+                                            row[
+                                                "Status"
+                                            ] ||
+                                            "Open",
+
+                                        raised:
+                                            row[
+                                                "Date Raised"
+                                            ] ||
+                                            today(),
+
+                                        deadline:
+                                            row[
+                                                "Deadline"
+                                            ] || "",
+
+                                        progress:
+                                            Number(
+                                                row[
+                                                    "Progress %"
+                                                ]
+                                            ) || 0,
+
+                                        followup:
+                                            row[
+                                                "Next Follow-up"
+                                            ] || "",
+
+                                        dependency:
+                                            row[
+                                                "Dependency"
+                                            ] || "",
+
+                                        nextAction:
+                                            row[
+                                                "Next Action"
+                                            ] || "",
+
+                                        escalation:
+                                            row[
+                                                "Escalation"
+                                            ] ||
+                                            "None",
+
+                                        verification:
+                                            row[
+                                                "Verification"
+                                            ] ||
+                                            "Not Required",
+
+                                        notes:
+                                            row[
+                                                "Notes"
+                                            ] || ""
+
+                                    })
+                                )
+                                .filter(
+                                    t =>
+                                        t.task
+                                );
+
+
+                        if (
+                            !imported.length
+                        ) {
+
+                            alert(
+                                "No valid tasks found."
+                            );
+
+                            return;
+
+                        }
+
+
+                        tasks =
+                            imported;
+
+
+                        logActivity(
+                            `Imported ${imported.length} tasks from Excel.`
+                        );
+
+
+                        saveData();
+
+
+                        renderAll();
+
+
+                        alert(
+                            `${imported.length} tasks imported successfully.`
+                        );
+
+                    }
+
+                    catch (error) {
+
+                        console.error(
+                            error
+                        );
+
+                        alert(
+                            "Could not read this Excel file."
+                        );
+
+                    }
+
+                };
+
+
+            reader.readAsArrayBuffer(
+                file
             );
+
+            event.target.value = "";
 
         }
     );
 
 
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHtml(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-
-    }
-
-
-    return String(value)
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-/* =========================================================
-   RENDER EVERYTHING
-========================================================= */
+/* ================= RENDER ALL ================= */
 
 function renderAll() {
 
     renderDashboard();
 
-    renderTaskTable();
+    renderTasks();
 
-    renderMyTasks();
+    renderDepartments();
 
     renderFollowups();
 
-    renderDepartmentAnalysis();
+    renderAnalytics();
 
-    renderAnalysis();
+    renderActivity();
+
+    renderData();
+
+    renderSettings();
 
 }
 
 
-/* =========================================================
-   INITIALIZE
-========================================================= */
+/* ================= INITIALIZE ================= */
 
-function initialize() {
+setupForm();
 
-    populateDropdowns();
 
-    $("taskRaised").value =
-        todayString();
+if (
+    sessionStorage.getItem(
+        "operationsLoggedIn"
+    ) === "true"
+) {
 
-    $("myDepartment").value =
-        "";
+    $("loginScreen")
+        .classList
+        .add("hidden");
+
+
+    $("app")
+        .classList
+        .remove("hidden");
+
+
+    loadData();
 
     renderAll();
 
 }
 
+else {
 
-/* =========================================================
-   START SYSTEM
-========================================================= */
+    $("loginPassword")
+        .focus();
 
-initialize();
+}
