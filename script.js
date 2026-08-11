@@ -1,285 +1,146 @@
 /* =========================================================
    USEDBOOKR OPERATIONS MANAGEMENT SYSTEM
-   MAIN JAVASCRIPT
+   COMPLETE JAVASCRIPT
 ========================================================= */
 
+"use strict";
 
 /* =========================================================
    CONFIGURATION
 ========================================================= */
 
 const APP_CONFIG = {
-
-    // Change this universal password.
-    // IMPORTANT: this is only frontend protection.
-    // For real security, authentication must eventually
-    // be moved to a backend.
     PASSWORD: "admin123",
-
     STORAGE_KEY: "usedbookr_operations_data",
-
-    LOGIN_KEY: "usedbookr_operations_logged_in",
-
-    USER_NAME: "Operations Monitor",
-
-    COMPANY_NAME: "UsedBookR",
-
-    DEPARTMENTS: [
-
-        {
-            id: "b2b-sales",
-            name: "B2B / Sales",
-            code: "B2B",
-            description: "B2B enquiries, sales, quotations and client follow-ups"
-        },
-
-        {
-            id: "customer-support",
-            name: "Customer Support",
-            code: "CS",
-            description: "Customer enquiries, complaints, refunds and support"
-        },
-
-        {
-            id: "warehouse",
-            name: "Warehouse",
-            code: "WH",
-            description: "Warehouse operations, stock movement and physical handling"
-        },
-
-        {
-            id: "scanning-catalog",
-            name: "Scanning / Catalog",
-            code: "SC",
-            description: "Book scanning, ISBN processing and catalog preparation"
-        },
-
-        {
-            id: "listing-inventory",
-            name: "Listing / Inventory",
-            code: "LI",
-            description: "Website listings, inventory control and stock accuracy"
-        },
-
-        {
-            id: "digital-marketing",
-            name: "Digital Marketing",
-            code: "DM",
-            description: "Campaigns, social media, promotions and digital activities"
-        },
-
-        {
-            id: "it-software",
-            name: "IT / Software Development",
-            code: "IT",
-            description: "Software systems, website, automation and technical support"
-        },
-
-        {
-            id: "finance",
-            name: "Finance",
-            code: "FIN",
-            description: "Payments, accounts, reconciliation and financial activities"
-        },
-
-        {
-            id: "book-fair-events",
-            name: "Book Fair / Events",
-            code: "BF",
-            description: "Book fairs, events, logistics and event coordination"
-        },
-
-        {
-            id: "books-procurement",
-            name: "Books & Supply Procurement",
-            code: "PROC",
-            description: "Book sourcing, supplier coordination and procurement"
-        },
-
-        {
-            id: "hr",
-            name: "HR",
-            code: "HR",
-            description: "People, attendance, recruitment and HR activities"
-        },
-
-        {
-            id: "data-analysis",
-            name: "Data Analysis",
-            code: "DA",
-            description: "Reports, data processing, analysis and business insights"
-        },
-
-        {
-            id: "software-testing",
-            name: "Software Testing",
-            code: "QA",
-            description: "Testing, bugs, quality assurance and verification"
-        },
-
-        {
-            id: "product-development",
-            name: "Product Development",
-            code: "PD",
-            description: "New products, features, process improvements and development"
-        }
-
-    ],
-
-    STATUSES: [
-        "Open",
-        "In Progress",
-        "Blocked",
-        "Completed"
-    ],
-
-    PRIORITIES: [
-        "High",
-        "Medium",
-        "Low"
-    ]
-
+    ACTIVITY_KEY: "usedbookr_operations_activity",
+    SESSION_KEY: "usedbookr_operations_session"
 };
+
+
+/* =========================================================
+   DEPARTMENTS
+========================================================= */
+
+const DEPARTMENTS = [
+    {
+        name: "B2B / Sales",
+        code: "B2B"
+    },
+    {
+        name: "Customer Support",
+        code: "CS"
+    },
+    {
+        name: "Warehouse",
+        code: "WH"
+    },
+    {
+        name: "Scanning / Catalog",
+        code: "SC"
+    },
+    {
+        name: "Listing / Inventory",
+        code: "LI"
+    },
+    {
+        name: "Digital Marketing",
+        code: "DM"
+    },
+    {
+        name: "IT / Software Development",
+        code: "IT"
+    },
+    {
+        name: "Finance",
+        code: "FN"
+    },
+    {
+        name: "Book Fair / Events",
+        code: "BF"
+    },
+    {
+        name: "Books & Supply Procurement",
+        code: "BP"
+    },
+    {
+        name: "HR",
+        code: "HR"
+    },
+    {
+        name: "Data Analysis",
+        code: "DA"
+    },
+    {
+        name: "Software Testing",
+        code: "ST"
+    },
+    {
+        name: "Product Development",
+        code: "PD"
+    }
+];
 
 
 /* =========================================================
    GLOBAL DATA
 ========================================================= */
 
-let operationsData = {
+let tasks = [];
+let activities = [];
 
-    tasks: [],
-
-    followups: [],
-
-    activities: [],
-
-    settings: {
-
-        lastUpdated: null,
-
-        version: "1.0"
-
-    }
-
-};
+let currentDepartment = null;
 
 
 /* =========================================================
-   DOM HELPERS
-========================================================= */
-
-function getElement(id) {
-
-    return document.getElementById(id);
-
-}
-
-
-function query(selector) {
-
-    return document.querySelector(selector);
-
-}
-
-
-function queryAll(selector) {
-
-    return document.querySelectorAll(selector);
-
-}
-
-
-/* =========================================================
-   INITIALIZATION
+   DOM READY
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    loadData();
-
-    initializeLogin();
-
-    initializeNavigation();
-
-    initializeButtons();
-
-    initializeFilters();
-
-    initializeTaskForm();
-
-    initializeModal();
-
-    updateCurrentDate();
-
-    renderApplication();
+    initializeApplication();
 
 });
 
 
 /* =========================================================
-   STORAGE
+   INITIALIZE APPLICATION
 ========================================================= */
 
-function loadData() {
+function initializeApplication() {
 
-    try {
+    loadData();
 
-        const savedData =
-            localStorage.getItem(APP_CONFIG.STORAGE_KEY);
+    setupLogin();
 
-        if (savedData) {
+    setupNavigation();
 
-            const parsed =
-                JSON.parse(savedData);
+    setupTaskButtons();
 
-            operationsData = {
+    setupTaskForm();
 
-                tasks: Array.isArray(parsed.tasks)
-                    ? parsed.tasks
-                    : [],
+    setupFilters();
 
-                followups: Array.isArray(parsed.followups)
-                    ? parsed.followups
-                    : [],
+    setupLogout();
 
-                activities: Array.isArray(parsed.activities)
-                    ? parsed.activities
-                    : [],
+    setupMenu();
 
-                settings: parsed.settings || {
-                    version: "1.0",
-                    lastUpdated: null
-                }
+    setupReports();
 
-            };
+    populateDepartmentSelects();
 
-        }
+    updateCurrentDate();
 
-    } catch (error) {
+    if (isLoggedIn()) {
 
-        console.error(
-            "Unable to load saved data:",
-            error
-        );
+        showApplication();
+
+    } else {
+
+        showLogin();
 
     }
 
-}
-
-
-function saveData() {
-
-    operationsData.settings.lastUpdated =
-        new Date().toISOString();
-
-    localStorage.setItem(
-
-        APP_CONFIG.STORAGE_KEY,
-
-        JSON.stringify(operationsData)
-
-    );
+    refreshEverything();
 
 }
 
@@ -288,117 +149,115 @@ function saveData() {
    LOGIN
 ========================================================= */
 
-function initializeLogin() {
+function setupLogin() {
 
-    const loginScreen =
-        query(".login-screen");
+    const loginForm = document.getElementById("loginForm");
 
-    const loginButton =
-        query(".login-button");
+    if (!loginForm) return;
 
-    const passwordInput =
-        query("#password");
+    loginForm.addEventListener("submit", function (event) {
 
-    const loginError =
-        query(".login-error");
+        event.preventDefault();
 
+        const passwordInput =
+            document.getElementById("loginPassword");
 
-    if (!loginScreen) {
+        const loginError =
+            document.getElementById("loginError");
 
-        return;
+        const enteredPassword =
+            passwordInput.value.trim();
 
-    }
+        if (enteredPassword === APP_CONFIG.PASSWORD) {
 
-
-    const loggedIn =
-        localStorage.getItem(
-            APP_CONFIG.LOGIN_KEY
-        );
-
-
-    if (loggedIn === "true") {
-
-        loginScreen.style.display =
-            "none";
-
-    }
-
-
-    if (loginButton) {
-
-        loginButton.addEventListener(
-            "click",
-            performLogin
-        );
-
-    }
-
-
-    if (passwordInput) {
-
-        passwordInput.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (event.key === "Enter") {
-
-                    performLogin();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    function performLogin() {
-
-        const password =
-            passwordInput
-                ? passwordInput.value
-                : "";
-
-
-        if (password === APP_CONFIG.PASSWORD) {
-
-            localStorage.setItem(
-                APP_CONFIG.LOGIN_KEY,
-                "true"
+            sessionStorage.setItem(
+                APP_CONFIG.SESSION_KEY,
+                "authenticated"
             );
 
-            loginScreen.style.display =
-                "none";
+            loginError.classList.remove("show");
 
-            showNotification(
-                "Login successful",
-                "Operations dashboard is ready."
+            passwordInput.value = "";
+
+            showApplication();
+
+            notify(
+                "Login Successful",
+                "Welcome to the Operations Management System."
             );
-
-            renderApplication();
 
         } else {
 
-            if (loginError) {
+            loginError.classList.add("show");
 
-                loginError.textContent =
-                    "Incorrect password. Please try again.";
+            passwordInput.value = "";
 
-                loginError.classList.add(
-                    "show"
-                );
-
-            }
-
-            if (passwordInput) {
-
-                passwordInput.value = "";
-
-                passwordInput.focus();
-
-            }
+            passwordInput.focus();
 
         }
+
+    });
+
+}
+
+
+/* =========================================================
+   SESSION
+========================================================= */
+
+function isLoggedIn() {
+
+    return sessionStorage.getItem(
+        APP_CONFIG.SESSION_KEY
+    ) === "authenticated";
+
+}
+
+
+/* =========================================================
+   SHOW / HIDE APPLICATION
+========================================================= */
+
+function showLogin() {
+
+    const loginScreen =
+        document.getElementById("loginScreen");
+
+    const app =
+        document.getElementById("app");
+
+    if (loginScreen) {
+
+        loginScreen.style.display = "flex";
+
+    }
+
+    if (app) {
+
+        app.style.display = "none";
+
+    }
+
+}
+
+
+function showApplication() {
+
+    const loginScreen =
+        document.getElementById("loginScreen");
+
+    const app =
+        document.getElementById("app");
+
+    if (loginScreen) {
+
+        loginScreen.style.display = "none";
+
+    }
+
+    if (app) {
+
+        app.style.display = "flex";
 
     }
 
@@ -409,13 +268,27 @@ function initializeLogin() {
    LOGOUT
 ========================================================= */
 
-function logout() {
+function setupLogout() {
 
-    localStorage.removeItem(
-        APP_CONFIG.LOGIN_KEY
-    );
+    const logoutButton =
+        document.getElementById("logoutButton");
 
-    location.reload();
+    if (!logoutButton) return;
+
+    logoutButton.addEventListener("click", function () {
+
+        sessionStorage.removeItem(
+            APP_CONFIG.SESSION_KEY
+        );
+
+        showLogin();
+
+        notify(
+            "Logged Out",
+            "You have been logged out."
+        );
+
+    });
 
 }
 
@@ -424,63 +297,158 @@ function logout() {
    NAVIGATION
 ========================================================= */
 
-function initializeNavigation() {
+function setupNavigation() {
 
-    queryAll(".nav-item")
-        .forEach(function (button) {
+    const navItems =
+        document.querySelectorAll(".nav-item");
 
-            button.addEventListener(
-                "click",
-                function () {
+    navItems.forEach(function (item) {
 
-                    const target =
-                        button.dataset.page ||
-                        button.getAttribute("data-page");
+        item.addEventListener("click", function () {
 
+            const page =
+                item.dataset.page;
 
-                    if (!target) {
+            const department =
+                item.dataset.department;
 
-                        return;
+            if (department) {
 
-                    }
+                openDepartment(department);
 
+                return;
 
-                    navigateTo(target);
+            }
 
-                }
-            );
+            if (page) {
+
+                showPage(page);
+
+            }
 
         });
 
+    });
 
-    const menuToggle =
-        query(".menu-toggle");
-
-    const sidebar =
-        query(".sidebar");
+}
 
 
-    if (menuToggle && sidebar) {
+function showPage(pageName) {
 
-        menuToggle.addEventListener(
-            "click",
-            function () {
+    const pages =
+        document.querySelectorAll(".page");
 
-                sidebar.classList.toggle(
-                    "mobile-open"
-                );
+    pages.forEach(function (page) {
 
-            }
+        page.classList.remove("active-page");
+
+    });
+
+    const target =
+        document.getElementById(
+            pageName + "Page"
         );
+
+    if (target) {
+
+        target.classList.add("active-page");
+
+    }
+
+    updateNavigation(pageName);
+
+    updatePageHeader(pageName);
+
+    refreshEverything();
+
+}
+
+
+function updateNavigation(pageName) {
+
+    const navItems =
+        document.querySelectorAll(".nav-item");
+
+    navItems.forEach(function (item) {
+
+        item.classList.remove("active");
+
+        if (item.dataset.page === pageName) {
+
+            item.classList.add("active");
+
+        }
+
+    });
+
+}
+
+
+function updatePageHeader(pageName) {
+
+    const title =
+        document.getElementById("pageTitle");
+
+    const subtitle =
+        document.getElementById("pageSubtitle");
+
+    const headers = {
+
+        dashboard: [
+            "Operations Dashboard",
+            "Centralized operational monitoring"
+        ],
+
+        tasks: [
+            "All Tasks",
+            "Manage tasks across all departments"
+        ],
+
+        followups: [
+            "Follow-ups",
+            "Monitor pending actions and commitments"
+        ],
+
+        reports: [
+            "Reports & Analysis",
+            "Analyze operational performance"
+        ],
+
+        activity: [
+            "Activity Log",
+            "Track operational changes"
+        ],
+
+        settings: [
+            "Settings",
+            "Manage system configuration"
+        ]
+
+    };
+
+    if (headers[pageName]) {
+
+        title.textContent =
+            headers[pageName][0];
+
+        subtitle.textContent =
+            headers[pageName][1];
 
     }
 
 }
 
 
-function navigateTo(pageId) {
+/* =========================================================
+   DEPARTMENT PAGE
+========================================================= */
 
-    queryAll(".page")
+function openDepartment(departmentName) {
+
+    currentDepartment =
+        departmentName;
+
+    document.querySelectorAll(".page")
         .forEach(function (page) {
 
             page.classList.remove(
@@ -489,157 +457,136 @@ function navigateTo(pageId) {
 
         });
 
+    const departmentPage =
+        document.getElementById(
+            "departmentDetailPage"
+        );
 
-    const targetPage =
-        getElement(pageId);
+    if (departmentPage) {
 
-
-    if (targetPage) {
-
-        targetPage.classList.add(
+        departmentPage.classList.add(
             "active-page"
         );
 
     }
 
-
-    queryAll(".nav-item")
+    document.querySelectorAll(".nav-item")
         .forEach(function (item) {
 
-            item.classList.remove(
-                "active"
-            );
+            item.classList.remove("active");
 
+            if (
+                item.dataset.department ===
+                departmentName
+            ) {
 
-            const itemPage =
-                item.dataset.page ||
-                item.getAttribute("data-page");
-
-
-            if (itemPage === pageId) {
-
-                item.classList.add(
-                    "active"
-                );
+                item.classList.add("active");
 
             }
 
         });
 
+    const department =
+        DEPARTMENTS.find(function (item) {
 
-    updatePageHeader(pageId);
+            return item.name === departmentName;
 
-    renderApplication();
+        });
 
+    if (!department) return;
 
-    const sidebar =
-        query(".sidebar");
+    document.getElementById(
+        "departmentDetailCode"
+    ).textContent = department.code;
 
+    document.getElementById(
+        "departmentDetailTitle"
+    ).textContent = department.name;
 
-    if (sidebar) {
+    document.getElementById(
+        "departmentDetailSubtitle"
+    ).textContent =
+        "Operational overview for " +
+        department.name;
 
-        sidebar.classList.remove(
-            "mobile-open"
-        );
+    document.getElementById(
+        "pageTitle"
+    ).textContent =
+        department.name;
 
-    }
+    document.getElementById(
+        "pageSubtitle"
+    ).textContent =
+        "Department task monitoring";
 
-}
-
-
-function updatePageHeader(pageId) {
-
-    const title =
-        getElement("pageTitle");
-
-    const subtitle =
-        getElement("pageSubtitle");
-
-
-    const pages = {
-
-        dashboard: [
-            "Operations Dashboard",
-            "Monitor tasks, priorities, follow-ups and department performance."
-        ],
-
-        tasksPage: [
-            "All Tasks",
-            "Central view of every operational task across all departments."
-        ],
-
-        followupsPage: [
-            "Follow-ups",
-            "Track pending communication, commitments and next actions."
-        ],
-
-        departmentsPage: [
-            "Departments",
-            "Monitor workload and activity across all 14 departments."
-        ],
-
-        reportsPage: [
-            "Reports & Analysis",
-            "Understand operational performance and identify areas requiring attention."
-        ],
-
-        activityPage: [
-            "Activity Log",
-            "Track changes and actions performed inside the operations system."
-        ],
-
-        settingsPage: [
-            "Settings",
-            "Manage system information and operational preferences."
-        ]
-
-    };
-
-
-    if (pages[pageId]) {
-
-        if (title) {
-
-            title.textContent =
-                pages[pageId][0];
-
-        }
-
-        if (subtitle) {
-
-            subtitle.textContent =
-                pages[pageId][1];
-
-        }
-
-    }
+    refreshDepartmentPage();
 
 }
 
 
 /* =========================================================
-   BUTTONS
+   DEPARTMENT SELECTS
 ========================================================= */
 
-function initializeButtons() {
+function populateDepartmentSelects() {
 
-    queryAll(
-        "[data-action='logout']"
-    )
-    .forEach(function (button) {
+    const selects = [
 
-        button.addEventListener(
-            "click",
-            logout
-        );
+        document.getElementById(
+            "taskDepartment"
+        ),
+
+        document.getElementById(
+            "departmentFilter"
+        )
+
+    ];
+
+    selects.forEach(function (select) {
+
+        if (!select) return;
+
+        DEPARTMENTS.forEach(function (department) {
+
+            const option =
+                document.createElement("option");
+
+            option.value =
+                department.name;
+
+            option.textContent =
+                department.name;
+
+            select.appendChild(option);
+
+        });
 
     });
 
+}
 
-    queryAll(
-        "[data-action='add-task']"
-    )
-    .forEach(function (button) {
+
+/* =========================================================
+   TASK BUTTONS
+========================================================= */
+
+function setupTaskButtons() {
+
+    const buttons = [
+
+        "topAddTask",
+        "dashboardAddTask",
+        "tasksAddButton",
+        "departmentAddTaskButton"
+
+    ];
+
+    buttons.forEach(function (id) {
+
+        const button =
+            document.getElementById(id);
+
+        if (!button) return;
 
         button.addEventListener(
             "click",
@@ -652,37 +599,149 @@ function initializeButtons() {
 
     });
 
+}
 
-    queryAll(
-        "[data-action='export']"
-    )
-    .forEach(function (button) {
 
-        button.addEventListener(
-            "click",
-            exportData
-        );
+/* =========================================================
+   TASK MODAL
+========================================================= */
 
-    });
+function openTaskModal(task = null) {
+
+    const modal =
+        document.getElementById("taskModal");
+
+    const form =
+        document.getElementById("taskForm");
+
+    const title =
+        document.getElementById("taskModalTitle");
+
+    if (!modal || !form) return;
+
+    form.reset();
+
+    document.getElementById(
+        "editTaskId"
+    ).value = "";
+
+    document.getElementById(
+        "taskCreatedDate"
+    ).value = todayISO();
+
+    if (currentDepartment) {
+
+        document.getElementById(
+            "taskDepartment"
+        ).value =
+            currentDepartment;
+
+    }
+
+    if (task) {
+
+        title.textContent =
+            "Edit Task";
+
+        document.getElementById(
+            "editTaskId"
+        ).value =
+            task.id;
+
+        document.getElementById(
+            "taskName"
+        ).value =
+            task.name || "";
+
+        document.getElementById(
+            "taskDepartment"
+        ).value =
+            task.department || "";
+
+        document.getElementById(
+            "taskAssignedTo"
+        ).value =
+            task.assignedTo || "";
+
+        document.getElementById(
+            "taskPriority"
+        ).value =
+            task.priority || "Medium";
+
+        document.getElementById(
+            "taskStatus"
+        ).value =
+            task.status || "Open";
+
+        document.getElementById(
+            "taskCreatedDate"
+        ).value =
+            task.createdDate || todayISO();
+
+        document.getElementById(
+            "taskDueDate"
+        ).value =
+            task.dueDate || "";
+
+        document.getElementById(
+            "taskFollowupDate"
+        ).value =
+            task.followupDate || "";
+
+        document.getElementById(
+            "taskFollowupAction"
+        ).value =
+            task.followupAction || "";
+
+        document.getElementById(
+            "taskRemarks"
+        ).value =
+            task.remarks || "";
+
+    } else {
+
+        title.textContent =
+            "Add New Task";
+
+    }
+
+    modal.style.display = "flex";
+
+}
+
+
+function closeTaskModal() {
+
+    const modal =
+        document.getElementById("taskModal");
+
+    if (modal) {
+
+        modal.style.display = "none";
+
+    }
 
 }
 
 
 /* =========================================================
-   MODAL
+   TASK FORM
 ========================================================= */
 
-let editingTaskId = null;
+function setupTaskForm() {
 
-
-function initializeModal() {
-
-    const overlay =
-        query(".modal-overlay");
+    const form =
+        document.getElementById("taskForm");
 
     const closeButton =
-        query(".modal-close");
+        document.getElementById(
+            "closeTaskModal"
+        );
 
+    const cancelButton =
+        document.getElementById(
+            "cancelTaskButton"
+        );
 
     if (closeButton) {
 
@@ -693,248 +752,16 @@ function initializeModal() {
 
     }
 
+    if (cancelButton) {
 
-    if (overlay) {
-
-        overlay.addEventListener(
+        cancelButton.addEventListener(
             "click",
-            function (event) {
-
-                if (
-                    event.target === overlay
-                ) {
-
-                    closeTaskModal();
-
-                }
-
-            }
+            closeTaskModal
         );
 
     }
 
-}
-
-
-function openTaskModal(taskId = null) {
-
-    const overlay =
-        query(".modal-overlay");
-
-
-    if (!overlay) {
-
-        showNotification(
-            "Task form unavailable",
-            "Please check the HTML structure."
-        );
-
-        return;
-
-    }
-
-
-    editingTaskId = taskId;
-
-
-    populateDepartmentSelect();
-
-    populateStatusSelect();
-
-    populatePrioritySelect();
-
-
-    const form =
-        getElement("taskForm");
-
-
-    if (form) {
-
-        form.reset();
-
-    }
-
-
-    if (taskId) {
-
-        const task =
-            operationsData.tasks.find(
-                function (item) {
-
-                    return item.id === taskId;
-
-                }
-            );
-
-
-        if (task) {
-
-            fillTaskForm(task);
-
-        }
-
-    }
-
-
-    overlay.style.display =
-        "flex";
-
-}
-
-
-function closeTaskModal() {
-
-    const overlay =
-        query(".modal-overlay");
-
-
-    if (overlay) {
-
-        overlay.style.display =
-            "none";
-
-    }
-
-
-    editingTaskId = null;
-
-}
-
-
-function populateDepartmentSelect() {
-
-    const select =
-        getElement("taskDepartment");
-
-
-    if (!select) {
-
-        return;
-
-    }
-
-
-    select.innerHTML =
-        '<option value="">Select department</option>';
-
-
-    APP_CONFIG.DEPARTMENTS
-        .forEach(function (department) {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                department.id;
-
-            option.textContent =
-                department.name;
-
-            select.appendChild(
-                option
-            );
-
-        });
-
-}
-
-
-function populateStatusSelect() {
-
-    const select =
-        getElement("taskStatus");
-
-
-    if (!select) {
-
-        return;
-
-    }
-
-
-    select.innerHTML = "";
-
-
-    APP_CONFIG.STATUSES
-        .forEach(function (status) {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                status;
-
-            option.textContent =
-                status;
-
-            select.appendChild(
-                option
-            );
-
-        });
-
-}
-
-
-function populatePrioritySelect() {
-
-    const select =
-        getElement("taskPriority");
-
-
-    if (!select) {
-
-        return;
-
-    }
-
-
-    select.innerHTML = "";
-
-
-    APP_CONFIG.PRIORITIES
-        .forEach(function (priority) {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                priority;
-
-            option.textContent =
-                priority;
-
-            select.appendChild(
-                option
-            );
-
-        });
-
-}
-
-
-/* =========================================================
-   TASK FORM
-========================================================= */
-
-function initializeTaskForm() {
-
-    const form =
-        getElement("taskForm");
-
-
-    if (!form) {
-
-        return;
-
-    }
-
+    if (!form) return;
 
     form.addEventListener(
         "submit",
@@ -942,89 +769,10 @@ function initializeTaskForm() {
 
             event.preventDefault();
 
-            saveTaskFromForm();
+            saveTask();
 
         }
     );
-
-}
-
-
-function fillTaskForm(task) {
-
-    setValue(
-        "taskTitle",
-        task.title
-    );
-
-    setValue(
-        "taskDepartment",
-        task.department
-    );
-
-    setValue(
-        "taskAssignedTo",
-        task.assignedTo
-    );
-
-    setValue(
-        "taskPriority",
-        task.priority
-    );
-
-    setValue(
-        "taskStatus",
-        task.status
-    );
-
-    setValue(
-        "taskDueDate",
-        task.dueDate
-    );
-
-    setValue(
-        "taskDescription",
-        task.description
-    );
-
-    setValue(
-        "taskFollowup",
-        task.followupDate
-    );
-
-    setValue(
-        "taskRemarks",
-        task.remarks
-    );
-
-}
-
-
-function setValue(id, value) {
-
-    const element =
-        getElement(id);
-
-
-    if (element) {
-
-        element.value =
-            value || "";
-
-    }
-
-}
-
-
-function getValue(id) {
-
-    const element =
-        getElement(id);
-
-
-    return element
-        ? element.value.trim()
-        : "";
 
 }
 
@@ -1033,40 +781,80 @@ function getValue(id) {
    SAVE TASK
 ========================================================= */
 
-function saveTaskFromForm() {
+function saveTask() {
 
-    const title =
-        getValue("taskTitle");
+    const editId =
+        document.getElementById(
+            "editTaskId"
+        ).value;
 
-    const department =
-        getValue("taskDepartment");
+    const taskData = {
 
-    const assignedTo =
-        getValue("taskAssignedTo");
+        id:
+            editId ||
+            generateTaskId(),
 
-    const priority =
-        getValue("taskPriority");
+        name:
+            document.getElementById(
+                "taskName"
+            ).value.trim(),
 
-    const status =
-        getValue("taskStatus");
+        department:
+            document.getElementById(
+                "taskDepartment"
+            ).value,
 
-    const dueDate =
-        getValue("taskDueDate");
+        assignedTo:
+            document.getElementById(
+                "taskAssignedTo"
+            ).value.trim(),
 
-    const description =
-        getValue("taskDescription");
+        priority:
+            document.getElementById(
+                "taskPriority"
+            ).value,
 
-    const followupDate =
-        getValue("taskFollowup");
+        status:
+            document.getElementById(
+                "taskStatus"
+            ).value,
 
-    const remarks =
-        getValue("taskRemarks");
+        createdDate:
+            document.getElementById(
+                "taskCreatedDate"
+            ).value ||
+            todayISO(),
+
+        dueDate:
+            document.getElementById(
+                "taskDueDate"
+            ).value,
+
+        followupDate:
+            document.getElementById(
+                "taskFollowupDate"
+            ).value,
+
+        followupAction:
+            document.getElementById(
+                "taskFollowupAction"
+            ).value.trim(),
+
+        remarks:
+            document.getElementById(
+                "taskRemarks"
+            ).value.trim(),
+
+        updatedAt:
+            new Date().toISOString()
+
+    };
 
 
-    if (!title) {
+    if (!taskData.name) {
 
-        showNotification(
-            "Task title required",
+        notify(
+            "Missing Task",
             "Please enter the task name."
         );
 
@@ -1075,11 +863,11 @@ function saveTaskFromForm() {
     }
 
 
-    if (!department) {
+    if (!taskData.department) {
 
-        showNotification(
-            "Department required",
-            "Please select the responsible department."
+        notify(
+            "Missing Department",
+            "Please select a department."
         );
 
         return;
@@ -1087,115 +875,41 @@ function saveTaskFromForm() {
     }
 
 
-    const departmentInfo =
-        getDepartment(
-            department
-        );
+    if (editId) {
 
+        const index =
+            tasks.findIndex(function (task) {
 
-    if (editingTaskId) {
+                return task.id === editId;
 
-        const task =
-            operationsData.tasks.find(
-                function (item) {
+            });
 
-                    return item.id === editingTaskId;
+        if (index !== -1) {
 
-                }
-            );
+            const oldTask =
+                tasks[index];
 
-
-        if (task) {
-
-            task.title =
-                title;
-
-            task.department =
-                department;
-
-            task.assignedTo =
-                assignedTo;
-
-            task.priority =
-                priority || "Medium";
-
-            task.status =
-                status || "Open";
-
-            task.dueDate =
-                dueDate;
-
-            task.description =
-                description;
-
-            task.followupDate =
-                followupDate;
-
-            task.remarks =
-                remarks;
-
-            task.updatedAt =
-                new Date().toISOString();
+            tasks[index] =
+                taskData;
 
             addActivity(
-                "Task updated",
-                `${title} was updated under ${departmentInfo ? departmentInfo.name : department}.`
+                "Task Updated",
+                taskData.name +
+                " was updated.",
+                taskData.department
             );
 
         }
 
     } else {
 
-        const newTask = {
-
-            id:
-                generateId("TASK"),
-
-            taskNumber:
-                generateTaskNumber(),
-
-            title,
-
-            department,
-
-            departmentName:
-                departmentInfo
-                    ? departmentInfo.name
-                    : department,
-
-            assignedTo,
-
-            priority:
-                priority || "Medium",
-
-            status:
-                status || "Open",
-
-            dueDate,
-
-            description,
-
-            followupDate,
-
-            remarks,
-
-            createdAt:
-                new Date().toISOString(),
-
-            updatedAt:
-                new Date().toISOString()
-
-        };
-
-
-        operationsData.tasks.push(
-            newTask
-        );
-
+        tasks.unshift(taskData);
 
         addActivity(
-            "New task created",
-            `${title} was added to ${departmentInfo ? departmentInfo.name : department}.`
+            "Task Created",
+            taskData.name +
+            " was added.",
+            taskData.department
         );
 
     }
@@ -1205,378 +919,241 @@ function saveTaskFromForm() {
 
     closeTaskModal();
 
-    renderApplication();
+    refreshEverything();
 
-    showNotification(
-        editingTaskId
-            ? "Task updated"
-            : "Task created",
-        "The operations database has been updated."
+    notify(
+        editId ?
+        "Task Updated" :
+        "Task Created",
+        editId ?
+        "Task successfully updated." :
+        "New task successfully created."
     );
 
 }
 
 
 /* =========================================================
-   TASK NUMBERS
+   GENERATE TASK ID
 ========================================================= */
 
-function generateTaskNumber() {
+function generateTaskId() {
 
     const number =
-        operationsData.tasks.length + 1;
+        Date.now()
+        .toString()
+        .slice(-6);
 
-    return "OPS-" +
-        String(number).padStart(
-            5,
-            "0"
+    return "TASK-" + number;
+
+}
+
+
+/* =========================================================
+   EDIT TASK
+========================================================= */
+
+function editTask(taskId) {
+
+    const task =
+        tasks.find(function (item) {
+
+            return item.id === taskId;
+
+        });
+
+    if (!task) return;
+
+    openTaskModal(task);
+
+}
+
+
+/* =========================================================
+   DELETE TASK
+========================================================= */
+
+function deleteTask(taskId) {
+
+    const task =
+        tasks.find(function (item) {
+
+            return item.id === taskId;
+
+        });
+
+    if (!task) return;
+
+    const confirmed =
+        confirm(
+            "Delete this task?\n\n" +
+            task.name
         );
 
+    if (!confirmed) return;
+
+    tasks =
+        tasks.filter(function (item) {
+
+            return item.id !== taskId;
+
+        });
+
+    addActivity(
+        "Task Deleted",
+        task.name +
+        " was deleted.",
+        task.department
+    );
+
+    saveData();
+
+    refreshEverything();
+
+    notify(
+        "Task Deleted",
+        "The task has been removed."
+    );
+
 }
 
 
 /* =========================================================
-   ID
+   STATUS LOGIC
 ========================================================= */
 
-function generateId(prefix) {
+function getEffectiveStatus(task) {
 
-    return prefix +
-        "-" +
-        Date.now() +
-        "-" +
-        Math.random()
-            .toString(36)
-            .substring(2, 8);
+    if (
+        task.status !== "Completed" &&
+        task.dueDate &&
+        isPastDate(task.dueDate)
+    ) {
+
+        return "Overdue";
+
+    }
+
+    return task.status;
 
 }
 
 
 /* =========================================================
-   DEPARTMENT HELPERS
+   DATE HELPERS
 ========================================================= */
 
-function getDepartment(id) {
+function todayISO() {
 
-    return APP_CONFIG.DEPARTMENTS.find(
-        function (department) {
+    const date =
+        new Date();
 
-            return department.id === id;
+    const year =
+        date.getFullYear();
 
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
+
+}
+
+
+function isPastDate(dateString) {
+
+    if (!dateString) return false;
+
+    return dateString < todayISO();
+
+}
+
+
+function isToday(dateString) {
+
+    return (
+        dateString &&
+        dateString === todayISO()
+    );
+
+}
+
+
+function isUpcoming(dateString) {
+
+    if (!dateString) return false;
+
+    return (
+        dateString > todayISO()
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(dateString) {
+
+    if (!dateString) return "—";
+
+    const date =
+        new Date(
+            dateString + "T00:00:00"
+        );
+
+    if (isNaN(date.getTime())) {
+
+        return dateString;
+
+    }
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
         }
     );
 
 }
 
 
-function getDepartmentName(id) {
-
-    const department =
-        getDepartment(id);
-
-
-    return department
-        ? department.name
-        : id || "Unassigned";
-
-}
-
-
 /* =========================================================
-   FILTERS
+   REFRESH EVERYTHING
 ========================================================= */
 
-function initializeFilters() {
+function refreshEverything() {
 
-    queryAll(
-        "[data-filter]"
-    )
-    .forEach(function (element) {
+    refreshDashboard();
 
-        element.addEventListener(
-            "input",
-            renderApplication
-        );
+    refreshTasksTable();
 
-        element.addEventListener(
-            "change",
-            renderApplication
-        );
+    refreshFollowups();
 
-    });
+    refreshDepartments();
 
-}
+    refreshDepartmentPage();
 
+    refreshReports();
 
-function getFilteredTasks() {
+    refreshActivity();
 
-    let tasks =
-        [...operationsData.tasks];
-
-
-    const search =
-        getFilterValue(
-            "search"
-        )
-        .toLowerCase();
-
-
-    const department =
-        getFilterValue(
-            "department"
-        );
-
-
-    const status =
-        getFilterValue(
-            "status"
-        );
-
-
-    const priority =
-        getFilterValue(
-            "priority"
-        );
-
-
-    if (search) {
-
-        tasks =
-            tasks.filter(
-                function (task) {
-
-                    return (
-
-                        String(task.title || "")
-                            .toLowerCase()
-                            .includes(search)
-
-                        ||
-
-                        String(task.taskNumber || "")
-                            .toLowerCase()
-                            .includes(search)
-
-                        ||
-
-                        String(task.assignedTo || "")
-                            .toLowerCase()
-                            .includes(search)
-
-                        ||
-
-                        getDepartmentName(
-                            task.department
-                        )
-                        .toLowerCase()
-                        .includes(search)
-
-                    );
-
-                }
-            );
-
-    }
-
-
-    if (department) {
-
-        tasks =
-            tasks.filter(
-                function (task) {
-
-                    return task.department ===
-                        department;
-
-                }
-            );
-
-    }
-
-
-    if (status) {
-
-        tasks =
-            tasks.filter(
-                function (task) {
-
-                    return task.status ===
-                        status;
-
-                }
-            );
-
-    }
-
-
-    if (priority) {
-
-        tasks =
-            tasks.filter(
-                function (task) {
-
-                    return task.priority ===
-                        priority;
-
-                }
-            );
-
-    }
-
-
-    return tasks;
-
-}
-
-
-function getFilterValue(name) {
-
-    const element =
-        query(
-            `[data-filter="${name}"]`
-        );
-
-
-    return element
-        ? element.value
-        : "";
-
-}
-
-
-/* =========================================================
-   OVERDUE
-========================================================= */
-
-function isOverdue(task) {
-
-    if (
-        !task.dueDate ||
-        task.status === "Completed"
-    ) {
-
-        return false;
-
-    }
-
-
-    const today =
-        new Date();
-
-    today.setHours(
-        0,
-        0,
-        0,
-        0
-    );
-
-
-    const due =
-        new Date(
-            task.dueDate
-        );
-
-    due.setHours(
-        0,
-        0,
-        0,
-        0
-    );
-
-
-    return due < today;
-
-}
-
-
-/* =========================================================
-   STATUS DISPLAY
-========================================================= */
-
-function getDisplayStatus(task) {
-
-    if (isOverdue(task)) {
-
-        return "Overdue";
-
-    }
-
-
-    return task.status ||
-        "Open";
-
-}
-
-
-function getStatusClass(status) {
-
-    const classes = {
-
-        "Open":
-            "status-open",
-
-        "In Progress":
-            "status-progress",
-
-        "Blocked":
-            "status-blocked",
-
-        "Completed":
-            "status-completed",
-
-        "Overdue":
-            "status-overdue"
-
-    };
-
-
-    return classes[status] ||
-        "status-open";
-
-}
-
-
-function getPriorityClass(priority) {
-
-    const classes = {
-
-        "High":
-            "priority-high",
-
-        "Medium":
-            "priority-medium",
-
-        "Low":
-            "priority-low"
-
-    };
-
-
-    return classes[priority] ||
-        "priority-medium";
-
-}
-
-
-/* =========================================================
-   MAIN RENDER
-========================================================= */
-
-function renderApplication() {
-
-    renderDashboard();
-
-    renderTasks();
-
-    renderFollowups();
-
-    renderDepartments();
-
-    renderReports();
-
-    renderActivity();
-
-    renderSettings();
+    updateDataSourceStatus();
 
 }
 
@@ -1585,49 +1162,60 @@ function renderApplication() {
    DASHBOARD
 ========================================================= */
 
-function renderDashboard() {
-
-    const tasks =
-        operationsData.tasks;
-
+function refreshDashboard() {
 
     const total =
         tasks.length;
 
-
     const open =
-        tasks.filter(
-            task =>
-                task.status === "Open"
-        ).length;
+        tasks.filter(function (task) {
 
+            return (
+                getEffectiveStatus(task) ===
+                "Open"
+            );
+
+        }).length;
 
     const progress =
-        tasks.filter(
-            task =>
-                task.status === "In Progress"
-        ).length;
+        tasks.filter(function (task) {
 
+            return (
+                getEffectiveStatus(task) ===
+                "In Progress"
+            );
+
+        }).length;
 
     const blocked =
-        tasks.filter(
-            task =>
-                task.status === "Blocked"
-        ).length;
+        tasks.filter(function (task) {
 
+            return (
+                getEffectiveStatus(task) ===
+                "Blocked"
+            );
 
-    const completed =
-        tasks.filter(
-            task =>
-                task.status === "Completed"
-        ).length;
-
+        }).length;
 
     const overdue =
-        tasks.filter(
-            task =>
-                isOverdue(task)
-        ).length;
+        tasks.filter(function (task) {
+
+            return (
+                getEffectiveStatus(task) ===
+                "Overdue"
+            );
+
+        }).length;
+
+    const completed =
+        tasks.filter(function (task) {
+
+            return (
+                task.status ===
+                "Completed"
+            );
+
+        }).length;
 
 
     setText(
@@ -1651,87 +1239,625 @@ function renderDashboard() {
     );
 
     setText(
-        "completedTasks",
-        completed
-    );
-
-    setText(
         "overdueTasks",
         overdue
     );
 
+    setText(
+        "completedTasks",
+        completed
+    );
 
-    renderPrioritySummary();
+
+    const high =
+        tasks.filter(function (task) {
+
+            return (
+                task.priority ===
+                "High"
+            );
+
+        }).length;
+
+    const medium =
+        tasks.filter(function (task) {
+
+            return (
+                task.priority ===
+                "Medium"
+            );
+
+        }).length;
+
+    const low =
+        tasks.filter(function (task) {
+
+            return (
+                task.priority ===
+                "Low"
+            );
+
+        }).length;
+
+
+    setText(
+        "highPriorityCount",
+        high
+    );
+
+    setText(
+        "mediumPriorityCount",
+        medium
+    );
+
+    setText(
+        "lowPriorityCount",
+        low
+    );
+
+
+    const dueToday =
+        tasks.filter(function (task) {
+
+            return (
+                task.followupDate &&
+                isToday(
+                    task.followupDate
+                )
+            );
+
+        }).length;
+
+
+    const followupOverdue =
+        tasks.filter(function (task) {
+
+            return (
+                task.followupDate &&
+                isPastDate(
+                    task.followupDate
+                )
+            );
+
+        }).length;
+
+
+    const upcoming =
+        tasks.filter(function (task) {
+
+            return (
+                task.followupDate &&
+                isUpcoming(
+                    task.followupDate
+                )
+            );
+
+        }).length;
+
+
+    setText(
+        "followupsToday",
+        dueToday
+    );
+
+    setText(
+        "followupsOverdue",
+        followupOverdue
+    );
+
+    setText(
+        "followupsUpcoming",
+        upcoming
+    );
+
 
     renderDepartmentPerformance();
+
+    renderRecentTasks();
 
 }
 
 
 /* =========================================================
-   PRIORITY SUMMARY
+   RECENT TASKS
 ========================================================= */
 
-function renderPrioritySummary() {
+function renderRecentTasks() {
 
-    const container =
-        getElement(
-            "prioritySummary"
+    const table =
+        document.getElementById(
+            "recentTasksTable"
         );
 
+    if (!table) return;
 
-    if (!container) {
+    const recent =
+        tasks.slice(0, 10);
+
+    if (!recent.length) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-table">
+                    No tasks available.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+    table.innerHTML =
+        recent.map(function (task) {
+
+            return `
+                <tr>
+
+                    <td>${escapeHTML(task.id)}</td>
+
+                    <td>
+                        ${escapeHTML(task.name)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(task.department)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(task.assignedTo)}
+                    </td>
+
+                    <td>
+                        ${statusBadge(
+                            task.priority
+                        )}
+                    </td>
+
+                    <td>
+                        ${statusBadge(
+                            getEffectiveStatus(task)
+                        )}
+                    </td>
+
+                    <td>
+                        ${formatDate(
+                            task.dueDate
+                        )}
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   TASK TABLE
+========================================================= */
+
+function refreshTasksTable() {
+
+    const table =
+        document.getElementById(
+            "allTasksTable"
+        );
+
+    if (!table) return;
+
+    let filtered =
+        applyTaskFilters();
+
+    if (!filtered.length) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="8" class="empty-table">
+                    No tasks found.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+    table.innerHTML =
+        filtered.map(function (task) {
+
+            return `
+                <tr>
+
+                    <td>
+                        ${escapeHTML(task.id)}
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${escapeHTML(task.name)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${escapeHTML(task.department)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(task.assignedTo)}
+                    </td>
+
+                    <td>
+                        ${statusBadge(
+                            task.priority
+                        )}
+                    </td>
+
+                    <td>
+                        ${statusBadge(
+                            getEffectiveStatus(task)
+                        )}
+                    </td>
+
+                    <td>
+                        ${formatDate(
+                            task.dueDate
+                        )}
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="table-action"
+                            onclick="editTask('${task.id}')"
+                        >
+                            Edit
+                        </button>
+
+                        <button
+                            class="table-action danger"
+                            onclick="deleteTask('${task.id}')"
+                        >
+                            Delete
+                        </button>
+
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+function setupFilters() {
+
+    [
+        "taskSearch",
+        "departmentFilter",
+        "priorityFilter",
+        "statusFilter"
+
+    ].forEach(function (id) {
+
+        const element =
+            document.getElementById(id);
+
+        if (!element) return;
+
+        element.addEventListener(
+            "input",
+            refreshTasksTable
+        );
+
+        element.addEventListener(
+            "change",
+            refreshTasksTable
+        );
+
+    });
+
+}
+
+
+function applyTaskFilters() {
+
+    const search =
+        getValue("taskSearch")
+            .toLowerCase();
+
+    const department =
+        getValue("departmentFilter");
+
+    const priority =
+        getValue("priorityFilter");
+
+    const status =
+        getValue("statusFilter");
+
+
+    return tasks.filter(function (task) {
+
+        const effectiveStatus =
+            getEffectiveStatus(task);
+
+        const matchesSearch =
+            !search ||
+            (
+                task.name || ""
+            ).toLowerCase()
+                .includes(search) ||
+            (
+                task.id || ""
+            ).toLowerCase()
+                .includes(search) ||
+            (
+                task.assignedTo || ""
+            ).toLowerCase()
+                .includes(search);
+
+        const matchesDepartment =
+            !department ||
+            task.department ===
+            department;
+
+        const matchesPriority =
+            !priority ||
+            task.priority ===
+            priority;
+
+        const matchesStatus =
+            !status ||
+            effectiveStatus ===
+            status;
+
+        return (
+            matchesSearch &&
+            matchesDepartment &&
+            matchesPriority &&
+            matchesStatus
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   FOLLOW UPS
+========================================================= */
+
+function refreshFollowups() {
+
+    const followupTasks =
+        tasks.filter(function (task) {
+
+            return (
+                task.followupDate ||
+                task.followupAction
+            );
+
+        });
+
+    const today =
+        followupTasks.filter(function (task) {
+
+            return isToday(
+                task.followupDate
+            );
+
+        });
+
+    const overdue =
+        followupTasks.filter(function (task) {
+
+            return isPastDate(
+                task.followupDate
+            );
+
+        });
+
+    const upcoming =
+        followupTasks.filter(function (task) {
+
+            return isUpcoming(
+                task.followupDate
+            );
+
+        });
+
+
+    setText(
+        "followupPageToday",
+        today.length
+    );
+
+    setText(
+        "followupPageOverdue",
+        overdue.length
+    );
+
+    setText(
+        "followupPageUpcoming",
+        upcoming.length
+    );
+
+
+    const table =
+        document.getElementById(
+            "followupsTable"
+        );
+
+    if (!table) return;
+
+
+    if (!followupTasks.length) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-table">
+                    No follow-ups available.
+                </td>
+            </tr>
+        `;
 
         return;
 
     }
 
 
-    const high =
-        operationsData.tasks.filter(
-            task =>
-                task.priority === "High"
-                &&
-                task.status !== "Completed"
-        ).length;
+    table.innerHTML =
+        followupTasks.map(function (task) {
+
+            return `
+                <tr>
+
+                    <td>
+                        ${escapeHTML(task.id)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(task.name)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(task.department)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(task.assignedTo)}
+                    </td>
+
+                    <td>
+                        ${formatDate(
+                            task.followupDate
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            task.followupAction ||
+                            "—"
+                        )}
+                    </td>
+
+                    <td>
+                        ${statusBadge(
+                            getEffectiveStatus(task)
+                        )}
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+
+}
 
 
-    const medium =
-        operationsData.tasks.filter(
-            task =>
-                task.priority === "Medium"
-                &&
-                task.status !== "Completed"
-        ).length;
+/* =========================================================
+   DEPARTMENTS
+========================================================= */
 
+function refreshDepartments() {
 
-    const low =
-        operationsData.tasks.filter(
-            task =>
-                task.priority === "Low"
-                &&
-                task.status !== "Completed"
-        ).length;
+    const grid =
+        document.getElementById(
+            "departmentsGrid"
+        );
 
+    if (!grid) return;
 
-    container.innerHTML = `
+    grid.innerHTML =
+        DEPARTMENTS.map(function (department) {
 
-        <div>
-            <span>High Priority</span>
-            <strong>${high}</strong>
-        </div>
+            const departmentTasks =
+                tasks.filter(function (task) {
 
-        <div>
-            <span>Medium Priority</span>
-            <strong>${medium}</strong>
-        </div>
+                    return (
+                        task.department ===
+                        department.name
+                    );
 
-        <div>
-            <span>Low Priority</span>
-            <strong>${low}</strong>
-        </div>
+                });
 
-    `;
+            const completed =
+                departmentTasks.filter(
+                    function (task) {
+
+                        return (
+                            task.status ===
+                            "Completed"
+                        );
+
+                    }
+                ).length;
+
+            const percentage =
+                departmentTasks.length ?
+                Math.round(
+                    (
+                        completed /
+                        departmentTasks.length
+                    ) * 100
+                ) :
+                0;
+
+            return `
+                <div
+                    class="department-card"
+                    onclick="openDepartment('${department.name}')"
+                >
+
+                    <div class="department-card-header">
+
+                        <span class="department-code">
+                            ${department.code}
+                        </span>
+
+                        <strong>
+                            ${escapeHTML(
+                                department.name
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="department-card-stats">
+
+                        <div>
+                            <span>Total</span>
+                            <strong>
+                                ${departmentTasks.length}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Completed</span>
+                            <strong>
+                                ${completed}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Progress</span>
+                            <strong>
+                                ${percentage}%
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+        }).join("");
 
 }
 
@@ -1743,135 +1869,210 @@ function renderPrioritySummary() {
 function renderDepartmentPerformance() {
 
     const container =
-        getElement(
+        document.getElementById(
             "departmentPerformance"
         );
 
+    if (!container) return;
 
-    if (!container) {
+    container.innerHTML =
+        DEPARTMENTS.map(function (department) {
 
-        return;
+            const departmentTasks =
+                tasks.filter(function (task) {
 
-    }
-
-
-    container.innerHTML = "";
-
-
-    APP_CONFIG.DEPARTMENTS
-        .forEach(function (department) {
-
-            const tasks =
-                operationsData.tasks.filter(
-                    task =>
+                    return (
                         task.department ===
-                        department.id
-                );
-
-
-            const completed =
-                tasks.filter(
-                    task =>
-                        task.status ===
-                        "Completed"
-                ).length;
-
-
-            const percentage =
-                tasks.length === 0
-                    ? 0
-                    : Math.round(
-                        (
-                            completed /
-                            tasks.length
-                        ) * 100
+                        department.name
                     );
 
+                });
 
-            const item =
-                document.createElement(
-                    "div"
-                );
+            const completed =
+                departmentTasks.filter(
+                    function (task) {
 
-            item.className =
-                "department-performance-item";
+                        return (
+                            task.status ===
+                            "Completed"
+                        );
 
+                    }
+                ).length;
 
-            item.innerHTML = `
+            const percentage =
+                departmentTasks.length ?
+                Math.round(
+                    completed /
+                    departmentTasks.length *
+                    100
+                ) :
+                0;
 
-                <div class="department-performance-header">
+            return `
+                <div class="department-performance-row">
 
-                    <span class="department-performance-name">
-                        ${escapeHtml(department.name)}
-                    </span>
+                    <div>
 
-                    <span class="department-performance-number">
-                        ${completed}/${tasks.length}
-                    </span>
+                        <strong>
+                            ${escapeHTML(
+                                department.name
+                            )}
+                        </strong>
+
+                        <span>
+                            ${departmentTasks.length}
+                            task(s)
+                        </span>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            ${percentage}%
+                        </strong>
+
+                    </div>
 
                 </div>
-
-                <div class="progress-bar">
-
-                    <div
-                        class="progress-fill"
-                        style="width:${percentage}%"
-                    ></div>
-
-                </div>
-
             `;
 
-
-            container.appendChild(
-                item
-            );
-
-        });
+        }).join("");
 
 }
 
 
 /* =========================================================
-   TASK TABLE
+   DEPARTMENT DETAIL
 ========================================================= */
 
-function renderTasks() {
+function refreshDepartmentPage() {
 
-    const tableBody =
-        getElement(
-            "tasksTableBody"
+    if (!currentDepartment) return;
+
+    const departmentTasks =
+        tasks.filter(function (task) {
+
+            return (
+                task.department ===
+                currentDepartment
+            );
+
+        });
+
+
+    const total =
+        departmentTasks.length;
+
+    const open =
+        departmentTasks.filter(
+            function (task) {
+
+                return (
+                    getEffectiveStatus(task) ===
+                    "Open"
+                );
+
+            }
+        ).length;
+
+    const progress =
+        departmentTasks.filter(
+            function (task) {
+
+                return (
+                    getEffectiveStatus(task) ===
+                    "In Progress"
+                );
+
+            }
+        ).length;
+
+    const blocked =
+        departmentTasks.filter(
+            function (task) {
+
+                return (
+                    getEffectiveStatus(task) ===
+                    "Blocked"
+                );
+
+            }
+        ).length;
+
+    const overdue =
+        departmentTasks.filter(
+            function (task) {
+
+                return (
+                    getEffectiveStatus(task) ===
+                    "Overdue"
+                );
+
+            }
+        ).length;
+
+    const completed =
+        departmentTasks.filter(
+            function (task) {
+
+                return (
+                    task.status ===
+                    "Completed"
+                );
+
+            }
+        ).length;
+
+
+    setText(
+        "departmentTotal",
+        total
+    );
+
+    setText(
+        "departmentOpen",
+        open
+    );
+
+    setText(
+        "departmentProgress",
+        progress
+    );
+
+    setText(
+        "departmentBlocked",
+        blocked
+    );
+
+    setText(
+        "departmentOverdue",
+        overdue
+    );
+
+    setText(
+        "departmentCompleted",
+        completed
+    );
+
+
+    const table =
+        document.getElementById(
+            "departmentTasksTable"
         );
 
-
-    if (!tableBody) {
-
-        return;
-
-    }
+    if (!table) return;
 
 
-    const tasks =
-        getFilteredTasks();
+    if (!departmentTasks.length) {
 
-
-    tableBody.innerHTML = "";
-
-
-    if (!tasks.length) {
-
-        tableBody.innerHTML = `
-
+        table.innerHTML = `
             <tr>
-                <td
-                    colspan="10"
-                    class="empty-table"
-                >
-                    No tasks found.
-                    Create a task or change your filters.
+                <td colspan="8" class="empty-table">
+                    No department tasks available.
                 </td>
             </tr>
-
         `;
 
         return;
@@ -1879,104 +2080,34 @@ function renderTasks() {
     }
 
 
-    tasks
-        .sort(
-            function (a, b) {
+    table.innerHTML =
+        departmentTasks.map(function (task) {
 
-                return (
-                    new Date(
-                        b.createdAt
-                    )
-                    -
-                    new Date(
-                        a.createdAt
-                    )
-                );
-
-            }
-        )
-        .forEach(
-            function (task) {
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                const displayStatus =
-                    getDisplayStatus(
-                        task
-                    );
-
-
-                row.innerHTML = `
+            return `
+                <tr>
 
                     <td>
-                        <strong>
-                            ${escapeHtml(
-                                task.taskNumber || ""
-                            )}
-                        </strong>
+                        ${escapeHTML(task.id)}
                     </td>
 
                     <td>
-                        <strong>
-                            ${escapeHtml(
-                                task.title
-                            )}
-                        </strong>
-
-                        ${
-                            task.description
-                                ? `
-                                <div style="
-                                    color:#9ca3af;
-                                    font-size:9px;
-                                    margin-top:2px;
-                                ">
-                                    ${escapeHtml(
-                                        shorten(
-                                            task.description,
-                                            60
-                                        )
-                                    )}
-                                </div>
-                                `
-                                : ""
-                        }
+                        ${escapeHTML(task.name)}
                     </td>
 
                     <td>
-                        ${escapeHtml(
-                            getDepartmentName(
-                                task.department
-                            )
+                        ${escapeHTML(task.assignedTo)}
+                    </td>
+
+                    <td>
+                        ${statusBadge(
+                            task.priority
                         )}
                     </td>
 
                     <td>
-                        ${escapeHtml(
-                            task.assignedTo ||
-                            "—"
+                        ${statusBadge(
+                            getEffectiveStatus(task)
                         )}
-                    </td>
-
-                    <td>
-                        <span class="priority-badge ${getPriorityClass(task.priority)}">
-                            ${escapeHtml(
-                                task.priority ||
-                                "Medium"
-                            )}
-                        </span>
-                    </td>
-
-                    <td>
-                        <span class="status-badge ${getStatusClass(displayStatus)}">
-                            ${escapeHtml(
-                                displayStatus
-                            )}
-                        </span>
                     </td>
 
                     <td>
@@ -1992,472 +2123,20 @@ function renderTasks() {
                     </td>
 
                     <td>
-                        ${formatDateTime(
-                            task.updatedAt
-                        )}
-                    </td>
-
-                    <td>
 
                         <button
                             class="table-action"
-                            title="Edit"
-                            onclick="openTaskModal('${task.id}')"
+                            onclick="editTask('${task.id}')"
                         >
-                            ✎
-                        </button>
-
-                        <button
-                            class="table-action"
-                            title="Delete"
-                            onclick="deleteTask('${task.id}')"
-                        >
-                            ×
+                            Edit
                         </button>
 
                     </td>
 
-                `;
-
-
-                tableBody.appendChild(
-                    row
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   DELETE TASK
-========================================================= */
-
-function deleteTask(taskId) {
-
-    const task =
-        operationsData.tasks.find(
-            item =>
-                item.id === taskId
-        );
-
-
-    if (!task) {
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            `Delete task "${task.title}"?`
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    operationsData.tasks =
-        operationsData.tasks.filter(
-            item =>
-                item.id !== taskId
-        );
-
-
-    addActivity(
-        "Task deleted",
-        `${task.title} was removed from the operations tracker.`
-    );
-
-
-    saveData();
-
-    renderApplication();
-
-    showNotification(
-        "Task deleted",
-        "The task has been removed."
-    );
-
-}
-
-
-/* =========================================================
-   FOLLOW-UPS
-========================================================= */
-
-function renderFollowups() {
-
-    const tableBody =
-        getElement(
-            "followupsTableBody"
-        );
-
-
-    if (!tableBody) {
-
-        return;
-
-    }
-
-
-    const followupTasks =
-        operationsData.tasks.filter(
-            task =>
-                task.followupDate
-        );
-
-
-    tableBody.innerHTML = "";
-
-
-    if (!followupTasks.length) {
-
-        tableBody.innerHTML = `
-
-            <tr>
-                <td
-                    colspan="7"
-                    class="empty-table"
-                >
-                    No follow-ups recorded yet.
-                </td>
-            </tr>
-
-        `;
-
-        return;
-
-    }
-
-
-    followupTasks
-        .sort(
-            function (a, b) {
-
-                return (
-                    new Date(
-                        a.followupDate
-                    )
-                    -
-                    new Date(
-                        b.followupDate
-                    )
-                );
-
-            }
-        )
-        .forEach(
-            function (task) {
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                row.innerHTML = `
-
-                    <td>
-                        <strong>
-                            ${escapeHtml(
-                                task.taskNumber
-                            )}
-                        </strong>
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            task.title
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            getDepartmentName(
-                                task.department
-                            )
-                        )}
-                    </td>
-
-                    <td>
-                        ${formatDate(
-                            task.followupDate
-                        )}
-                    </td>
-
-                    <td>
-                        <span class="status-badge ${getStatusClass(getDisplayStatus(task))}">
-                            ${escapeHtml(
-                                getDisplayStatus(task)
-                            )}
-                        </span>
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            task.remarks ||
-                            "No remarks"
-                        )}
-                    </td>
-
-                    <td>
-
-                        <button
-                            class="table-action"
-                            onclick="openTaskModal('${task.id}')"
-                        >
-                            ✎
-                        </button>
-
-                    </td>
-
-                `;
-
-
-                tableBody.appendChild(
-                    row
-                );
-
-            }
-        );
-
-
-    renderFollowupNumbers();
-
-}
-
-
-function renderFollowupNumbers() {
-
-    const tasks =
-        operationsData.tasks
-            .filter(
-                task =>
-                    task.followupDate
-            );
-
-
-    const today =
-        new Date();
-
-
-    today.setHours(
-        0,
-        0,
-        0,
-        0
-    );
-
-
-    const upcoming =
-        tasks.filter(
-            task => {
-
-                const date =
-                    new Date(
-                        task.followupDate
-                    );
-
-                date.setHours(
-                    0,
-                    0,
-                    0,
-                    0
-                );
-
-                return (
-                    date >= today &&
-                    task.status !==
-                        "Completed"
-                );
-
-            }
-        ).length;
-
-
-    const overdue =
-        tasks.filter(
-            task => {
-
-                const date =
-                    new Date(
-                        task.followupDate
-                    );
-
-                date.setHours(
-                    0,
-                    0,
-                    0,
-                    0
-                );
-
-                return (
-                    date < today &&
-                    task.status !==
-                        "Completed"
-                );
-
-            }
-        ).length;
-
-
-    setText(
-        "totalFollowups",
-        tasks.length
-    );
-
-    setText(
-        "upcomingFollowups",
-        upcoming
-    );
-
-    setText(
-        "overdueFollowups",
-        overdue
-    );
-
-}
-
-
-/* =========================================================
-   DEPARTMENTS
-========================================================= */
-
-function renderDepartments() {
-
-    const container =
-        getElement(
-            "departmentsGrid"
-        );
-
-
-    if (!container) {
-
-        return;
-
-    }
-
-
-    container.innerHTML = "";
-
-
-    APP_CONFIG.DEPARTMENTS
-        .forEach(function (department) {
-
-            const tasks =
-                operationsData.tasks.filter(
-                    task =>
-                        task.department ===
-                        department.id
-                );
-
-
-            const pending =
-                tasks.filter(
-                    task =>
-                        task.status !==
-                        "Completed"
-                ).length;
-
-
-            const card =
-                document.createElement(
-                    "div"
-                );
-
-
-            card.className =
-                "department-card";
-
-
-            card.innerHTML = `
-
-                <div class="department-card-top">
-
-                    <div class="department-card-code">
-                        ${escapeHtml(
-                            department.code
-                        )}
-                    </div>
-
-                    <div class="department-card-count">
-                        ${tasks.length}
-                    </div>
-
-                </div>
-
-                <h3>
-                    ${escapeHtml(
-                        department.name
-                    )}
-                </h3>
-
-                <p>
-                    ${escapeHtml(
-                        department.description
-                    )}
-                </p>
-
-                <div style="
-                    margin-top:12px;
-                    color:#6b7280;
-                    font-size:9px;
-                ">
-                    ${pending} pending
-                </div>
-
+                </tr>
             `;
 
-
-            card.addEventListener(
-                "click",
-                function () {
-
-                    filterByDepartment(
-                        department.id
-                    );
-
-                }
-            );
-
-
-            container.appendChild(
-                card
-            );
-
-        });
-
-}
-
-
-function filterByDepartment(
-    departmentId
-) {
-
-    const departmentFilter =
-        query(
-            '[data-filter="department"]'
-        );
-
-
-    if (departmentFilter) {
-
-        departmentFilter.value =
-            departmentId;
-
-    }
-
-
-    navigateTo(
-        "tasksPage"
-    );
+        }).join("");
 
 }
 
@@ -2466,179 +2145,133 @@ function filterByDepartment(
    REPORTS
 ========================================================= */
 
-function renderReports() {
+function refreshReports() {
 
-    const total =
-        operationsData.tasks.length;
-
-
-    const completed =
-        operationsData.tasks.filter(
-            task =>
-                task.status ===
-                "Completed"
-        ).length;
-
-
-    const completionRate =
-        total === 0
-            ? 0
-            : Math.round(
-                completed /
-                total *
-                100
-            );
-
-
-    const overdue =
-        operationsData.tasks.filter(
-            task =>
-                isOverdue(task)
-        ).length;
-
-
-    const blocked =
-        operationsData.tasks.filter(
-            task =>
-                task.status ===
-                "Blocked"
-        ).length;
-
-
-    setText(
-        "completionRate",
-        `${completionRate}%`
-    );
-
-    setText(
-        "reportTotalTasks",
-        total
-    );
-
-    setText(
-        "reportOverdue",
-        overdue
-    );
-
-    setText(
-        "reportBlocked",
-        blocked
-    );
-
-
-    renderDepartmentReport();
-
-}
-
-
-function renderDepartmentReport() {
-
-    const container =
-        getElement(
-            "departmentReport"
+    const table =
+        document.getElementById(
+            "analysisTable"
         );
 
-
-    if (!container) {
-
-        return;
-
-    }
+    if (!table) return;
 
 
-    container.innerHTML = "";
+    table.innerHTML =
+        DEPARTMENTS.map(function (department) {
 
+            const departmentTasks =
+                tasks.filter(function (task) {
 
-    APP_CONFIG.DEPARTMENTS
-        .forEach(function (department) {
-
-            const tasks =
-                operationsData.tasks.filter(
-                    task =>
+                    return (
                         task.department ===
-                        department.id
-                );
+                        department.name
+                    );
+
+                });
 
 
-            const completed =
-                tasks.filter(
-                    task =>
-                        task.status ===
-                        "Completed"
+            const total =
+                departmentTasks.length;
+
+            const open =
+                departmentTasks.filter(
+                    function (task) {
+
+                        return (
+                            getEffectiveStatus(task) ===
+                            "Open"
+                        );
+
+                    }
                 ).length;
 
+            const progress =
+                departmentTasks.filter(
+                    function (task) {
 
-            const overdue =
-                tasks.filter(
-                    task =>
-                        isOverdue(task)
+                        return (
+                            getEffectiveStatus(task) ===
+                            "In Progress"
+                        );
+
+                    }
                 ).length;
-
 
             const blocked =
-                tasks.filter(
-                    task =>
-                        task.status ===
-                        "Blocked"
+                departmentTasks.filter(
+                    function (task) {
+
+                        return (
+                            getEffectiveStatus(task) ===
+                            "Blocked"
+                        );
+
+                    }
+                ).length;
+
+            const overdue =
+                departmentTasks.filter(
+                    function (task) {
+
+                        return (
+                            getEffectiveStatus(task) ===
+                            "Overdue"
+                        );
+
+                    }
+                ).length;
+
+            const completed =
+                departmentTasks.filter(
+                    function (task) {
+
+                        return (
+                            task.status ===
+                            "Completed"
+                        );
+
+                    }
                 ).length;
 
 
-            const rate =
-                tasks.length
-                    ? Math.round(
-                        completed /
-                        tasks.length *
-                        100
-                    )
-                    : 0;
+            const completion =
+                total ?
+                Math.round(
+                    completed /
+                    total *
+                    100
+                ) :
+                0;
 
 
-            const row =
-                document.createElement(
-                    "tr"
-                );
+            return `
+                <tr>
 
-
-            row.innerHTML = `
-
-                <td>
-                    <strong>
-                        ${escapeHtml(
+                    <td>
+                        ${escapeHTML(
                             department.name
                         )}
-                    </strong>
-                </td>
+                    </td>
 
-                <td>
-                    ${tasks.length}
-                </td>
+                    <td>${total}</td>
 
-                <td>
-                    ${completed}
-                </td>
+                    <td>${open}</td>
 
-                <td>
-                    ${blocked}
-                </td>
+                    <td>${progress}</td>
 
-                <td>
-                    ${overdue}
-                </td>
+                    <td>${blocked}</td>
 
-                <td>
-                    <strong>
-                        ${rate}%
-                    </strong>
-                </td>
+                    <td>${overdue}</td>
 
+                    <td>${completed}</td>
+
+                    <td>
+                        ${completion}%
+                    </td>
+
+                </tr>
             `;
 
-
-            container.appendChild(
-                row
-            );
-
-        });
+        }).join("");
 
 }
 
@@ -2648,70 +2281,55 @@ function renderDepartmentReport() {
 ========================================================= */
 
 function addActivity(
-    action,
-    description
+    title,
+    description,
+    department
 ) {
 
-    operationsData.activities.unshift({
+    activities.unshift({
 
         id:
-            generateId("ACT"),
+            "ACT-" +
+            Date.now(),
 
-        action,
+        title:
+            title,
 
-        description,
+        description:
+            description,
+
+        department:
+            department,
 
         timestamp:
             new Date().toISOString()
 
     });
 
+    activities =
+        activities.slice(0, 200);
 
-    // Keep the activity log manageable.
-    if (
-        operationsData.activities.length >
-        500
-    ) {
-
-        operationsData.activities =
-            operationsData.activities.slice(
-                0,
-                500
-            );
-
-    }
+    saveActivity();
 
 }
 
 
-function renderActivity() {
+function refreshActivity() {
 
     const container =
-        getElement(
+        document.getElementById(
             "activityTimeline"
         );
 
-
-    if (!container) {
-
-        return;
-
-    }
+    if (!container) return;
 
 
-    container.innerHTML = "";
-
-
-    if (
-        !operationsData.activities.length
-    ) {
+    if (!activities.length) {
 
         container.innerHTML = `
-
             <div class="empty-state">
                 No activity recorded yet.
             </div>
-
         `;
 
         return;
@@ -2719,283 +2337,662 @@ function renderActivity() {
     }
 
 
-    operationsData.activities
-        .slice(0, 30)
-        .forEach(
-            function (activity) {
+    container.innerHTML =
+        activities.map(function (activity) {
 
-                const item =
-                    document.createElement(
-                        "div"
-                    );
+            return `
+                <div class="activity-item">
 
-
-                item.className =
-                    "activity-item";
-
-
-                item.innerHTML = `
-
-                    <div class="activity-dot"></div>
+                    <div class="activity-dot">
+                    </div>
 
                     <div class="activity-content">
 
                         <strong>
-                            ${escapeHtml(
-                                activity.action
+                            ${escapeHTML(
+                                activity.title
                             )}
                         </strong>
 
                         <p>
-                            ${escapeHtml(
+                            ${escapeHTML(
                                 activity.description
                             )}
                         </p>
 
-                        <div class="activity-time">
-                            ${formatDateTime(
-                                activity.timestamp
-                            )}
-                        </div>
+                        <small>
+
+                            ${
+                                escapeHTML(
+                                    activity.department ||
+                                    ""
+                                )
+                            }
+
+                            ·
+
+                            ${
+                                formatDateTime(
+                                    activity.timestamp
+                                )
+                            }
+
+                        </small>
 
                     </div>
 
-                `;
+                </div>
+            `;
+
+        }).join("");
+
+}
 
 
-                container.appendChild(
-                    item
+/* =========================================================
+   MENU
+========================================================= */
+
+function setupMenu() {
+
+    const button =
+        document.getElementById(
+            "menuToggle"
+        );
+
+    if (!button) return;
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            const sidebar =
+                document.querySelector(
+                    ".sidebar"
+                );
+
+            if (sidebar) {
+
+                sidebar.classList.toggle(
+                    "mobile-open"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   REPORT BUTTONS
+========================================================= */
+
+function setupReports() {
+
+    const exportTasks =
+        document.getElementById(
+            "exportTasksButton"
+        );
+
+    const exportExcel =
+        document.getElementById(
+            "exportExcelButton"
+        );
+
+    const exportAll =
+        document.getElementById(
+            "exportAllButton"
+        );
+
+    if (exportTasks) {
+
+        exportTasks.addEventListener(
+            "click",
+            function () {
+
+                exportCSV(
+                    tasks,
+                    "UsedBookR_Tasks.csv"
                 );
 
             }
         );
 
-}
+    }
 
+    if (exportExcel) {
 
-/* =========================================================
-   SETTINGS
-========================================================= */
+        exportExcel.addEventListener(
+            "click",
+            function () {
 
-function renderSettings() {
+                exportCSV(
+                    tasks,
+                    "UsedBookR_Operations.csv"
+                );
 
-    setText(
-        "settingsTaskCount",
-        operationsData.tasks.length
-    );
-
-    setText(
-        "settingsFollowupCount",
-        operationsData.tasks.filter(
-            task =>
-                task.followupDate
-        ).length
-    );
-
-    setText(
-        "settingsDepartmentCount",
-        APP_CONFIG.DEPARTMENTS.length
-    );
-
-    setText(
-        "settingsLastUpdated",
-        formatDateTime(
-            operationsData.settings.lastUpdated
-        )
-    );
-
-}
-
-
-/* =========================================================
-   EXPORT DATA
-========================================================= */
-
-function exportData() {
-
-    const data =
-        JSON.stringify(
-            operationsData,
-            null,
-            2
+            }
         );
 
+    }
 
-    const blob =
-        new Blob(
-            [data],
-            {
-                type:
-                    "application/json"
+    if (exportAll) {
+
+        exportAll.addEventListener(
+            "click",
+            function () {
+
+                exportAllData();
+
+            }
+        );
+
+    }
+
+
+    const departmentReport =
+        document.getElementById(
+            "departmentReportButton"
+        );
+
+    if (departmentReport) {
+
+        departmentReport.addEventListener(
+            "click",
+            function () {
+
+                exportDepartmentReport();
+
+            }
+        );
+
+    }
+
+
+    const performance =
+        document.getElementById(
+            "performanceReportButton"
+        );
+
+    if (performance) {
+
+        performance.addEventListener(
+            "click",
+            function () {
+
+                exportPerformanceReport();
+
+            }
+        );
+
+    }
+
+
+    const importButton =
+        document.getElementById(
+            "importExcelButton"
+        );
+
+    if (importButton) {
+
+        importButton.addEventListener(
+            "click",
+            function () {
+
+                notify(
+                    "Import",
+                    "Excel import will be connected in the next stage."
+                );
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CSV EXPORT
+========================================================= */
+
+function exportCSV(data, filename) {
+
+    if (!data.length) {
+
+        notify(
+            "Nothing to Export",
+            "There is currently no data."
+        );
+
+        return;
+
+    }
+
+
+    const headers = Object.keys(
+        data[0]
+    );
+
+
+    const rows =
+        data.map(function (item) {
+
+            return headers.map(
+                function (header) {
+
+                    const value =
+                        item[header] ?? "";
+
+                    return '"' +
+                        String(value)
+                            .replace(
+                                /"/g,
+                                '""'
+                            ) +
+                        '"';
+
+                }
+            ).join(",");
+
+        });
+
+
+    const csv =
+        [
+            headers.join(","),
+            ...rows
+
+        ].join("\n");
+
+
+    downloadFile(
+        csv,
+        filename,
+        "text/csv"
+    );
+
+
+    notify(
+        "Export Complete",
+        filename +
+        " has been downloaded."
+    );
+
+}
+
+
+/* =========================================================
+   DEPARTMENT REPORT
+========================================================= */
+
+function exportDepartmentReport() {
+
+    const report =
+        DEPARTMENTS.map(
+            function (department) {
+
+                const list =
+                    tasks.filter(
+                        function (task) {
+
+                            return (
+                                task.department ===
+                                department.name
+                            );
+
+                        }
+                    );
+
+                const completed =
+                    list.filter(
+                        function (task) {
+
+                            return (
+                                task.status ===
+                                "Completed"
+                            );
+
+                        }
+                    ).length;
+
+                return {
+
+                    Department:
+                        department.name,
+
+                    Total:
+                        list.length,
+
+                    Open:
+                        list.filter(
+                            t =>
+                                getEffectiveStatus(t) ===
+                                "Open"
+                        ).length,
+
+                    InProgress:
+                        list.filter(
+                            t =>
+                                getEffectiveStatus(t) ===
+                                "In Progress"
+                        ).length,
+
+                    Blocked:
+                        list.filter(
+                            t =>
+                                getEffectiveStatus(t) ===
+                                "Blocked"
+                        ).length,
+
+                    Overdue:
+                        list.filter(
+                            t =>
+                                getEffectiveStatus(t) ===
+                                "Overdue"
+                        ).length,
+
+                    Completed:
+                        completed,
+
+                    CompletionPercent:
+                        list.length ?
+                        Math.round(
+                            completed /
+                            list.length *
+                            100
+                        ) :
+                        0
+
+                };
+
             }
         );
 
 
-    const url =
-        URL.createObjectURL(
-            blob
+    exportCSV(
+        report,
+        "UsedBookR_Department_Report.csv"
+    );
+
+}
+
+
+/* =========================================================
+   PERFORMANCE REPORT
+========================================================= */
+
+function exportPerformanceReport() {
+
+    const report =
+        tasks.map(function (task) {
+
+            return {
+
+                TaskID:
+                    task.id,
+
+                Task:
+                    task.name,
+
+                Department:
+                    task.department,
+
+                AssignedTo:
+                    task.assignedTo,
+
+                Priority:
+                    task.priority,
+
+                OriginalStatus:
+                    task.status,
+
+                EffectiveStatus:
+                    getEffectiveStatus(task),
+
+                CreatedDate:
+                    task.createdDate,
+
+                DueDate:
+                    task.dueDate,
+
+                FollowupDate:
+                    task.followupDate,
+
+                FollowupAction:
+                    task.followupAction,
+
+                Remarks:
+                    task.remarks
+
+            };
+
+        });
+
+
+    exportCSV(
+        report,
+        "UsedBookR_Performance_Report.csv"
+    );
+
+}
+
+
+/* =========================================================
+   EXPORT ALL DATA
+========================================================= */
+
+function exportAllData() {
+
+    const data = {
+
+        exportedAt:
+            new Date().toISOString(),
+
+        departments:
+            DEPARTMENTS,
+
+        tasks:
+            tasks,
+
+        activities:
+            activities
+
+    };
+
+
+    downloadFile(
+        JSON.stringify(
+            data,
+            null,
+            2
+        ),
+        "UsedBookR_Operations_Backup.json",
+        "application/json"
+    );
+
+
+    notify(
+        "Backup Created",
+        "All operational data has been exported."
+    );
+
+}
+
+
+/* =========================================================
+   DOWNLOAD HELPER
+========================================================= */
+
+function downloadFile(
+    content,
+    filename,
+    type
+) {
+
+    const blob =
+        new Blob(
+            [content],
+            {
+                type: type
+            }
         );
 
+    const url =
+        URL.createObjectURL(blob);
 
     const link =
-        document.createElement(
-            "a"
-        );
-
+        document.createElement("a");
 
     link.href =
         url;
 
     link.download =
-        `usedbookr-operations-backup-${formatFileDate()}.json`;
-
+        filename;
 
     document.body.appendChild(
         link
     );
 
-
     link.click();
 
-    link.remove();
-
+    document.body.removeChild(
+        link
+    );
 
     URL.revokeObjectURL(
         url
     );
 
-
-    showNotification(
-        "Backup exported",
-        "Your operations data has been downloaded."
-    );
-
 }
 
 
 /* =========================================================
-   IMPORT DATA
+   LOCAL STORAGE
 ========================================================= */
 
-function importData(file) {
+function loadData() {
 
-    if (!file) {
+    try {
 
-        return;
+        const savedTasks =
+            localStorage.getItem(
+                APP_CONFIG.STORAGE_KEY
+            );
 
-    }
-
-
-    const reader =
-        new FileReader();
-
-
-    reader.onload =
-        function (event) {
-
-            try {
-
-                const imported =
-                    JSON.parse(
-                        event.target.result
-                    );
+        const savedActivities =
+            localStorage.getItem(
+                APP_CONFIG.ACTIVITY_KEY
+            );
 
 
-                if (
-                    !imported ||
-                    !Array.isArray(
-                        imported.tasks
-                    )
-                ) {
-
-                    throw new Error(
-                        "Invalid backup file."
-                    );
-
-                }
+        tasks =
+            savedTasks ?
+            JSON.parse(savedTasks) :
+            [];
 
 
-                operationsData =
-                    imported;
+        activities =
+            savedActivities ?
+            JSON.parse(savedActivities) :
+            [];
 
 
-                saveData();
+        if (!Array.isArray(tasks)) {
 
-                renderApplication();
-
-
-                showNotification(
-                    "Backup restored",
-                    "Operations data has been restored successfully."
-                );
-
-
-            } catch (error) {
-
-                showNotification(
-                    "Import failed",
-                    error.message
-                );
-
-            }
-
-        };
-
-
-    reader.readAsText(
-        file
-    );
-
-}
-
-
-/* =========================================================
-   CLEAR ALL DATA
-========================================================= */
-
-function clearAllData() {
-
-    const confirmed =
-        confirm(
-            "This will permanently delete all tasks, follow-ups and activity history. Continue?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    operationsData = {
-
-        tasks: [],
-
-        followups: [],
-
-        activities: [],
-
-        settings: {
-
-            lastUpdated: null,
-
-            version: "1.0"
+            tasks = [];
 
         }
 
-    };
+        if (!Array.isArray(activities)) {
+
+            activities = [];
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Data loading error:",
+            error
+        );
+
+        tasks = [];
+
+        activities = [];
+
+    }
+
+}
 
 
-    saveData();
+function saveData() {
 
-    renderApplication();
-
-
-    showNotification(
-        "Data cleared",
-        "The operations tracker is now empty."
+    localStorage.setItem(
+        APP_CONFIG.STORAGE_KEY,
+        JSON.stringify(tasks)
     );
+
+}
+
+
+function saveActivity() {
+
+    localStorage.setItem(
+        APP_CONFIG.ACTIVITY_KEY,
+        JSON.stringify(activities)
+    );
+
+}
+
+
+/* =========================================================
+   DATA SOURCE STATUS
+========================================================= */
+
+function updateDataSourceStatus() {
+
+    const element =
+        document.getElementById(
+            "dataSourceStatus"
+        );
+
+    if (!element) return;
+
+    element.textContent =
+        "Browser Local Storage";
+
+}
+
+
+/* =========================================================
+   CURRENT DATE
+========================================================= */
+
+function updateCurrentDate() {
+
+    const element =
+        document.getElementById(
+            "currentDate"
+        );
+
+    if (!element) return;
+
+    const date =
+        new Date();
+
+    element.textContent =
+        date.toLocaleDateString(
+            "en-IN",
+            {
+                weekday: "short",
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
 
 }
 
@@ -3004,51 +3001,39 @@ function clearAllData() {
    NOTIFICATION
 ========================================================= */
 
-let notificationTimer;
-
-
-function showNotification(
+function notify(
     title,
     message
 ) {
 
     const notification =
-        query(".notification");
-
-
-    if (!notification) {
-
-        return;
-
-    }
-
+        document.getElementById(
+            "notification"
+        );
 
     const titleElement =
-        notification.querySelector(
-            "strong"
+        document.getElementById(
+            "notificationTitle"
         );
-
 
     const messageElement =
-        notification.querySelector(
-            "span"
+        document.getElementById(
+            "notificationMessage"
         );
 
 
-    if (titleElement) {
+    if (
+        !notification ||
+        !titleElement ||
+        !messageElement
+    ) return;
 
-        titleElement.textContent =
-            title;
 
-    }
+    titleElement.textContent =
+        title;
 
-
-    if (messageElement) {
-
-        messageElement.textContent =
-            message;
-
-    }
+    messageElement.textContent =
+        message;
 
 
     notification.classList.add(
@@ -3056,93 +3041,133 @@ function showNotification(
     );
 
 
-    clearTimeout(
-        notificationTimer
+    setTimeout(
+        function () {
+
+            notification.classList.remove(
+                "show"
+            );
+
+        },
+        3000
     );
 
+}
 
-    notificationTimer =
-        setTimeout(
-            function () {
 
-                notification.classList.remove(
-                    "show"
-                );
+/* =========================================================
+   UTILITY FUNCTIONS
+========================================================= */
 
-            },
-            3500
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+function getValue(id) {
+
+    const element =
+        document.getElementById(id);
+
+    return element ?
+        element.value :
+        "";
+
+}
+
+
+function escapeHTML(value) {
+
+    if (value === null ||
+        value === undefined) {
+
+        return "";
+
+    }
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
         );
 
 }
 
 
 /* =========================================================
-   DATE FUNCTIONS
+   STATUS BADGES
 ========================================================= */
 
-function formatDate(dateString) {
+function statusBadge(status) {
 
-    if (!dateString) {
+    const safeStatus =
+        escapeHTML(status);
 
-        return "—";
-
-    }
-
-
-    const date =
-        new Date(
-            dateString
-        );
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return "—";
-
-    }
+    const className =
+        String(status)
+            .toLowerCase()
+            .replace(
+                /\s+/g,
+                "-"
+            );
 
 
-    return date.toLocaleDateString(
-        "en-IN",
-        {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        }
-    );
+    return `
+        <span class="status-badge ${className}">
+            ${safeStatus}
+        </span>
+    `;
 
 }
 
 
-function formatDateTime(dateString) {
+/* =========================================================
+   DATE / TIME
+========================================================= */
 
-    if (!dateString) {
+function formatDateTime(
+    timestamp
+) {
 
-        return "—";
-
-    }
-
+    if (!timestamp) return "—";
 
     const date =
-        new Date(
-            dateString
-        );
+        new Date(timestamp);
 
+    if (isNaN(date.getTime())) {
 
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return "—";
+        return timestamp;
 
     }
-
 
     return date.toLocaleString(
         "en-IN",
@@ -3158,381 +3183,43 @@ function formatDateTime(dateString) {
 }
 
 
-function formatFileDate() {
+/* =========================================================
+   CLOSE MODAL WHEN CLICKING OUTSIDE
+========================================================= */
 
-    const date =
-        new Date();
+document.addEventListener(
+    "click",
+    function (event) {
 
-
-    return date
-        .toISOString()
-        .slice(
-            0,
-            10
-        );
-
-}
-
-
-function updateCurrentDate() {
-
-    const element =
-        getElement(
-            "currentDate"
-        );
-
-
-    if (element) {
-
-        element.textContent =
-            new Date().toLocaleDateString(
-                "en-IN",
-                {
-                    weekday: "short",
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric"
-                }
+        const modal =
+            document.getElementById(
+                "taskModal"
             );
 
-    }
+        if (!modal) return;
 
-}
+        if (
+            event.target === modal
+        ) {
 
-
-/* =========================================================
-   GENERAL HELPERS
-========================================================= */
-
-function setText(
-    id,
-    value
-) {
-
-    const element =
-        getElement(id);
-
-
-    if (element) {
-
-        element.textContent =
-            value;
-
-    }
-
-}
-
-
-function shorten(
-    text,
-    length
-) {
-
-    if (!text) {
-
-        return "";
-
-    }
-
-
-    if (
-        text.length <= length
-    ) {
-
-        return text;
-
-    }
-
-
-    return text.substring(
-        0,
-        length
-    ) + "...";
-
-}
-
-
-function escapeHtml(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-
-    }
-
-
-    return String(value)
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-/* =========================================================
-   DEMO DATA
-========================================================= */
-
-/*
-   This function is intentionally NOT called automatically.
-
-   If you want to test the dashboard with sample tasks,
-   open the browser console and run:
-
-       createDemoData();
-
-   Then refresh the page.
-*/
-
-function createDemoData() {
-
-    operationsData.tasks = [
-
-        {
-
-            id: generateId("TASK"),
-
-            taskNumber: "OPS-00001",
-
-            title:
-                "Prepare B2B school quotation",
-
-            department:
-                "b2b-sales",
-
-            departmentName:
-                "B2B / Sales",
-
-            assignedTo:
-                "Sales Head",
-
-            priority:
-                "High",
-
-            status:
-                "In Progress",
-
-            dueDate:
-                getDateOffset(2),
-
-            description:
-                "Prepare quotation for school bulk reading requirement.",
-
-            followupDate:
-                getDateOffset(3),
-
-            remarks:
-                "Waiting for final quantity confirmation.",
-
-            createdAt:
-                new Date().toISOString(),
-
-            updatedAt:
-                new Date().toISOString()
-
-        },
-
-        {
-
-            id: generateId("TASK"),
-
-            taskNumber: "OPS-00002",
-
-            title:
-                "Verify warehouse stock",
-
-            department:
-                "warehouse",
-
-            departmentName:
-                "Warehouse",
-
-            assignedTo:
-                "Warehouse Head",
-
-            priority:
-                "Medium",
-
-            status:
-                "Open",
-
-            dueDate:
-                getDateOffset(5),
-
-            description:
-                "Verify physical stock against inventory records.",
-
-            followupDate:
-                getDateOffset(5),
-
-            remarks:
-                "",
-
-            createdAt:
-                new Date().toISOString(),
-
-            updatedAt:
-                new Date().toISOString()
-
-        },
-
-        {
-
-            id: generateId("TASK"),
-
-            taskNumber: "OPS-00003",
-
-            title:
-                "Resolve website listing issue",
-
-            department:
-                "listing-inventory",
-
-            departmentName:
-                "Listing / Inventory",
-
-            assignedTo:
-                "Listing Team",
-
-            priority:
-                "High",
-
-            status:
-                "Blocked",
-
-            dueDate:
-                getDateOffset(-2),
-
-            description:
-                "Investigate books not appearing correctly on the website.",
-
-            followupDate:
-                getDateOffset(1),
-
-            remarks:
-                "Requires IT assistance.",
-
-            createdAt:
-                new Date().toISOString(),
-
-            updatedAt:
-                new Date().toISOString()
+            closeTaskModal();
 
         }
 
-    ];
-
-
-    operationsData.activities = [
-
-        {
-
-            id:
-                generateId("ACT"),
-
-            action:
-                "Demo data created",
-
-            description:
-                "Sample operational tasks were added for testing.",
-
-            timestamp:
-                new Date().toISOString()
-
-        }
-
-    ];
-
-
-    saveData();
-
-    renderApplication();
-
-    showNotification(
-        "Demo data created",
-        "Sample tasks have been added."
-    );
-
-}
-
-
-function getDateOffset(days) {
-
-    const date =
-        new Date();
-
-
-    date.setDate(
-        date.getDate() + days
-    );
-
-
-    return date
-        .toISOString()
-        .split("T")[0];
-
-}
+    }
+);
 
 
 /* =========================================================
    GLOBAL FUNCTIONS
+   Required for inline table buttons
 ========================================================= */
 
-/*
-   These functions are deliberately attached to window
-   because table buttons use onclick="..." in generated HTML.
-*/
-
-window.openTaskModal =
-    openTaskModal;
-
-window.closeTaskModal =
-    closeTaskModal;
+window.editTask =
+    editTask;
 
 window.deleteTask =
     deleteTask;
 
-window.logout =
-    logout;
-
-window.exportData =
-    exportData;
-
-window.importData =
-    importData;
-
-window.clearAllData =
-    clearAllData;
-
-window.createDemoData =
-    createDemoData;
-
-
-/* =========================================================
-   END OF SCRIPT
-========================================================= */
+window.openDepartment =
+    openDepartment;
