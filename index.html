@@ -1024,13 +1024,25 @@
                     </div>
 
 
-                    <button
-                        id="tasksAddButton"
-                        class="primary-button"
-                        type="button"
-                    >
-                        + Add New Task
-                    </button>
+                    <div class="page-actions">
+
+                        <button
+                            id="exportTasksButton"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            Export CSV
+                        </button>
+
+                        <button
+                            id="tasksAddButton"
+                            class="primary-button"
+                            type="button"
+                        >
+                            + Add New Task
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -1649,6 +1661,9 @@
 <div
     id="taskModal"
     class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="taskModalTitle"
     style="display:none;"
 >
 
@@ -1922,6 +1937,7 @@
                 <button
                     type="submit"
                     class="primary-button"
+                    id="saveTaskButton"
                 >
                     Save Task
                 </button>
