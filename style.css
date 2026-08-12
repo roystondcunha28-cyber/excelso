@@ -560,13 +560,6 @@ body {
     margin-bottom: 25px;
 }
 
-.page-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
 .page-label,
 .modal-label {
     display: block;
@@ -610,7 +603,6 @@ body {
     font-weight: 700;
 
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s, opacity 0.2s, transform 0.05s;
 }
 
 .primary-button,
@@ -633,18 +625,6 @@ body {
 
 .secondary-button:hover {
     background: #e5e7eb;
-}
-
-.primary-button:disabled,
-.secondary-button:disabled,
-.top-add-button:disabled,
-.login-button:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-}
-
-button:active:not(:disabled) {
-    transform: translateY(1px);
 }
 
 /* =========================================================
@@ -1328,7 +1308,6 @@ tbody tr:hover {
     max-height: 90vh;
 
     overflow-y: auto;
-    overscroll-behavior: contain;
 
     background: white;
 
@@ -1366,11 +1345,6 @@ tbody tr:hover {
     font-size: 22px;
 
     cursor: pointer;
-    transition: background 0.2s, transform 0.05s;
-}
-
-.modal-close:hover {
-    background: #e5e7eb;
 }
 
 #taskForm {
@@ -1547,18 +1521,6 @@ tbody tr:hover {
         flex-direction: column;
     }
 
-    .page-actions {
-        width: 100%;
-    }
-
-    .topbar-left h1 {
-        font-size: 17px;
-    }
-
-    .topbar-right .top-add-button {
-        padding: 9px 11px;
-    }
-
     .kpi-grid {
         grid-template-columns:
             repeat(2, 1fr);
@@ -1590,26 +1552,5 @@ tbody tr:hover {
 
     .login-card {
         padding: 28px 22px;
-    }
-
-    .modal-overlay {
-        padding: 10px;
-        align-items: flex-end;
-    }
-
-    .modal {
-        max-height: 94vh;
-        border-radius: 14px 14px 0 0;
-    }
-
-    .modal-header,
-    #taskForm {
-        padding: 18px;
-    }
-
-    .notification {
-        right: 12px;
-        bottom: 12px;
-        width: calc(100% - 24px);
     }
 }
