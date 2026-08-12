@@ -12,25 +12,36 @@ const API_URL =
     "https://script.google.com/macros/s/AKfycbyrOAQZ--7aDiAHv0ey60C8-xXuTKDAhOVDQjUOc-uiGdgNnpuJ97nL4m-ABkw0Znf3ig/exec";
 
 
-const LOGIN_PASSWORD =
-    "admin123";
-
-
 const DEPARTMENTS = [
+
     "B2B - Sales",
+
     "Customer Support",
+
     "Warehouse",
+
     "Scanning - Catalog",
+
     "Listing - Inventory",
+
     "Digital Marketing",
+
     "IT - Software Development",
+
     "Finance",
+
     "Book Fair - Events",
+
     "Books and Supply Procurement",
+
     "HR",
+
     "Data Analysis",
+
     "Software Testing",
+
     "Product Development"
+
 ];
 
 
@@ -41,11 +52,16 @@ let currentDepartment = "";
 let currentPage =
     "dashboard";
 
-
 let editingTaskId =
     "";
 
 
+/* =========================================================
+   AUTHENTICATION SESSION
+========================================================= */
+
+let currentUser =
+    null;
 /* =========================================================
    INITIALIZATION
 ========================================================= */
