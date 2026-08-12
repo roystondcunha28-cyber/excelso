@@ -95,7 +95,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   LOGIN
+   LOGIN / AUTHENTICATION
 ========================================================= */
 
 function initializeLogin() {
@@ -105,15 +105,21 @@ function initializeLogin() {
             "loginForm"
         );
 
-
     if (!form) return;
 
 
     form.addEventListener(
         "submit",
-        function (event) {
+        async function (event) {
 
             event.preventDefault();
+
+
+            const username =
+                document.getElementById(
+                    "loginUsername"
+                )?.value
+                ?.trim() || "";
 
 
             const password =
@@ -128,27 +134,143 @@ function initializeLogin() {
                 );
 
 
-            if (
-                password ===
-                LOGIN_PASSWORD
-            ) {
+            if (error) {
 
-                localStorage.setItem(
+                error.classList.remove(
+                    "show"
+                );
+
+                error.textContent = "";
+
+            }
+
+
+            if (!username || !password) {
+
+                if (error) {
+
+                    error.textContent =
+                        "Please enter your username and password.";
+
+                    error.classList.add(
+                        "show"
+                    );
+
+                }
+
+                return;
+
+            }
+
+
+            try {
+
+                const result =
+                    await apiRequest(
+                        "login",
+                        {
+                            username:
+                                username,
+
+                            password:
+                                password
+                        }
+                    );
+
+
+                console.log(
+                    "LOGIN RESPONSE:",
+                    result
+                );
+
+
+                if (
+                    !result ||
+                    !result.success ||
+                    !result.user
+                ) {
+
+                    if (error) {
+
+                        error.textContent =
+                            result?.message ||
+                            "Invalid username or password.";
+
+                        error.classList.add(
+                            "show"
+                        );
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * Store authenticated user
+                 */
+
+                currentUser =
+                    result.user;
+
+
+                sessionStorage.setItem(
+                    "usedbookrCurrentUser",
+                    JSON.stringify(
+                        currentUser
+                    )
+                );
+
+
+                /*
+                 * Keep the existing
+                 * login state
+                 */
+
+                sessionStorage.setItem(
                     "usedbookrOperationsLogin",
                     "true"
                 );
 
 
+                /*
+                 * Hide login screen
+                 */
+
                 hideLogin();
 
 
-                loadTasks();
+                /*
+                 * Load tasks after
+                 * successful authentication
+                 */
+
+                await loadTasks();
+
+
+                /*
+                 * Apply permissions /
+                 * department visibility
+                 */
+
+                applyUserAccess();
+
 
             }
 
-            else {
+            catch (err) {
+
+                console.error(
+                    "LOGIN ERROR:",
+                    err
+                );
+
 
                 if (error) {
+
+                    error.textContent =
+                        "Unable to connect to the authentication server.";
 
                     error.classList.add(
                         "show"
@@ -164,21 +286,58 @@ function initializeLogin() {
 }
 
 
+/* =========================================================
+   CHECK LOGIN
+========================================================= */
+
 function checkLogin() {
 
     const loggedIn =
-        localStorage.getItem(
+        sessionStorage.getItem(
             "usedbookrOperationsLogin"
         );
 
 
+    const savedUser =
+        sessionStorage.getItem(
+            "usedbookrCurrentUser"
+        );
+
+
     if (
-        loggedIn === "true"
+        loggedIn === "true" &&
+        savedUser
     ) {
 
-        hideLogin();
+        try {
 
-        loadTasks();
+            currentUser =
+                JSON.parse(
+                    savedUser
+                );
+
+
+            hideLogin();
+
+
+            loadTasks();
+
+
+            applyUserAccess();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "SESSION RESTORE ERROR:",
+                error
+            );
+
+
+            logoutUser();
+
+        }
 
     }
 
@@ -190,6 +349,10 @@ function checkLogin() {
 
 }
 
+
+/* =========================================================
+   HIDE LOGIN
+========================================================= */
 
 function hideLogin() {
 
@@ -205,17 +368,27 @@ function hideLogin() {
         );
 
 
-    if (login)
+    if (login) {
+
         login.style.display =
             "none";
 
+    }
 
-    if (app)
+
+    if (app) {
+
         app.style.display =
             "flex";
 
+    }
+
 }
 
+
+/* =========================================================
+   SHOW LOGIN
+========================================================= */
 
 function showLogin() {
 
@@ -231,14 +404,20 @@ function showLogin() {
         );
 
 
-    if (login)
+    if (login) {
+
         login.style.display =
             "flex";
 
+    }
 
-    if (app)
+
+    if (app) {
+
         app.style.display =
             "none";
+
+    }
 
 }
 
@@ -262,15 +441,91 @@ function initializeLogout() {
         "click",
         function () {
 
-            localStorage.removeItem(
-                "usedbookrOperationsLogin"
-            );
-
-
-            location.reload();
+            logoutUser();
 
         }
     );
+
+}
+
+
+/* =========================================================
+   LOGOUT USER
+========================================================= */
+
+function logoutUser() {
+
+    currentUser =
+        null;
+
+
+    sessionStorage.removeItem(
+        "usedbookrOperationsLogin"
+    );
+
+
+    sessionStorage.removeItem(
+        "usedbookrCurrentUser"
+    );
+
+
+    showLogin();
+
+
+    /*
+     * Clear login fields
+     */
+
+    const username =
+        document.getElementById(
+            "loginUsername"
+        );
+
+
+    const password =
+        document.getElementById(
+            "loginPassword"
+        );
+
+
+    if (username) {
+
+        username.value = "";
+
+    }
+
+
+    if (password) {
+
+        password.value = "";
+
+    }
+
+}
+
+
+/* =========================================================
+   USER ACCESS
+========================================================= */
+
+function applyUserAccess() {
+
+    if (!currentUser) return;
+
+
+    console.log(
+        "AUTHENTICATED USER:",
+        currentUser
+    );
+
+
+    /*
+     * Department access will be
+     * applied in the next step.
+     *
+     * For now we only establish
+     * the authenticated user.
+     */
 
 }
 
