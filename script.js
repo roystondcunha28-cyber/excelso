@@ -420,7 +420,145 @@ function showLogin() {
     }
 
 }
+/* =========================================================
+   UPDATE LOGGED-IN USER PROFILE
+========================================================= */
 
+function updateLoggedInUserProfile() {
+
+    if (!currentUser) {
+
+        console.warn(
+            "No current user available for profile display."
+        );
+
+        return;
+
+    }
+
+
+    const avatar =
+        document.getElementById(
+            "loggedUserAvatar"
+        );
+
+
+    const nameElement =
+        document.getElementById(
+            "loggedUserName"
+        );
+
+
+    const roleElement =
+        document.getElementById(
+            "loggedUserRole"
+        );
+
+
+    const name =
+        String(
+            currentUser.name || ""
+        ).trim();
+
+
+    const role =
+        String(
+            currentUser.role || ""
+        ).trim();
+
+
+    const username =
+        String(
+            currentUser.username || ""
+        ).trim();
+
+
+    /*
+     * Display name
+     */
+
+    if (nameElement) {
+
+        nameElement.textContent =
+            name || username || "User";
+
+    }
+
+
+    /*
+     * Display role
+     */
+
+    if (roleElement) {
+
+        roleElement.textContent =
+            role || "User";
+
+    }
+
+
+    /*
+     * Create initials for avatar
+     *
+     * Example:
+     * Mr.Tarun → MT
+     * Royston → R
+     * Sundara → S
+     * Bhuvana → B
+     */
+
+    let initials = "";
+
+
+    if (name) {
+
+        const words =
+            name
+                .replace(/\./g, " ")
+                .split(/\s+/)
+                .filter(
+                    function(word) {
+                        return word.length > 0;
+                    }
+                );
+
+
+        if (words.length >= 2) {
+
+            initials =
+                words[0].charAt(0) +
+                words[words.length - 1].charAt(0);
+
+        }
+
+        else {
+
+            initials =
+                words[0]
+                    .substring(0, 2);
+
+        }
+
+    }
+
+
+    if (!initials) {
+
+        initials =
+            username
+                .substring(0, 2);
+
+    }
+
+
+    if (avatar) {
+
+        avatar.textContent =
+            initials.toUpperCase();
+
+    }
+
+}
 
 /* =========================================================
    LOGOUT
