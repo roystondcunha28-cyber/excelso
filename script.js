@@ -957,107 +957,14 @@ async function apiRequest(
 
 }
 
-
-/* =========================================================
-   LOAD TASKS
-========================================================= */
-
-async function loadTasks() {
-
-    showNotification(
-        "Loading",
-        "Loading operations data..."
-    );
-
-
-    const result =
-        await apiRequest(
-            "getTasks"
-        );
-
-
-    if (
-        !result ||
-        !result.success
-    ) {
-
-        showNotification(
-            "Error",
-            result?.message ||
-            "Unable to load tasks."
-        );
-
-
-        tasks = [];
-
-
-        updateAllViews();
-
-
-        return;
-
-    }
-
-
-    /*
-     * Normalize all tasks received
-     * from Google Sheets.
-     */
-
-    const allTasks =
-        normalizeTasks(
-            result.tasks || []
-        );
-
-
-    /*
-     * Apply user access control.
-     */
-
-    tasks =
-        filterTasksForCurrentUser(
-            allTasks
-        );
-
-
-    updateAllViews();
-
-
-    const source =
-        document.getElementById(
-            "dataSourceStatus"
-        );
-
-
-    if (source) {
-
-        source.textContent =
-            "Google Sheets";
-
-    }
-
-
-    showNotification(
-        "Updated",
-        tasks.length +
-        " task(s) available to you."
-    );
-
-}
-
-
 /* =========================================================
    FILTER TASKS FOR CURRENT USER
 ========================================================= */
 
-function filterTasksForCurrentUser(
-    allTasks
-) {
+function filterTasksForCurrentUser(allTasks) {
 
     /*
-     * Safety:
-     * If no authenticated user exists,
-     * return no tasks.
+     * No authenticated user = no task access.
      */
 
     if (!currentUser) {
@@ -1079,10 +986,28 @@ function filterTasksForCurrentUser(
         .toLowerCase();
 
 
+    const username =
+        String(
+            currentUser.username || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const name =
+        String(
+            currentUser.name || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
     /*
-     * Founder
-     * --------
-     * Full access.
+     * =====================================================
+     * FOUNDER
+     * =====================================================
+     *
+     * Founder has complete access.
      */
 
     if (
@@ -1095,14 +1020,15 @@ function filterTasksForCurrentUser(
 
 
     /*
-     * Operations Head
-     * ---------------
-     * Full operational access.
+     * =====================================================
+     * OPERATIONS HEAD
+     * =====================================================
+     *
+     * Operations Head has complete access.
      */
 
     if (
-        role ===
-        "operations head"
+        role === "operations head"
     ) {
 
         return allTasks;
@@ -1111,161 +1037,93 @@ function filterTasksForCurrentUser(
 
 
     /*
-     * Department Head
-     * ----------------
-     * Can see:
+     * =====================================================
+     * ALL OTHER USERS
+     * =====================================================
      *
-     * 1. Primary department
-     * 2. Coordination departments
-     * 3. Tasks personally assigned to them
+     * Access is based on:
+     *
+     * 1. Primary Department
+     * 2. Coordination Departments
+     * 3. Tasks personally assigned to the user
+     *
+     * The exact Role name does NOT matter here.
+     *
+     * This supports:
+     *
+     * Software Tester
+     * Digital Marketing Head
+     * Warehouse Lead
+     * Warehouse Manager
+     * B2B - Sales Head
+     * and other roles.
      */
 
-    if (
-        role ===
-        "department head"
-    ) {
-
-        const allowedDepartments =
-            getAllowedDepartments();
+    const allowedDepartments =
+        getAllowedDepartments();
 
 
-        const username =
-            String(
-                currentUser.username || ""
-            )
-            .trim()
-            .toLowerCase();
+    return allTasks.filter(
+        function(task) {
+
+            const department =
+                String(
+                    task.department || ""
+                )
+                .trim();
 
 
-        const name =
-            String(
-                currentUser.name || ""
-            )
-            .trim()
-            .toLowerCase();
+            const assignedTo =
+                String(
+                    task.assignedTo || ""
+                )
+                .trim()
+                .toLowerCase();
 
 
-        return allTasks.filter(
-            function(task) {
+            /*
+             * ---------------------------------------------
+             * DEPARTMENT ACCESS
+             * ---------------------------------------------
+             */
 
-                const department =
-                    String(
-                        task.department || ""
-                    )
-                    .trim();
+            if (
+                allowedDepartments.includes(
+                    department
+                )
+            ) {
 
-
-                const assignedTo =
-                    String(
-                        task.assignedTo || ""
-                    )
-                    .trim()
-                    .toLowerCase();
-
-
-                /*
-                 * Department access
-                 */
-
-                if (
-                    allowedDepartments.includes(
-                        department
-                    )
-                ) {
-
-                    return true;
-
-                }
-
-
-                /*
-                 * Personal task ownership
-                 */
-
-                if (
-                    assignedTo === username ||
-                    assignedTo === name
-                ) {
-
-                    return true;
-
-                }
-
-
-                return false;
+                return true;
 
             }
-        );
-
-    }
 
 
-    /*
-     * Task Owner
-     * ----------
-     * Can see tasks assigned
-     * directly to them.
-     */
+            /*
+             * ---------------------------------------------
+             * PERSONAL TASK ACCESS
+             * ---------------------------------------------
+             *
+             * A user can see a task assigned directly
+             * to them even if the task belongs to
+             * another department.
+             */
 
-    if (
-        role ===
-        "task owner"
-    ) {
+            if (
+                assignedTo === username ||
+                assignedTo === name
+            ) {
 
-        const username =
-            String(
-                currentUser.username || ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        const name =
-            String(
-                currentUser.name || ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        return allTasks.filter(
-            function(task) {
-
-                const assignedTo =
-                    String(
-                        task.assignedTo || ""
-                    )
-                    .trim()
-                    .toLowerCase();
-
-
-                return (
-                    assignedTo === username ||
-                    assignedTo === name
-                );
+                return true;
 
             }
-        );
-
-    }
 
 
-    /*
-     * Unknown role:
-     * deny access rather than
-     * accidentally exposing tasks.
-     */
+            return false;
 
-    console.warn(
-        "Unknown user role:",
-        currentUser.role
+        }
     );
 
-
-    return [];
-
 }
-
 
 /* =========================================================
    GET ALLOWED DEPARTMENTS
