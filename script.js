@@ -656,7 +656,7 @@ function applyUserAccess() {
         currentUser
     );
 
-
+updateLoggedInUserProfile();
     /*
      * Department access will be
      * applied in the next step.
