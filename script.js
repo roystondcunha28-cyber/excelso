@@ -1022,8 +1022,6 @@ function updateDashboard() {
 
     updateFollowupSummary();
 
-    renderDepartmentPerformance();
-
     renderRecentTasks();
 
 }
