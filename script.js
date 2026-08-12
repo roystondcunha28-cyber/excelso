@@ -999,9 +999,24 @@ async function loadTasks() {
     }
 
 
-    tasks =
+    /*
+     * Normalize all tasks received
+     * from Google Sheets.
+     */
+
+    const allTasks =
         normalizeTasks(
             result.tasks || []
+        );
+
+
+    /*
+     * Apply user access control.
+     */
+
+    tasks =
+        filterTasksForCurrentUser(
+            allTasks
         );
 
 
@@ -1025,11 +1040,337 @@ async function loadTasks() {
     showNotification(
         "Updated",
         tasks.length +
-        " task(s) loaded from Google Sheets."
+        " task(s) available to you."
     );
 
 }
 
+
+/* =========================================================
+   FILTER TASKS FOR CURRENT USER
+========================================================= */
+
+function filterTasksForCurrentUser(
+    allTasks
+) {
+
+    /*
+     * Safety:
+     * If no authenticated user exists,
+     * return no tasks.
+     */
+
+    if (!currentUser) {
+
+        console.warn(
+            "No authenticated user found."
+        );
+
+        return [];
+
+    }
+
+
+    const role =
+        String(
+            currentUser.role || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+     * Founder
+     * --------
+     * Full access.
+     */
+
+    if (
+        role === "founder"
+    ) {
+
+        return allTasks;
+
+    }
+
+
+    /*
+     * Operations Head
+     * ---------------
+     * Full operational access.
+     */
+
+    if (
+        role ===
+        "operations head"
+    ) {
+
+        return allTasks;
+
+    }
+
+
+    /*
+     * Department Head
+     * ----------------
+     * Can see:
+     *
+     * 1. Primary department
+     * 2. Coordination departments
+     * 3. Tasks personally assigned to them
+     */
+
+    if (
+        role ===
+        "department head"
+    ) {
+
+        const allowedDepartments =
+            getAllowedDepartments();
+
+
+        const username =
+            String(
+                currentUser.username || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const name =
+            String(
+                currentUser.name || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        return allTasks.filter(
+            function(task) {
+
+                const department =
+                    String(
+                        task.department || ""
+                    )
+                    .trim();
+
+
+                const assignedTo =
+                    String(
+                        task.assignedTo || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                /*
+                 * Department access
+                 */
+
+                if (
+                    allowedDepartments.includes(
+                        department
+                    )
+                ) {
+
+                    return true;
+
+                }
+
+
+                /*
+                 * Personal task ownership
+                 */
+
+                if (
+                    assignedTo === username ||
+                    assignedTo === name
+                ) {
+
+                    return true;
+
+                }
+
+
+                return false;
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Task Owner
+     * ----------
+     * Can see tasks assigned
+     * directly to them.
+     */
+
+    if (
+        role ===
+        "task owner"
+    ) {
+
+        const username =
+            String(
+                currentUser.username || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const name =
+            String(
+                currentUser.name || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        return allTasks.filter(
+            function(task) {
+
+                const assignedTo =
+                    String(
+                        task.assignedTo || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                return (
+                    assignedTo === username ||
+                    assignedTo === name
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Unknown role:
+     * deny access rather than
+     * accidentally exposing tasks.
+     */
+
+    console.warn(
+        "Unknown user role:",
+        currentUser.role
+    );
+
+
+    return [];
+
+}
+
+
+/* =========================================================
+   GET ALLOWED DEPARTMENTS
+========================================================= */
+
+function getAllowedDepartments() {
+
+    if (!currentUser) {
+
+        return [];
+
+    }
+
+
+    const departments = [];
+
+
+    /*
+     * Primary department
+     */
+
+    const primary =
+        String(
+            currentUser.primaryDepartment || ""
+        )
+        .trim();
+
+
+    if (
+        primary &&
+        primary.toLowerCase() !== "all"
+    ) {
+
+        departments.push(
+            primary
+        );
+
+    }
+
+
+    /*
+     * Coordination departments
+     */
+
+    const coordination =
+        String(
+            currentUser.coordinationDepartments || ""
+        )
+        .trim();
+
+
+    if (
+        coordination
+    ) {
+
+        if (
+            coordination.toLowerCase() ===
+            "all"
+        ) {
+
+            return DEPARTMENTS.slice();
+
+        }
+
+
+        coordination
+            .split(",")
+            .map(
+                function(department) {
+
+                    return department.trim();
+
+                }
+            )
+            .filter(
+                function(department) {
+
+                    return department !== "";
+
+                }
+            )
+            .forEach(
+                function(department) {
+
+                    if (
+                        !departments.includes(
+                            department
+                        )
+                    ) {
+
+                        departments.push(
+                            department
+                        );
+
+                    }
+
+                }
+            );
+
+    }
+
+
+    return departments;
+
+}
 
 /* =========================================================
    NORMALIZE API DATA
