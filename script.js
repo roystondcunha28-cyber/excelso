@@ -9101,3 +9101,5709 @@ document.addEventListener(
 
     }
 );
+/* =========================================================
+   FILTERS
+========================================================= */
+
+function initializeFilters() {
+
+    const filterIds = [
+
+        "taskSearch",
+
+        "departmentFilter",
+
+        "priorityFilter",
+
+        "statusFilter"
+
+    ];
+
+
+    filterIds.forEach(
+        function (id) {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+
+            if (!element) {
+
+                return;
+
+            }
+
+
+            /*
+             * Search field.
+             */
+
+            element.addEventListener(
+                "input",
+                function () {
+
+                    renderTasksTable();
+
+                }
+            );
+
+
+            /*
+             * Dropdown filters.
+             */
+
+            element.addEventListener(
+                "change",
+                function () {
+
+                    renderTasksTable();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   GET FILTERED TASKS
+========================================================= */
+
+function getFilteredTasks() {
+
+    const search =
+        getInput(
+            "taskSearch"
+        )
+        .toLowerCase();
+
+
+    const department =
+        getInput(
+            "departmentFilter"
+        );
+
+
+    const priority =
+        getInput(
+            "priorityFilter"
+        );
+
+
+    const status =
+        getInput(
+            "statusFilter"
+        );
+
+
+    return tasks.filter(
+        function (task) {
+
+            /*
+             * Search across the most useful
+             * task fields.
+             */
+
+            const searchableText = [
+
+                task.taskId,
+
+                task.task,
+
+                task.description,
+
+                task.assignedTo,
+
+                task.department,
+
+                task.priority,
+
+                task.status,
+
+                task.lastAction,
+
+                task.remarks
+
+            ]
+            .map(
+                function (value) {
+
+                    return String(
+                        value || ""
+                    )
+                    .toLowerCase();
+
+                }
+            )
+            .join(" ");
+
+
+            if (
+                search &&
+                !searchableText.includes(
+                    search
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            /*
+             * Department filter.
+             */
+
+            if (
+                department &&
+                normalizeDepartmentName(
+                    task.department
+                ) !==
+                normalizeDepartmentName(
+                    department
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            /*
+             * Priority filter.
+             */
+
+            if (
+                priority &&
+                normalizePriority(
+                    task.priority
+                ) !==
+                normalizePriority(
+                    priority
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            /*
+             * Overdue is a calculated filter,
+             * not an actual task status.
+             */
+
+            if (
+                status ===
+                "Overdue"
+            ) {
+
+                return isOverdue(
+                    task
+                );
+
+            }
+
+
+            /*
+             * Normal status filter.
+             */
+
+            if (
+                status &&
+                normalizeStatus(
+                    task.status
+                ) !==
+                normalizeStatus(
+                    status
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            return true;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RENDER ALL TASKS
+========================================================= */
+
+function renderTasksTable() {
+
+    const tbody =
+        document.getElementById(
+            "allTasksTable"
+        );
+
+
+    if (!tbody) {
+
+        return;
+
+    }
+
+
+    const filtered =
+        getFilteredTasks();
+
+
+    tbody.innerHTML =
+        "";
+
+
+    /*
+     * Empty result.
+     */
+
+    if (
+        !filtered.length
+    ) {
+
+        tbody.innerHTML =
+            `
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty-table">
+
+                    No matching tasks available.
+
+                </td>
+
+            </tr>
+            `;
+
+        updateTaskTableCount(
+            0
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+     * Sort newest/updated tasks first.
+     */
+
+    const sorted =
+        [...filtered].sort(
+            function (a, b) {
+
+                const dateA =
+                    parseDate(
+                        a.updatedDate ||
+                        a.createdDate
+                    );
+
+
+                const dateB =
+                    parseDate(
+                        b.updatedDate ||
+                        b.createdDate
+                    );
+
+
+                return (
+                    (dateB?.getTime() || 0) -
+                    (dateA?.getTime() || 0)
+                );
+
+            }
+        );
+
+
+    sorted.forEach(
+        function (task) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            /*
+             * Mark overdue rows.
+             */
+
+            if (
+                isOverdue(
+                    task
+                )
+            ) {
+
+                row.classList.add(
+                    "task-overdue"
+                );
+
+            }
+
+
+            row.innerHTML =
+                `
+                <td>
+
+                    ${escapeHTML(
+                        task.taskId ||
+                        "-"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    <strong>
+
+                        ${escapeHTML(
+                            task.task ||
+                            "-"
+                        )}
+
+                    </strong>
+
+                    ${
+                        task.description
+                            ? `
+                                <div class="task-description">
+
+                                    ${escapeHTML(
+                                        task.description
+                                    )}
+
+                                </div>
+                              `
+                            : ""
+                    }
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHTML(
+                        task.department ||
+                        "-"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHTML(
+                        task.assignedTo ||
+                        "-"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${priorityBadge(
+                        task.priority
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${statusBadge(
+                        task.status,
+                        task
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${displayDate(
+                        task.dueDate
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    <div class="task-actions">
+
+                        <button
+                            type="button"
+                            class="table-action edit-task-button"
+                            data-task-id="${escapeHTML(
+                                task.taskId
+                            )}">
+
+                            Edit
+
+                        </button>
+
+                    </div>
+
+                </td>
+
+                `;
+
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+    updateTaskTableCount(
+        sorted.length
+    );
+
+}
+
+
+/* =========================================================
+   TASK TABLE COUNT
+========================================================= */
+
+function updateTaskTableCount(
+    count
+) {
+
+    const elements = [
+
+        "taskTableCount",
+
+        "tasksResultCount",
+
+        "visibleTaskCount"
+
+    ];
+
+
+    elements.forEach(
+        function (id) {
+
+            setText(
+                id,
+                count
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TASK TABLE CLICK HANDLER
+========================================================= */
+
+function initializeTaskTableActions() {
+
+    const tbody =
+        document.getElementById(
+            "allTasksTable"
+        );
+
+
+    if (!tbody) {
+
+        return;
+
+    }
+
+
+    /*
+     * Event delegation means we don't
+     * need to attach an event listener
+     * to every row after every render.
+     */
+
+    tbody.addEventListener(
+        "click",
+        function (event) {
+
+            const button =
+                event.target.closest(
+                    ".edit-task-button"
+                );
+
+
+            if (!button) {
+
+                return;
+
+            }
+
+
+            const taskId =
+                button.dataset.taskId;
+
+
+            if (
+                taskId
+            ) {
+
+                editTask(
+                    taskId
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CLEAR FILTERS
+========================================================= */
+
+function clearTaskFilters() {
+
+    setInput(
+        "taskSearch",
+        ""
+    );
+
+
+    setInput(
+        "departmentFilter",
+        ""
+    );
+
+
+    setInput(
+        "priorityFilter",
+        ""
+    );
+
+
+    setInput(
+        "statusFilter",
+        ""
+    );
+
+
+    renderTasksTable();
+
+}
+
+
+/* =========================================================
+   CLEAR FILTER BUTTON
+========================================================= */
+
+function initializeClearFilters() {
+
+    const possibleIds = [
+
+        "clearFilters",
+
+        "clearTaskFilters",
+
+        "resetFilters"
+
+    ];
+
+
+    possibleIds.forEach(
+        function (id) {
+
+            const button =
+                document.getElementById(
+                    id
+                );
+
+
+            if (!button) {
+
+                return;
+
+            }
+
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    clearTaskFilters();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   EXPORT
+========================================================= */
+
+function initializeExports() {
+
+    const button =
+        document.getElementById(
+            "exportTasksButton"
+        );
+
+
+    if (!button) {
+
+        return;
+
+    }
+
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            exportTasksCSV();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   EXPORT TASKS CSV
+========================================================= */
+
+function exportTasksCSV() {
+
+    /*
+     * Export the currently visible
+     * filtered tasks rather than
+     * unexpectedly exporting hidden
+     * records.
+     */
+
+    const exportTasks =
+        getFilteredTasks();
+
+
+    if (
+        !exportTasks.length
+    ) {
+
+        showNotification(
+            "Export",
+            "There are no tasks to export."
+        );
+
+
+        return;
+
+    }
+
+
+    const headers = [
+
+        "Task ID",
+
+        "Department",
+
+        "Task",
+
+        "Description",
+
+        "Assigned To",
+
+        "Priority",
+
+        "Status",
+
+        "Created Date",
+
+        "Due Date",
+
+        "Follow-up Date",
+
+        "Last Action",
+
+        "Remarks",
+
+        "Updated By",
+
+        "Updated Date"
+
+    ];
+
+
+    const rows =
+        exportTasks.map(
+            function (task) {
+
+                return [
+
+                    task.taskId,
+
+                    task.department,
+
+                    task.task,
+
+                    task.description,
+
+                    task.assignedTo,
+
+                    task.priority,
+
+                    task.status,
+
+                    task.createdDate,
+
+                    task.dueDate,
+
+                    task.followupDate,
+
+                    task.lastAction,
+
+                    task.remarks,
+
+                    task.updatedBy,
+
+                    task.updatedDate
+
+                ];
+
+            }
+        );
+
+
+    const csv =
+        [
+            headers,
+            ...rows
+        ]
+        .map(
+            function (row) {
+
+                return row
+                    .map(
+                        csvEscape
+                    )
+                    .join(",");
+
+            }
+        )
+        .join("\n");
+
+
+    /*
+     * Add UTF-8 BOM so Excel opens
+     * Indian/local text correctly.
+     */
+
+    const blob =
+        new Blob(
+            [
+                "\uFEFF" +
+                csv
+            ],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        "UsedBookR_Operations_Tasks.csv";
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    setTimeout(
+        function () {
+
+            URL.revokeObjectURL(
+                url
+            );
+
+        },
+        100
+    );
+
+
+    showNotification(
+        "Export Complete",
+        exportTasks.length +
+        " task(s) exported successfully."
+    );
+
+}
+
+
+/* =========================================================
+   CSV ESCAPE
+========================================================= */
+
+function csvEscape(
+    value
+) {
+
+    const text =
+        String(
+            value ??
+            ""
+        );
+
+
+    /*
+     * CSV requires quotes when a
+     * field contains comma, quote,
+     * or newline.
+     */
+
+    if (
+        /[",\r\n]/.test(
+            text
+        )
+    ) {
+
+        return (
+            '"' +
+            text.replace(
+                /"/g,
+                '""'
+            ) +
+            '"'
+        );
+
+    }
+
+
+    return text;
+
+}
+
+
+/* =========================================================
+   ADD FILTER / TABLE INITIALIZATION
+========================================================= */
+
+function initializeTaskTableFeatures() {
+
+    initializeTaskTableActions();
+
+    initializeClearFilters();
+
+    initializeExports();
+
+}
+/* =========================================================
+   NORMALIZE API DATA
+========================================================= */
+
+function normalizeTasks(data) {
+
+    if (!Array.isArray(data)) {
+
+        return [];
+
+    }
+
+
+    return data.map(function (task) {
+
+        task =
+            task ||
+            {};
+
+
+        return {
+
+            taskId:
+                task.taskId ??
+                task["Task ID"] ??
+                "",
+
+
+            task:
+                task.task ??
+                task["Task"] ??
+                "",
+
+
+            description:
+                task.description ??
+                task["Description"] ??
+                "",
+
+
+            department:
+                normalizeDepartmentName(
+                    task.department ??
+                    task["Department"] ??
+                    ""
+                ),
+
+
+            assignedTo:
+                task.assignedTo ??
+                task["Assigned To"] ??
+                "",
+
+
+            priority:
+                normalizePriority(
+                    task.priority ??
+                    task["Priority"] ??
+                    "Medium"
+                ),
+
+
+            status:
+                normalizeStatus(
+                    task.status ??
+                    task["Status"] ??
+                    "Open"
+                ),
+
+
+            createdDate:
+                formatDateForInput(
+                    task.createdDate ??
+                    task["Created Date"] ??
+                    ""
+                ),
+
+
+            dueDate:
+                formatDateForInput(
+                    task.dueDate ??
+                    task["Due Date"] ??
+                    ""
+                ),
+
+
+            followupDate:
+                formatDateForInput(
+                    task.followupDate ??
+                    task["Follow-up Date"] ??
+                    ""
+                ),
+
+
+            lastAction:
+                task.lastAction ??
+                task["Last Action"] ??
+                task["Last Action / Follow-up"] ??
+                "",
+
+
+            remarks:
+                task.remarks ??
+                task["Remarks"] ??
+                "",
+
+
+            updatedBy:
+                task.updatedBy ??
+                task["Updated By"] ??
+                "",
+
+
+            updatedDate:
+                task.updatedDate ??
+                task["Updated Date"] ??
+                "",
+
+
+            createdBy:
+                task.createdBy ??
+                task["Created By"] ??
+                ""
+
+        };
+
+    });
+
+}
+
+
+/* =========================================================
+   NORMALIZE STATUS
+========================================================= */
+
+function normalizeStatus(
+    value
+) {
+
+    const text =
+        String(
+            value ||
+            ""
+        )
+        .trim();
+
+
+    if (!text) {
+
+        return "Open";
+
+    }
+
+
+    const normalized =
+        text
+            .toLowerCase()
+            .replace(
+                /[_-]+/g,
+                " "
+            )
+            .replace(
+                /\s+/g,
+                " "
+            );
+
+
+    const map = {
+
+        "open":
+            "Open",
+
+        "pending":
+            "Open",
+
+        "new":
+            "Open",
+
+        "in progress":
+            "In Progress",
+
+        "inprogress":
+            "In Progress",
+
+        "progress":
+            "In Progress",
+
+        "working":
+            "In Progress",
+
+        "completed":
+            "Completed",
+
+        "complete":
+            "Completed",
+
+        "done":
+            "Completed",
+
+        "closed":
+            "Completed",
+
+        "blocked":
+            "Blocked",
+
+        "on hold":
+            "Blocked",
+
+        "onhold":
+            "Blocked"
+
+    };
+
+
+    return (
+        map[
+            normalized
+        ] ||
+        text
+    );
+
+}
+
+
+/* =========================================================
+   NORMALIZE PRIORITY
+========================================================= */
+
+function normalizePriority(
+    value
+) {
+
+    const text =
+        String(
+            value ||
+            ""
+        )
+        .trim();
+
+
+    if (!text) {
+
+        return "Medium";
+
+    }
+
+
+    const normalized =
+        text.toLowerCase();
+
+
+    if (
+        normalized ===
+        "high"
+    ) {
+
+        return "High";
+
+    }
+
+
+    if (
+        normalized ===
+        "low"
+    ) {
+
+        return "Low";
+
+    }
+
+
+    if (
+        normalized ===
+        "medium"
+    ) {
+
+        return "Medium";
+
+    }
+
+
+    /*
+     * Preserve unknown values rather
+     * than silently changing backend data.
+     */
+
+    return text;
+
+}
+
+
+/* =========================================================
+   DATE PARSER
+========================================================= */
+
+function parseDate(
+    value
+) {
+
+    if (!value) {
+
+        return null;
+
+    }
+
+
+    if (
+        value instanceof Date
+    ) {
+
+        return isNaN(
+            value.getTime()
+        )
+            ? null
+            : new Date(
+                value.getTime()
+            );
+
+    }
+
+
+    const text =
+        String(
+            value
+        )
+        .trim();
+
+
+    if (!text) {
+
+        return null;
+
+    }
+
+
+    /*
+     * yyyy-MM-dd
+     *
+     * Parse manually to avoid timezone
+     * shifts caused by new Date("yyyy-MM-dd").
+     */
+
+    const isoDate =
+        text.match(
+            /^(\d{4})-(\d{2})-(\d{2})$/
+        );
+
+
+    if (isoDate) {
+
+        const year =
+            Number(
+                isoDate[1]
+            );
+
+
+        const month =
+            Number(
+                isoDate[2]
+            ) - 1;
+
+
+        const day =
+            Number(
+                isoDate[3]
+            );
+
+
+        const date =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+
+        if (
+            date.getFullYear() ===
+                year &&
+            date.getMonth() ===
+                month &&
+            date.getDate() ===
+                day
+        ) {
+
+            return date;
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /*
+     * dd/MM/yyyy
+     */
+
+    const indianDate =
+        text.match(
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+        );
+
+
+    if (indianDate) {
+
+        const day =
+            Number(
+                indianDate[1]
+            );
+
+
+        const month =
+            Number(
+                indianDate[2]
+            ) - 1;
+
+
+        const year =
+            Number(
+                indianDate[3]
+            );
+
+
+        const date =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+
+        if (
+            date.getFullYear() ===
+                year &&
+            date.getMonth() ===
+                month &&
+            date.getDate() ===
+                day
+        ) {
+
+            return date;
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /*
+     * ISO datetime / Google Apps Script
+     * datetime / other standard values.
+     */
+
+    const date =
+        new Date(
+            text
+        );
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    return date;
+
+}
+
+
+/* =========================================================
+   FORMAT DATE FOR INPUT
+========================================================= */
+
+function formatDateForInput(
+    value
+) {
+
+    if (!value) {
+
+        return "";
+
+    }
+
+
+    const text =
+        String(
+            value
+        )
+        .trim();
+
+
+    /*
+     * Already yyyy-MM-dd.
+     */
+
+    const direct =
+        text.match(
+            /^(\d{4})-(\d{2})-(\d{2})/
+        );
+
+
+    if (direct) {
+
+        return (
+            direct[1] +
+            "-" +
+            direct[2] +
+            "-" +
+            direct[3]
+        );
+
+    }
+
+
+    const date =
+        parseDate(
+            value
+        );
+
+
+    if (!date) {
+
+        return "";
+
+    }
+
+
+    return (
+
+        date.getFullYear() +
+
+        "-" +
+
+        String(
+            date.getMonth() + 1
+        )
+        .padStart(
+            2,
+            "0"
+        ) +
+
+        "-" +
+
+        String(
+            date.getDate()
+        )
+        .padStart(
+            2,
+            "0"
+        )
+
+    );
+
+}
+
+
+/* =========================================================
+   DISPLAY DATE
+========================================================= */
+
+function displayDate(
+    value
+) {
+
+    if (!value) {
+
+        return "-";
+
+    }
+
+
+    const date =
+        parseDate(
+            value
+        );
+
+
+    if (!date) {
+
+        return String(
+            value
+        );
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:
+                "2-digit",
+
+            month:
+                "short",
+
+            year:
+                "numeric"
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DISPLAY DATE + TIME
+========================================================= */
+
+function displayDateTime(
+    value
+) {
+
+    if (!value) {
+
+        return "-";
+
+    }
+
+
+    const date =
+        parseDate(
+            value
+        );
+
+
+    if (!date) {
+
+        return String(
+            value
+        );
+
+    }
+
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "short",
+
+            year:
+                "numeric",
+
+            hour:
+                "2-digit",
+
+            minute:
+                "2-digit"
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TODAY
+========================================================= */
+
+function todayInput() {
+
+    const today =
+        new Date();
+
+
+    return (
+
+        today.getFullYear() +
+
+        "-" +
+
+        String(
+            today.getMonth() + 1
+        )
+        .padStart(
+            2,
+            "0"
+        ) +
+
+        "-" +
+
+        String(
+            today.getDate()
+        )
+        .padStart(
+            2,
+            "0"
+        )
+
+    );
+
+}
+
+
+/* =========================================================
+   SAME DATE
+========================================================= */
+
+function sameDate(
+    first,
+    second
+) {
+
+    const a =
+        parseDate(
+            first
+        );
+
+
+    const b =
+        parseDate(
+            second
+        );
+
+
+    if (
+        !a ||
+        !b
+    ) {
+
+        return false;
+
+    }
+
+
+    return (
+
+        a.getFullYear() ===
+            b.getFullYear() &&
+
+        a.getMonth() ===
+            b.getMonth() &&
+
+        a.getDate() ===
+            b.getDate()
+
+    );
+
+}
+
+
+/* =========================================================
+   DATE BEFORE TODAY
+========================================================= */
+
+function dateBeforeToday(
+    value
+) {
+
+    const date =
+        parseDate(
+            value
+        );
+
+
+    if (!date) {
+
+        return false;
+
+    }
+
+
+    const today =
+        new Date();
+
+
+    today.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    date.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    return (
+        date <
+        today
+    );
+
+}
+
+
+/* =========================================================
+   OVERDUE
+========================================================= */
+
+function isOverdue(
+    task
+) {
+
+    if (
+        !task ||
+        !task.dueDate
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+     * Completed tasks are never overdue.
+     */
+
+    if (
+        normalizeStatus(
+            task.status
+        ) ===
+        "Completed"
+    ) {
+
+        return false;
+
+    }
+
+
+    return dateBeforeToday(
+        task.dueDate
+    );
+
+}
+
+
+/* =========================================================
+   PRIORITY BADGE
+========================================================= */
+
+function priorityBadge(
+    priority
+) {
+
+    const safePriority =
+        normalizePriority(
+            priority
+        );
+
+
+    const cssClass =
+        safePriority
+            .toLowerCase()
+            .replace(
+                /[^a-z0-9]+/g,
+                "-"
+            );
+
+
+    return `
+        <span
+            class="priority-badge priority-${escapeHTML(
+                cssClass
+            )}">
+
+            ${escapeHTML(
+                safePriority
+            )}
+
+        </span>
+    `;
+
+}
+
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+function statusBadge(
+    status,
+    task
+) {
+
+    let displayStatus =
+        normalizeStatus(
+            status
+        );
+
+
+    /*
+     * Overdue takes priority over the
+     * normal status except Completed.
+     */
+
+    if (
+        displayStatus !==
+        "Completed" &&
+        isOverdue(
+            task
+        )
+    ) {
+
+        displayStatus =
+            "Overdue";
+
+    }
+
+
+    const cssClass =
+        displayStatus
+            .toLowerCase()
+            .replace(
+                /[^a-z0-9]+/g,
+                "-"
+            );
+
+
+    return `
+        <span
+            class="status-badge status-${escapeHTML(
+                cssClass
+            )}">
+
+            ${escapeHTML(
+                displayStatus
+            )}
+
+        </span>
+    `;
+
+}
+
+
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
+
+function escapeHTML(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(
+        value
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   SET TEXT SAFELY
+========================================================= */
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    element.textContent =
+        value === null ||
+        value === undefined
+            ? ""
+            : String(
+                value
+            );
+
+}
+
+
+/* =========================================================
+   SET HTML SAFELY
+========================================================= */
+
+function setHTML(
+    id,
+    html
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    element.innerHTML =
+        html ||
+        "";
+
+}
+/* =========================================================
+   TASK FORM
+========================================================= */
+
+function initializeTaskForm() {
+
+    const form =
+        document.getElementById(
+            "taskForm"
+        );
+
+
+    if (!form) {
+
+        return;
+
+    }
+
+
+    /*
+     * Prevent duplicate submit listeners.
+     */
+
+    if (
+        form.dataset.initialized ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    form.dataset.initialized =
+        "true";
+
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            await saveTask();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   OPEN TASK MODAL
+========================================================= */
+
+function openTaskModal(
+    task = null
+) {
+
+    const modal =
+        document.getElementById(
+            "taskModal"
+        );
+
+
+    if (!modal) {
+
+        return;
+
+    }
+
+
+    /*
+     * Editing existing task.
+     */
+
+    if (task) {
+
+        editingTaskId =
+            task.taskId ||
+            "";
+
+
+        setText(
+            "taskModalTitle",
+            "Edit Task"
+        );
+
+
+        populateTaskForm(
+            task
+        );
+
+    }
+
+
+    /*
+     * Creating new task.
+     */
+
+    else {
+
+        editingTaskId =
+            "";
+
+
+        setText(
+            "taskModalTitle",
+            "Add New Task"
+        );
+
+
+        clearTaskForm();
+
+
+        /*
+         * If user opened Add Task
+         * from a department page,
+         * automatically select it.
+         */
+
+        if (
+            currentDepartment
+        ) {
+
+            setInput(
+                "taskDepartment",
+                currentDepartment
+            );
+
+        }
+
+
+        /*
+         * Default creation date.
+         */
+
+        if (
+            !getInput(
+                "taskCreatedDate"
+            )
+        ) {
+
+            setInput(
+                "taskCreatedDate",
+                todayInput()
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Display modal only after the
+     * form has been prepared.
+     */
+
+    modal.style.display =
+        "flex";
+
+
+    modal.classList.add(
+        "show"
+    );
+
+
+    /*
+     * Prevent background scrolling.
+     */
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+
+    /*
+     * Focus task field.
+     */
+
+    setTimeout(
+        function () {
+
+            const taskInput =
+                document.getElementById(
+                    "taskName"
+                );
+
+
+            if (taskInput) {
+
+                taskInput.focus();
+
+            }
+
+        },
+        50
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE TASK MODAL
+========================================================= */
+
+function closeTaskModal() {
+
+    const modal =
+        document.getElementById(
+            "taskModal"
+        );
+
+
+    if (modal) {
+
+        modal.classList.remove(
+            "show"
+        );
+
+
+        modal.style.display =
+            "none";
+
+    }
+
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+
+    editingTaskId =
+        "";
+
+}
+
+
+/* =========================================================
+   CLEAR TASK FORM
+========================================================= */
+
+function clearTaskForm() {
+
+    const form =
+        document.getElementById(
+            "taskForm"
+        );
+
+
+    if (form) {
+
+        form.reset();
+
+    }
+
+
+    editingTaskId =
+        "";
+
+
+    setInput(
+        "editTaskId",
+        ""
+    );
+
+
+    setInput(
+        "taskPriority",
+        "Medium"
+    );
+
+
+    setInput(
+        "taskStatus",
+        "Open"
+    );
+
+
+    setInput(
+        "taskCreatedDate",
+        todayInput()
+    );
+
+
+    /*
+     * Clear fields that may not be
+     * reset correctly by custom UI.
+     */
+
+    setInput(
+        "taskName",
+        ""
+    );
+
+
+    setInput(
+        "taskDescription",
+        ""
+    );
+
+
+    setInput(
+        "taskAssignedTo",
+        ""
+    );
+
+
+    setInput(
+        "taskDueDate",
+        ""
+    );
+
+
+    setInput(
+        "taskFollowupDate",
+        ""
+    );
+
+
+    setInput(
+        "taskFollowupAction",
+        ""
+    );
+
+
+    setInput(
+        "taskRemarks",
+        ""
+    );
+
+}
+
+
+/* =========================================================
+   POPULATE TASK FORM
+========================================================= */
+
+function populateTaskForm(
+    task
+) {
+
+    if (!task) {
+
+        return;
+
+    }
+
+
+    setInput(
+        "editTaskId",
+        task.taskId ||
+        ""
+    );
+
+
+    setInput(
+        "taskName",
+        task.task ||
+        ""
+    );
+
+
+    setInput(
+        "taskDescription",
+        task.description ||
+        ""
+    );
+
+
+    setInput(
+        "taskDepartment",
+        task.department ||
+        ""
+    );
+
+
+    setInput(
+        "taskAssignedTo",
+        task.assignedTo ||
+        ""
+    );
+
+
+    setInput(
+        "taskPriority",
+        normalizePriority(
+            task.priority
+        )
+    );
+
+
+    setInput(
+        "taskStatus",
+        normalizeStatus(
+            task.status
+        )
+    );
+
+
+    setInput(
+        "taskCreatedDate",
+        formatDateForInput(
+            task.createdDate
+        )
+    );
+
+
+    setInput(
+        "taskDueDate",
+        formatDateForInput(
+            task.dueDate
+        )
+    );
+
+
+    setInput(
+        "taskFollowupDate",
+        formatDateForInput(
+            task.followupDate
+        )
+    );
+
+
+    setInput(
+        "taskFollowupAction",
+        task.lastAction ||
+        ""
+    );
+
+
+    setInput(
+        "taskRemarks",
+        task.remarks ||
+        ""
+    );
+
+}
+
+
+/* =========================================================
+   COLLECT TASK FORM DATA
+========================================================= */
+
+function collectTaskFormData() {
+
+    const task = {
+
+        taskId:
+            getInput(
+                "editTaskId"
+            ) ||
+            editingTaskId ||
+            "",
+
+
+        task:
+            getInput(
+                "taskName"
+            ).trim(),
+
+
+        description:
+            getInput(
+                "taskDescription"
+            ).trim(),
+
+
+        department:
+            normalizeDepartmentName(
+                getInput(
+                    "taskDepartment"
+                )
+            ),
+
+
+        assignedTo:
+            getInput(
+                "taskAssignedTo"
+            ).trim(),
+
+
+        priority:
+            normalizePriority(
+                getInput(
+                    "taskPriority"
+                )
+            ),
+
+
+        status:
+            normalizeStatus(
+                getInput(
+                    "taskStatus"
+                )
+            ),
+
+
+        createdDate:
+            getInput(
+                "taskCreatedDate"
+            ) ||
+            todayInput(),
+
+
+        dueDate:
+            getInput(
+                "taskDueDate"
+            ),
+
+
+        followupDate:
+            getInput(
+                "taskFollowupDate"
+            ),
+
+
+        lastAction:
+            getInput(
+                "taskFollowupAction"
+            ).trim(),
+
+
+        remarks:
+            getInput(
+                "taskRemarks"
+            ).trim(),
+
+
+        updatedBy:
+            currentUser?.name ||
+            currentUser?.username ||
+            ""
+
+    };
+
+
+    return task;
+
+}
+
+
+/* =========================================================
+   VALIDATE TASK
+========================================================= */
+
+function validateTask(
+    task
+) {
+
+    if (
+        !task
+    ) {
+
+        return {
+            valid:
+                false,
+
+            message:
+                "Task information is missing."
+
+        };
+
+    }
+
+
+    if (
+        !task.task
+    ) {
+
+        return {
+            valid:
+                false,
+
+            message:
+                "Please enter a task."
+
+        };
+
+    }
+
+
+    if (
+        !task.department
+    ) {
+
+        return {
+            valid:
+                false,
+
+            message:
+                "Please select a department."
+
+        };
+
+    }
+
+
+    /*
+     * Non-admin users cannot create
+     * tasks in departments they cannot
+     * access.
+     */
+
+    if (
+        !hasFullAccess() &&
+        !canAccessDepartment(
+            task.department
+        )
+    ) {
+
+        return {
+            valid:
+                false,
+
+            message:
+                "You do not have permission to create a task for this department."
+
+        };
+
+    }
+
+
+    return {
+        valid:
+            true,
+
+        message:
+            ""
+
+    };
+
+}
+
+
+/* =========================================================
+   SAVE TASK
+========================================================= */
+
+async function saveTask() {
+
+    const form =
+        document.getElementById(
+            "taskForm"
+        );
+
+
+    if (!form) {
+
+        return;
+
+    }
+
+
+    const submitButton =
+        form.querySelector(
+            'button[type="submit"]'
+        );
+
+
+    /*
+     * Prevent double-click /
+     * double-submit.
+     */
+
+    if (
+        submitButton &&
+        submitButton.disabled
+    ) {
+
+        return;
+
+    }
+
+
+    if (submitButton) {
+
+        submitButton.disabled =
+            true;
+
+
+        submitButton.dataset.originalText =
+            submitButton.textContent;
+
+
+        submitButton.textContent =
+            "Saving...";
+
+    }
+
+
+    try {
+
+        const task =
+            collectTaskFormData();
+
+
+        const validation =
+            validateTask(
+                task
+            );
+
+
+        if (
+            !validation.valid
+        ) {
+
+            showNotification(
+                "Missing Information",
+                validation.message
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+         * Determine whether this is
+         * CREATE or UPDATE.
+         */
+
+        const isEditing =
+            Boolean(
+                task.taskId
+            );
+
+
+        const action =
+            isEditing
+                ? "updateTask"
+                : "createTask";
+
+
+        console.log(
+            "Saving task:",
+            {
+                action:
+                    action,
+
+                task:
+                    task
+            }
+        );
+
+
+        /*
+         * Apps Script expects the task
+         * object under the `task` property.
+         */
+
+        const result =
+            await apiRequest(
+                action,
+                {
+                    task:
+                        task
+                }
+            );
+
+
+        console.log(
+            "Save result:",
+            result
+        );
+
+
+        /*
+         * Backend failure.
+         */
+
+        if (
+            !result ||
+            !result.success
+        ) {
+
+            throw new Error(
+                getServerMessage(
+                    result,
+                    "Unable to save task."
+                )
+            );
+
+        }
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Do NOT immediately add the task
+         * manually to `tasks`.
+         *
+         * Instead, fetch the actual data
+         * from Apps Script again.
+         *
+         * This prevents the frontend from
+         * displaying data that wasn't really
+         * written to Google Sheets.
+         */
+
+        const refreshed =
+            await loadTasks();
+
+
+        if (!refreshed) {
+
+            /*
+             * The save succeeded, but the
+             * refresh failed.
+             */
+
+            closeTaskModal();
+
+
+            showNotification(
+                "Saved",
+                "Task was saved, but the latest task list could not be refreshed. Please refresh once."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+         * Close only after successful
+         * save + refresh.
+         */
+
+        closeTaskModal();
+
+
+        showNotification(
+            isEditing
+                ? "Task Updated"
+                : "Task Created",
+
+            isEditing
+                ? "Task updated successfully."
+                : "New task created successfully."
+        );
+
+
+        /*
+         * Make sure the tasks page is
+         * rendered using the fresh data.
+         */
+
+        renderTasksTable();
+
+
+        /*
+         * Update dashboard counters.
+         */
+
+        updateDashboard();
+
+
+        updateTaskCounts();
+
+        updateFollowupSummary();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "SAVE TASK ERROR:",
+            error
+        );
+
+
+        showNotification(
+            "Save Error",
+            error.message ||
+            "Unable to save task."
+        );
+
+    }
+
+    finally {
+
+        if (submitButton) {
+
+            submitButton.disabled =
+                false;
+
+
+            submitButton.textContent =
+                submitButton.dataset.originalText ||
+                "Save Task";
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   EDIT TASK
+========================================================= */
+
+function editTask(
+    taskId
+) {
+
+    if (
+        !taskId
+    ) {
+
+        return;
+
+    }
+
+
+    const task =
+        tasks.find(
+            function (item) {
+
+                return (
+                    String(
+                        item.taskId
+                    ) ===
+                    String(
+                        taskId
+                    )
+                );
+
+            }
+        );
+
+
+    if (!task) {
+
+        showNotification(
+            "Task Not Found",
+            "The selected task is no longer available. Refresh the task list and try again."
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+     * Check access before opening.
+     */
+
+    if (
+        !hasFullAccess() &&
+        !canAccessDepartment(
+            task.department
+        )
+    ) {
+
+        showNotification(
+            "Access Denied",
+            "You do not have permission to edit this task."
+        );
+
+
+        return;
+
+    }
+
+
+    openTaskModal(
+        task
+    );
+
+}
+
+
+/* =========================================================
+   ADD TASK BUTTONS
+========================================================= */
+
+function initializeTaskButtons() {
+
+    const addButtonIds = [
+
+        "addTaskButton",
+
+        "addTaskBtn",
+
+        "createTaskButton",
+
+        "createNewTask",
+
+        "newTaskButton"
+
+    ];
+
+
+    addButtonIds.forEach(
+        function (id) {
+
+            const button =
+                document.getElementById(
+                    id
+                );
+
+
+            if (!button) {
+
+                return;
+
+            }
+
+
+            /*
+             * Avoid duplicate listeners.
+             */
+
+            if (
+                button.dataset.taskButtonInitialized ===
+                "true"
+            ) {
+
+                return;
+
+            }
+
+
+            button.dataset.taskButtonInitialized =
+                "true";
+
+
+            button.addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    openTaskModal();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   MODAL UX
+========================================================= */
+
+function initializeTaskModalUX() {
+
+    const modal =
+        document.getElementById(
+            "taskModal"
+        );
+
+
+    if (!modal) {
+
+        return;
+
+    }
+
+
+    /*
+     * Close buttons.
+     */
+
+    modal
+        .querySelectorAll(
+            "[data-close-modal], " +
+            ".close-modal, " +
+            ".modal-close"
+        )
+        .forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function (event) {
+
+                        event.preventDefault();
+
+
+                        closeTaskModal();
+
+                    }
+                );
+
+            }
+        );
+
+
+    /*
+     * Clicking the backdrop closes
+     * the modal.
+     */
+
+    modal.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target ===
+                modal
+            ) {
+
+                closeTaskModal();
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Escape closes modal.
+     */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                if (
+                    modal.classList.contains(
+                        "show"
+                    )
+                ) {
+
+                    closeTaskModal();
+
+                }
+
+            }
+
+        }
+    );
+
+}
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function updateDashboard() {
+
+    /*
+     * Always calculate dashboard numbers
+     * from the current visible task array.
+     */
+
+    const total =
+        tasks.length;
+
+
+    const completed =
+        tasks.filter(
+            function (task) {
+
+                return (
+                    normalizeStatus(
+                        task.status
+                    ) ===
+                    "Completed"
+                );
+
+            }
+        ).length;
+
+
+    const overdue =
+        tasks.filter(
+            function (task) {
+
+                return isOverdue(
+                    task
+                );
+
+            }
+        ).length;
+
+
+    const open =
+        tasks.filter(
+            function (task) {
+
+                const status =
+                    normalizeStatus(
+                        task.status
+                    );
+
+
+                return (
+                    status !==
+                    "Completed" &&
+                    !isOverdue(
+                        task
+                    )
+                );
+
+            }
+        ).length;
+
+
+    const inProgress =
+        tasks.filter(
+            function (task) {
+
+                return (
+                    normalizeStatus(
+                        task.status
+                    ) ===
+                    "In Progress"
+                );
+
+            }
+        ).length;
+
+
+    /*
+     * Update the common dashboard
+     * counter IDs.
+     */
+
+    setMultipleText(
+        [
+            "totalTasks",
+            "totalTaskCount",
+            "dashboardTotalTasks"
+        ],
+        total
+    );
+
+
+    setMultipleText(
+        [
+            "completedTasks",
+            "completedTaskCount",
+            "dashboardCompletedTasks"
+        ],
+        completed
+    );
+
+
+    setMultipleText(
+        [
+            "overdueTasks",
+            "overdueTaskCount",
+            "dashboardOverdueTasks"
+        ],
+        overdue
+    );
+
+
+    setMultipleText(
+        [
+            "openTasks",
+            "openTaskCount",
+            "dashboardOpenTasks"
+        ],
+        open
+    );
+
+
+    setMultipleText(
+        [
+            "inProgressTasks",
+            "inProgressTaskCount",
+            "dashboardInProgressTasks"
+        ],
+        inProgress
+    );
+
+
+    /*
+     * Completion percentage.
+     */
+
+    const completionRate =
+        total > 0
+            ? Math.round(
+                (
+                    completed /
+                    total
+                ) * 100
+            )
+            : 0;
+
+
+    setMultipleText(
+        [
+            "completionRate",
+            "taskCompletionRate",
+            "dashboardCompletionRate"
+        ],
+        completionRate + "%"
+    );
+
+
+    /*
+     * Update progress bars if they
+     * exist in the HTML.
+     */
+
+    document
+        .querySelectorAll(
+            "[data-completion-progress]"
+        )
+        .forEach(
+            function (element) {
+
+                element.style.width =
+                    completionRate +
+                    "%";
+
+            }
+        );
+
+
+    /*
+     * Render department overview.
+     */
+
+    renderDepartmentOverview();
+
+
+    /*
+     * Render recent tasks.
+     */
+
+    renderRecentTasks();
+
+
+    /*
+     * Render today's follow-ups.
+     */
+
+    renderTodayFollowups();
+
+}
+
+
+/* =========================================================
+   SET MULTIPLE TEXT ELEMENTS
+========================================================= */
+
+function setMultipleText(
+    ids,
+    value
+) {
+
+    if (
+        !Array.isArray(
+            ids
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    ids.forEach(
+        function (id) {
+
+            setText(
+                id,
+                value
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE TASK COUNTS
+========================================================= */
+
+function updateTaskCounts() {
+
+    const total =
+        tasks.length;
+
+
+    const completed =
+        tasks.filter(
+            function (task) {
+
+                return (
+                    normalizeStatus(
+                        task.status
+                    ) ===
+                    "Completed"
+                );
+
+            }
+        ).length;
+
+
+    const overdue =
+        tasks.filter(
+            function (task) {
+
+                return isOverdue(
+                    task
+                );
+
+            }
+        ).length;
+
+
+    const pending =
+        total -
+        completed;
+
+
+    setMultipleText(
+        [
+            "totalTasks",
+            "totalTaskCount"
+        ],
+        total
+    );
+
+
+    setMultipleText(
+        [
+            "completedTasks",
+            "completedTaskCount"
+        ],
+        completed
+    );
+
+
+    setMultipleText(
+        [
+            "pendingTasks",
+            "pendingTaskCount"
+        ],
+        pending
+    );
+
+
+    setMultipleText(
+        [
+            "overdueTasks",
+            "overdueTaskCount"
+        ],
+        overdue
+    );
+
+}
+
+
+/* =========================================================
+   DEPARTMENT STATISTICS
+========================================================= */
+
+function getDepartmentStats(
+    department
+) {
+
+    const normalized =
+        normalizeDepartmentName(
+            department
+        );
+
+
+    const departmentTasks =
+        tasks.filter(
+            function (task) {
+
+                return (
+                    normalizeDepartmentName(
+                        task.department
+                    ) ===
+                    normalized
+                );
+
+            }
+        );
+
+
+    const total =
+        departmentTasks.length;
+
+
+    const completed =
+        departmentTasks.filter(
+            function (task) {
+
+                return (
+                    normalizeStatus(
+                        task.status
+                    ) ===
+                    "Completed"
+                );
+
+            }
+        ).length;
+
+
+    const overdue =
+        departmentTasks.filter(
+            function (task) {
+
+                return isOverdue(
+                    task
+                );
+
+            }
+        ).length;
+
+
+    const inProgress =
+        departmentTasks.filter(
+            function (task) {
+
+                return (
+                    normalizeStatus(
+                        task.status
+                    ) ===
+                    "In Progress"
+                );
+
+            }
+        ).length;
+
+
+    const open =
+        departmentTasks.filter(
+            function (task) {
+
+                const status =
+                    normalizeStatus(
+                        task.status
+                    );
+
+
+                return (
+                    status ===
+                    "Open"
+                );
+
+            }
+        ).length;
+
+
+    return {
+
+        department:
+            normalized,
+
+        total:
+            total,
+
+        completed:
+            completed,
+
+        overdue:
+            overdue,
+
+        inProgress:
+            inProgress,
+
+        open:
+            open
+
+    };
+
+}
+
+
+/* =========================================================
+   ALL DEPARTMENT STATISTICS
+========================================================= */
+
+function getAllDepartmentStats() {
+
+    return DEPARTMENTS.map(
+        function (department) {
+
+            return getDepartmentStats(
+                department
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DEPARTMENT OVERVIEW
+========================================================= */
+
+function renderDepartmentOverview() {
+
+    const container =
+        document.getElementById(
+            "departmentOverview"
+        );
+
+
+    /*
+     * If the section has been removed
+     * from your HTML, simply do nothing.
+     *
+     * This is intentional because you
+     * previously wanted this section
+     * removed from the dashboard.
+     */
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    /*
+     * If the section is explicitly
+     * disabled, don't render it.
+     */
+
+    if (
+        container.dataset.disabled ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    const stats =
+        getAllDepartmentStats();
+
+
+    container.innerHTML =
+        "";
+
+
+    stats.forEach(
+        function (item) {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "department-overview-card";
+
+
+            const completion =
+                item.total > 0
+                    ? Math.round(
+                        (
+                            item.completed /
+                            item.total
+                        ) * 100
+                    )
+                    : 0;
+
+
+            card.innerHTML =
+                `
+                <div class="department-card-header">
+
+                    <div>
+
+                        <h3>
+                            ${escapeHTML(
+                                item.department
+                            )}
+                        </h3>
+
+                        <span class="department-code">
+
+                            ${escapeHTML(
+                                getDepartmentCode(
+                                    item.department
+                                )
+                            )}
+
+                        </span>
+
+                    </div>
+
+                    <strong>
+
+                        ${item.total}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="department-card-stats">
+
+                    <span>
+                        Open: ${item.open}
+                    </span>
+
+                    <span>
+                        In Progress: ${item.inProgress}
+                    </span>
+
+                    <span>
+                        Completed: ${item.completed}
+                    </span>
+
+                    <span>
+                        Overdue: ${item.overdue}
+                    </span>
+
+                </div>
+
+
+                <div class="department-progress">
+
+                    <div
+                        class="department-progress-bar"
+                        style="width:${completion}%">
+
+                    </div>
+
+                </div>
+
+
+                <div class="department-progress-label">
+
+                    ${completion}% completed
+
+                </div>
+                `;
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DEPARTMENT CARDS PAGE
+========================================================= */
+
+function renderDepartmentCards() {
+
+    const container =
+        document.getElementById(
+            "departmentsContainer"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    const allowed =
+        hasFullAccess()
+            ? DEPARTMENTS
+            : getAllowedDepartments();
+
+
+    container.innerHTML =
+        "";
+
+
+    allowed.forEach(
+        function (department) {
+
+            const stats =
+                getDepartmentStats(
+                    department
+                );
+
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "department-card";
+
+
+            card.innerHTML =
+                `
+                <div class="department-card-header">
+
+                    <div>
+
+                        <h3>
+                            ${escapeHTML(
+                                stats.department
+                            )}
+                        </h3>
+
+                        <small>
+
+                            ${escapeHTML(
+                                getDepartmentCode(
+                                    stats.department
+                                )
+                            )}
+
+                        </small>
+
+                    </div>
+
+                    <span class="department-total">
+
+                        ${stats.total}
+
+                    </span>
+
+                </div>
+
+
+                <div class="department-stat-row">
+
+                    <span>Open</span>
+
+                    <strong>
+                        ${stats.open}
+                    </strong>
+
+                </div>
+
+
+                <div class="department-stat-row">
+
+                    <span>In Progress</span>
+
+                    <strong>
+                        ${stats.inProgress}
+                    </strong>
+
+                </div>
+
+
+                <div class="department-stat-row">
+
+                    <span>Completed</span>
+
+                    <strong>
+                        ${stats.completed}
+                    </strong>
+
+                </div>
+
+
+                <div class="department-stat-row">
+
+                    <span>Overdue</span>
+
+                    <strong>
+                        ${stats.overdue}
+                    </strong>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="department-view-button"
+                    data-department="${escapeHTML(
+                        stats.department
+                    )}">
+
+                    View Tasks
+
+                </button>
+                `;
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+
+
+    /*
+     * Event delegation.
+     */
+
+    container
+        .querySelectorAll(
+            ".department-view-button"
+        )
+        .forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        const department =
+                            button.dataset.department;
+
+
+                        openDepartment(
+                            department
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   OPEN DEPARTMENT
+========================================================= */
+
+function openDepartment(
+    department
+) {
+
+    const normalized =
+        normalizeDepartmentName(
+            department
+        );
+
+
+    if (
+        !normalized
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !hasFullAccess() &&
+        !canAccessDepartment(
+            normalized
+        )
+    ) {
+
+        showNotification(
+            "Access Denied",
+            "You do not have access to this department."
+        );
+
+
+        return;
+
+    }
+
+
+    currentDepartment =
+        normalized;
+
+
+    /*
+     * Apply department filter.
+     */
+
+    setInput(
+        "departmentFilter",
+        normalized
+    );
+
+
+    /*
+     * Open task page.
+     */
+
+    showPage(
+        "tasks"
+    );
+
+
+    renderTasksTable();
+
+}
+
+
+/* =========================================================
+   RECENT TASKS
+========================================================= */
+
+function renderRecentTasks() {
+
+    const container =
+        document.getElementById(
+            "recentTasks"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    const recent =
+        [...tasks]
+        .sort(
+            function (a, b) {
+
+                const aDate =
+                    parseDate(
+                        a.updatedDate ||
+                        a.createdDate
+                    );
+
+
+                const bDate =
+                    parseDate(
+                        b.updatedDate ||
+                        b.createdDate
+                    );
+
+
+                return (
+                    (bDate?.getTime() || 0) -
+                    (aDate?.getTime() || 0)
+                );
+
+            }
+        )
+        .slice(
+            0,
+            5
+        );
+
+
+    container.innerHTML =
+        "";
+
+
+    if (
+        !recent.length
+    ) {
+
+        container.innerHTML =
+            `
+            <div class="empty-state">
+
+                No recent tasks.
+
+            </div>
+            `;
+
+
+        return;
+
+    }
+
+
+    recent.forEach(
+        function (task) {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "recent-task-item";
+
+
+            item.innerHTML =
+                `
+                <div class="recent-task-main">
+
+                    <strong>
+
+                        ${escapeHTML(
+                            task.task ||
+                            "-"
+                        )}
+
+                    </strong>
+
+                    <span>
+
+                        ${escapeHTML(
+                            task.department ||
+                            "-"
+                        )}
+
+                    </span>
+
+                </div>
+
+
+                <div class="recent-task-meta">
+
+                    ${statusBadge(
+                        task.status,
+                        task
+                    )}
+
+                    <small>
+
+                        ${displayDate(
+                            task.updatedDate ||
+                            task.createdDate
+                        )}
+
+                    </small>
+
+                </div>
+                `;
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TODAY'S FOLLOW-UPS
+========================================================= */
+
+function renderTodayFollowups() {
+
+    const container =
+        document.getElementById(
+            "todayFollowups"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    const today =
+        new Date();
+
+
+    const followups =
+        tasks.filter(
+            function (task) {
+
+                return (
+                    task.followupDate &&
+                    sameDate(
+                        task.followupDate,
+                        today
+                    ) &&
+                    normalizeStatus(
+                        task.status
+                    ) !==
+                    "Completed"
+                );
+
+            }
+        );
+
+
+    container.innerHTML =
+        "";
+
+
+    if (
+        !followups.length
+    ) {
+
+        container.innerHTML =
+            `
+            <div class="empty-state">
+
+                No follow-ups scheduled for today.
+
+            </div>
+            `;
+
+
+        return;
+
+    }
+
+
+    followups.forEach(
+        function (task) {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "followup-item";
+
+
+            item.innerHTML =
+                `
+                <div>
+
+                    <strong>
+
+                        ${escapeHTML(
+                            task.task ||
+                            "-"
+                        )}
+
+                    </strong>
+
+                    <small>
+
+                        ${escapeHTML(
+                            task.assignedTo ||
+                            "Unassigned"
+                        )}
+
+                    </small>
+
+                </div>
+
+
+                <span>
+
+                    ${escapeHTML(
+                        task.lastAction ||
+                        "Follow-up due"
+                    )}
+
+                </span>
+                `;
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE ALL VIEWS
+========================================================= */
+
+function updateAllViews() {
+
+    /*
+     * Main task table.
+     */
+
+    renderTasksTable();
+
+
+    /*
+     * Dashboard.
+     */
+
+    updateDashboard();
+
+
+    /*
+     * Counters.
+     */
+
+    updateTaskCounts();
+
+
+    /*
+     * Follow-up summary.
+     */
+
+    updateFollowupSummary();
+
+
+    /*
+     * Department cards.
+     */
+
+    renderDepartmentCards();
+
+}
+/* =========================================================
+   FOLLOW-UP SYSTEM
+========================================================= */
+
+function updateFollowupSummary() {
+
+    const today =
+        new Date();
+
+    today.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    /*
+     * Follow-ups scheduled for today.
+     */
+
+    const todayCount =
+        tasks.filter(
+            function (task) {
+
+                return (
+                    task.followupDate &&
+                    sameDate(
+                        task.followupDate,
+                        today
+                    )
+                );
+
+            }
+        ).length;
+
+
+    /*
+     * Follow-ups before today.
+     */
+
+    const overdue =
+        tasks.filter(
+            function (task) {
+
+                if (
+                    !task.followupDate
+                ) {
+
+                    return false;
+
+                }
+
+
+                /*
+                 * Completed tasks do not need
+                 * follow-up attention.
+                 */
+
+                if (
+                    normalizeStatus(
+                        task.status
+                    ) ===
+                    "Completed"
+                ) {
+
+                    return false;
+
+                }
+
+
+                return dateBeforeToday(
+                    task.followupDate
+                );
+
+            }
+        ).length;
+
+
+    /*
+     * Future follow-ups.
+     */
+
+    const upcoming =
+        tasks.filter(
+            function (task) {
+
+                if (
+                    !task.followupDate
+                ) {
+
+                    return false;
+
+                }
+
+
+                const date =
+                    parseDate(
+                        task.followupDate
+                    );
+
+
+                if (!date) {
+
+                    return false;
+
+                }
+
+
+                date.setHours(
+                    0,
+                    0,
+                    0,
+                    0
+                );
+
+
+                return (
+                    date >
+                    today
+                );
+
+            }
+        ).length;
+
+
+    /*
+     * Dashboard counters.
+     */
+
+    setMultipleText(
+        [
+            "followupsToday",
+            "followupPageToday"
+        ],
+        todayCount
+    );
+
+
+    setMultipleText(
+        [
+            "followupsOverdue",
+            "followupPageOverdue"
+        ],
+        overdue
+    );
+
+
+    setMultipleText(
+        [
+            "followupsUpcoming",
+            "followupPageUpcoming"
+        ],
+        upcoming
+    );
+
+}
+
+
+/* =========================================================
+   RENDER FOLLOW-UP TABLE
+========================================================= */
+
+function renderFollowups() {
+
+    const tbody =
+        document.getElementById(
+            "followupsTable"
+        );
+
+
+    if (!tbody) {
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        "";
+
+
+    const followups =
+        tasks
+            .filter(
+                function (task) {
+
+                    return (
+                        task.followupDate
+                    );
+
+                }
+            )
+            .sort(
+                function (a, b) {
+
+                    const dateA =
+                        parseDate(
+                            a.followupDate
+                        );
+
+
+                    const dateB =
+                        parseDate(
+                            b.followupDate
+                        );
+
+
+                    return (
+                        (dateA?.getTime() || 0) -
+                        (dateB?.getTime() || 0)
+                    );
+
+                }
+            );
+
+
+    if (
+        !followups.length
+    ) {
+
+        tbody.innerHTML =
+            `
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="empty-table">
+
+                    No follow-ups available.
+
+                </td>
+
+            </tr>
+            `;
+
+
+        return;
+
+    }
+
+
+    followups.forEach(
+        function (task) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            /*
+             * Determine follow-up state.
+             */
+
+            const followupDate =
+                parseDate(
+                    task.followupDate
+                );
+
+
+            const completed =
+                normalizeStatus(
+                    task.status
+                ) ===
+                "Completed";
+
+
+            let followupClass =
+                "";
+
+
+            let followupLabel =
+                "Upcoming";
+
+
+            if (
+                completed
+            ) {
+
+                followupClass =
+                    "followup-completed";
+
+
+                followupLabel =
+                    "Completed";
+
+            }
+
+            else if (
+                sameDate(
+                    task.followupDate,
+                    new Date()
+                )
+            ) {
+
+                followupClass =
+                    "followup-today";
+
+
+                followupLabel =
+                    "Today";
+
+            }
+
+            else if (
+                followupDate &&
+                dateBeforeToday(
+                    task.followupDate
+                )
+            ) {
+
+                followupClass =
+                    "followup-overdue";
+
+
+                followupLabel =
+                    "Overdue";
+
+            }
+
+
+            row.className =
+                followupClass;
+
+
+            row.innerHTML =
+                `
+                <td>
+
+                    ${escapeHTML(
+                        task.taskId ||
+                        "-"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    <strong>
+
+                        ${escapeHTML(
+                            task.task ||
+                            "-"
+                        )}
+
+                    </strong>
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHTML(
+                        task.department ||
+                        "-"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHTML(
+                        task.assignedTo ||
+                        "Unassigned"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${displayDate(
+                        task.followupDate
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="followup-status ${followupClass}">
+
+                        ${followupLabel}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <button
+                        type="button"
+                        class="table-action edit-followup-task"
+                        data-task-id="${escapeHTML(
+                            task.taskId
+                        )}">
+
+                        View
+
+                    </button>
+
+                </td>
+
+                `;
+
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+    /*
+     * Event delegation.
+     */
+
+    tbody
+        .querySelectorAll(
+            ".edit-followup-task"
+        )
+        .forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        editTask(
+                            button.dataset.taskId
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   FOLLOW-UP PAGE INITIALIZATION
+========================================================= */
+
+function initializeFollowups() {
+
+    /*
+     * Render immediately if the
+     * follow-up table exists.
+     */
+
+    renderFollowups();
+
+
+    updateFollowupSummary();
+
+}
+
+
+/* =========================================================
+   FOLLOW-UP REFRESH
+========================================================= */
+
+function refreshFollowups() {
+
+    updateFollowupSummary();
+
+    renderFollowups();
+
+}
+
+
+/* =========================================================
+   NOTIFICATION
+========================================================= */
+
+function showNotification(
+    title,
+    message
+) {
+
+    const notification =
+        document.getElementById(
+            "notification"
+        );
+
+
+    const titleElement =
+        document.getElementById(
+            "notificationTitle"
+        );
+
+
+    const messageElement =
+        document.getElementById(
+            "notificationMessage"
+        );
+
+
+    /*
+     * If the notification HTML isn't
+     * present, don't crash the app.
+     */
+
+    if (
+        !notification
+    ) {
+
+        /*
+         * Still log the notification
+         * for debugging.
+         */
+
+        console.log(
+            title +
+            ": " +
+            message
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        titleElement
+    ) {
+
+        titleElement.textContent =
+            title ||
+            "";
+
+    }
+
+
+    if (
+        messageElement
+    ) {
+
+        messageElement.textContent =
+            message ||
+            "";
+
+    }
+
+
+    /*
+     * Clear an existing timer so
+     * repeated notifications don't
+     * interfere with each other.
+     */
+
+    if (
+        notificationTimeout
+    ) {
+
+        clearTimeout(
+            notificationTimeout
+        );
+
+    }
+
+
+    notification.classList.add(
+        "show"
+    );
+
+
+    notificationTimeout =
+        setTimeout(
+            function () {
+
+                notification.classList.remove(
+                    "show"
+                );
+
+            },
+            3500
+        );
+
+}
+
+
+/* =========================================================
+   CLOSE NOTIFICATION
+========================================================= */
+
+function closeNotification() {
+
+    const notification =
+        document.getElementById(
+            "notification"
+        );
+
+
+    if (!notification) {
+
+        return;
+
+    }
+
+
+    notification.classList.remove(
+        "show"
+    );
+
+
+    if (
+        notificationTimeout
+    ) {
+
+        clearTimeout(
+            notificationTimeout
+        );
+
+
+        notificationTimeout =
+            null;
+
+    }
+
+}
+
+
+/* =========================================================
+   NOTIFICATION CLOSE BUTTON
+========================================================= */
+
+function initializeNotification() {
+
+    const notification =
+        document.getElementById(
+            "notification"
+        );
+
+
+    if (!notification) {
+
+        return;
+
+    }
+
+
+    const closeButton =
+        notification.querySelector(
+            "[data-close-notification], " +
+            ".notification-close, " +
+            ".close-notification"
+        );
+
+
+    if (!closeButton) {
+
+        return;
+
+    }
+
+
+    if (
+        closeButton.dataset.initialized ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    closeButton.dataset.initialized =
+        "true";
+
+
+    closeButton.addEventListener(
+        "click",
+        function () {
+
+            closeNotification();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   NOTIFICATION HELPERS
+========================================================= */
+
+function notifySuccess(
+    message
+) {
+
+    showNotification(
+        "Success",
+        message
+    );
+
+}
+
+
+function notifyError(
+    message
+) {
+
+    showNotification(
+        "Error",
+        message
+    );
+
+}
+
+
+function notifyInfo(
+    message
+) {
+
+    showNotification(
+        "Information",
+        message
+    );
+
+}
+
+
+/* =========================================================
+   REFRESH FOLLOW-UP DATA AFTER TASK SAVE
+========================================================= */
+
+function updateFollowupsAfterTaskChange() {
+
+    updateFollowupSummary();
+
+    renderFollowups();
+
+    renderTodayFollowups();
+
+}
+/* =========================================================
+   API REQUEST
+========================================================= */
+
+async function apiRequest(
+    action,
+    data = {}
+) {
+
+    if (!API_URL) {
+
+        console.error(
+            "API_URL is not configured."
+        );
+
+
+        return {
+
+            success:
+                false,
+
+            message:
+                "API URL is not configured."
+
+        };
+
+    }
+
+
+    if (!action) {
+
+        return {
+
+            success:
+                false,
+
+            message:
+                "API action is missing."
+
+        };
+
+    }
+
+
+    try {
+
+        const payload = {
+
+            action:
+                action,
+
+            ...data
+
+        };
+
+
+        console.log(
+            "API REQUEST:",
+            action,
+            payload
+        );
+
+
+        const response =
+            await fetch(
+                API_URL,
+                {
+
+                    method:
+                        "POST",
+
+                    cache:
+                        "no-store",
+
+                    headers: {
+
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+
+                }
+            );
+
+
+        /*
+         * HTTP-level failure.
+         */
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                "HTTP " +
+                response.status +
+                " " +
+                response.statusText
+            );
+
+        }
+
+
+        /*
+         * Read response as text first.
+         *
+         * This is safer with Apps Script because
+         * a deployment/proxy error can sometimes
+         * return HTML instead of JSON.
+         */
+
+        const responseText =
+            await response.text();
+
+
+        if (
+            !responseText
+        ) {
+
+            throw new Error(
+                "Empty response received from Google Apps Script."
+            );
+
+        }
+
+
+        let result;
+
+
+        try {
+
+            result =
+                JSON.parse(
+                    responseText
+                );
+
+        }
+
+        catch (
+            jsonError
+        ) {
+
+            console.error(
+                "INVALID API JSON:",
+                responseText
+            );
+
+
+            throw new Error(
+                "Invalid response received from Google Apps Script."
+            );
+
+        }
+
+
+        console.log(
+            "API RESPONSE:",
+            action,
+            result
+        );
+
+
+        return result;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "API ERROR:",
+            action,
+            error
+        );
+
+
+        /*
+         * Don't show a notification here for
+         * every API call if the caller is going
+         * to display a more specific error.
+         */
+
+        return {
+
+            success:
+                false,
+
+            message:
+                error.message ||
+                "Unable to connect to Google Sheets.",
+
+            error:
+                true
+
+        };
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD TASKS
+========================================================= */
+
+async function loadTasks() {
+
+    /*
+     * Don't destroy the existing task list
+     * while a new request is being made.
+     *
+     * This is important if the API temporarily
+     * fails after a successful save.
+     */
+
+    const previousTasks =
+        Array.isArray(
+            tasks
+        )
+            ? [...tasks]
+            : [];
+
+
+    try {
+
+        console.log(
+            "Loading tasks..."
+        );
+
+
+        const result =
+            await apiRequest(
+                "getTasks"
+            );
+
+
+        if (
+            !result ||
+            !result.success
+        ) {
+
+            console.error(
+                "LOAD TASKS ERROR:",
+                result?.message ||
+                "Unknown server error"
+            );
+
+
+            /*
+             * KEEP the existing tasks.
+             *
+             * Do NOT replace them with [].
+             */
+
+            tasks =
+                previousTasks;
+
+
+            updateAllViews();
+
+
+            showNotification(
+                "Unable to Refresh",
+                result?.message ||
+                "Could not load the latest tasks from Google Sheets."
+            );
+
+
+            return false;
+
+        }
+
+
+        /*
+         * Apps Script may return either:
+         *
+         * result.tasks
+         *
+         * or
+         *
+         * result.data
+         */
+
+        const serverTasks =
+            Array.isArray(
+                result.tasks
+            )
+                ? result.tasks
+                : (
+                    Array.isArray(
+                        result.data
+                    )
+                        ? result.data
+                        : []
+                );
+
+
+        console.log(
+            "Tasks received from server:",
+            serverTasks.length
+        );
+
+
+        const normalizedTasks =
+            normalizeTasks(
+                serverTasks
+            );
+
+
+        /*
+         * Apply access control only after
+         * receiving valid server data.
+         */
+
+        const visibleTasks =
+            filterTasksForCurrentUser(
+                normalizedTasks
+            );
+
+
+        /*
+         * Replace local state ONLY after
+         * successful server response.
+         */
+
+        tasks =
+            visibleTasks;
+
+
+        console.log(
+            "Visible tasks:",
+            tasks.length
+        );
+
+
+        /*
+         * Update everything using the
+         * fresh server data.
+         */
+
+        updateAllViews();
+
+
+        refreshFollowups();
+
+
+        return true;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "LOAD TASKS EXCEPTION:",
+            error
+        );
+
+
+        /*
+         * Preserve the existing list.
+         */
+
+        tasks =
+            previousTasks;
+
+
+        updateAllViews();
+
+
+        showNotification(
+            "Connection Error",
+            error.message ||
+            "Unable to load tasks from Google Sheets."
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   REFRESH TASKS
+========================================================= */
+
+async function refreshTasks(
+    showMessage = true
+) {
+
+    const success =
+        await loadTasks();
+
+
+    if (
+        success &&
+        showMessage
+    ) {
+
+        showNotification(
+            "Updated",
+            "Task list refreshed successfully."
+        );
+
+    }
+
+
+    return success;
+
+}
+
+
+/* =========================================================
+   FILTER TASKS FOR CURRENT USER
+========================================================= */
+
+function filterTasksForCurrentUser(
+    allTasks
+) {
+
+    if (
+        !Array.isArray(
+            allTasks
+        )
+    ) {
+
+        return [];
+
+    }
+
+
+    /*
+     * No authenticated user means
+     * no task access.
+     */
+
+    if (
+        !currentUser
+    ) {
+
+        console.warn(
+            "No authenticated user found."
+        );
+
+
+        return [];
+
+    }
+
+
+    const role =
+        String(
+            currentUser.role ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+     * Administrators / managers with
+     * full access see all tasks.
+     */
+
+    if (
+        role === "admin" ||
+        role === "administrator" ||
+        role === "manager" ||
+        role === "super admin" ||
+        role === "superadmin"
+    ) {
+
+        return allTasks;
+
+    }
+
+
+    /*
+     * Determine departments assigned
+     * to the current user.
+     */
+
+    const allowedDepartments =
+        getAllowedDepartments();
+
+
+    /*
+     * If the user has no department
+     * restriction configured, preserve
+     * the existing behavior and use the
+     * user's department when available.
+     */
+
+    const userDepartment =
+        normalizeDepartmentName(
+            currentUser.department ||
+            ""
+        );
+
+
+    return allTasks.filter(
+        function (task) {
+
+            const taskDepartment =
+                normalizeDepartmentName(
+                    task.department ||
+                    ""
+                );
+
+
+            /*
+             * Department access.
+             */
+
+            if (
+                allowedDepartments.length
+            ) {
+
+                if (
+                    allowedDepartments.some(
+                        function (department) {
+
+                            return (
+                                normalizeDepartmentName(
+                                    department
+                                ) ===
+                                taskDepartment
+                            );
+
+                        }
+                    )
+                ) {
+
+                    return true;
+
+                }
+
+            }
+
+
+            /*
+             * Direct department fallback.
+             */
+
+            if (
+                userDepartment &&
+                taskDepartment ===
+                    userDepartment
+            ) {
+
+                return true;
+
+            }
+
+
+            /*
+             * Assigned-to fallback.
+             *
+             * This allows a user to see tasks
+             * specifically assigned to them.
+             */
+
+            const assignedTo =
+                String(
+                    task.assignedTo ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const username =
+                String(
+                    currentUser.username ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const name =
+                String(
+                    currentUser.name ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            if (
+                assignedTo &&
+                (
+                    (
+                        username &&
+                        assignedTo ===
+                            username
+                    ) ||
+                    (
+                        name &&
+                        assignedTo ===
+                            name
+                    )
+                )
+            ) {
+
+                return true;
+
+            }
+
+
+            return false;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   API SERVER MESSAGE
+========================================================= */
+
+function getServerMessage(
+    result,
+    fallback
+) {
+
+    if (
+        !result
+    ) {
+
+        return (
+            fallback ||
+            "An unknown server error occurred."
+        );
+
+    }
+
+
+    return (
+        result.message ||
+        result.error ||
+        result.reason ||
+        fallback ||
+        "An unknown server error occurred."
+    );
+
+}
