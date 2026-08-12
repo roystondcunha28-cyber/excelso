@@ -67,6 +67,28 @@
 
         <form id="loginForm">
 
+            <!-- USERNAME -->
+
+            <div class="form-group">
+
+                <label for="loginUsername">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="loginUsername"
+                    name="username"
+                    placeholder="Enter username"
+                    autocomplete="username"
+                    required
+                >
+
+            </div>
+
+
+            <!-- PASSWORD -->
+
             <div class="form-group">
 
                 <label for="loginPassword">
@@ -76,6 +98,7 @@
                 <input
                     type="password"
                     id="loginPassword"
+                    name="password"
                     placeholder="Enter password"
                     autocomplete="current-password"
                     required
@@ -83,6 +106,18 @@
 
             </div>
 
+
+            <!-- LOGIN ERROR -->
+
+            <div
+                id="loginError"
+                class="login-error"
+            >
+                Incorrect username or password. Please try again.
+            </div>
+
+
+            <!-- SIGN IN -->
 
             <button
                 type="submit"
@@ -94,14 +129,6 @@
         </form>
 
 
-        <div
-            id="loginError"
-            class="login-error"
-        >
-            Incorrect password. Please try again.
-        </div>
-
-
         <div class="login-footer">
             Authorized Operations Access
         </div>
@@ -109,8 +136,6 @@
     </div>
 
 </div>
-
-
 
 <!-- =====================================================
      APPLICATION
