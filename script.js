@@ -549,13 +549,6 @@ function showPage(page) {
 
     if (
         page ===
-        "reports"
-    )
-        renderAnalysis();
-
-
-    if (
-        page ===
         "activity"
     )
         renderActivity();
@@ -896,8 +889,6 @@ function updateAllViews() {
     renderTasksTable();
 
     renderFollowups();
-
-    renderAnalysis();
 
     renderActivity();
 
@@ -2103,131 +2094,6 @@ function renderDepartmentCards() {
     );
 
 }
-
-
-/* =========================================================
-   REPORTS
-========================================================= */
-
-function renderAnalysis() {
-
-    const tbody =
-        document.getElementById(
-            "analysisTable"
-        );
-
-
-    if (!tbody) return;
-
-
-    tbody.innerHTML = "";
-
-
-    DEPARTMENTS.forEach(
-        function(department) {
-
-            const data =
-                tasks.filter(
-                    function(task) {
-
-                        return (
-                            task.department ===
-                            department
-                        );
-
-                    }
-                );
-
-
-            const total =
-                data.length;
-
-
-            const open =
-                data.filter(
-                    function(t) {
-                        return t.status === "Open";
-                    }
-                ).length;
-
-
-            const progress =
-                data.filter(
-                    function(t) {
-                        return t.status === "In Progress";
-                    }
-                ).length;
-
-
-            const blocked =
-                data.filter(
-                    function(t) {
-                        return t.status === "Blocked";
-                    }
-                ).length;
-
-
-            const completed =
-                data.filter(
-                    function(t) {
-                        return t.status === "Completed";
-                    }
-                ).length;
-
-
-            const overdue =
-                data.filter(
-                    isOverdue
-                ).length;
-
-
-            const percentage =
-                total
-                    ? Math.round(
-                        completed /
-                        total *
-                        100
-                    )
-                    : 0;
-
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            row.innerHTML =
-                `
-                <td>
-                    ${escapeHTML(department)}
-                </td>
-
-                <td>${total}</td>
-
-                <td>${open}</td>
-
-                <td>${progress}</td>
-
-                <td>${blocked}</td>
-
-                <td>${overdue}</td>
-
-                <td>${completed}</td>
-
-                <td>${percentage}%</td>
-                `;
-
-
-            tbody.appendChild(
-                row
-            );
-
-        }
-    );
-
-}
-
 
 /* =========================================================
    ACTIVITY
