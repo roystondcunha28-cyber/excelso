@@ -587,21 +587,10 @@ function updatePageHeader(page) {
             "Monitor commitments and pending actions"
         ],
 
-        reports: [
-            "Reports & Analysis",
-            "Analyze operational performance"
-        ],
-
         activity: [
             "Activity Log",
             "Track operational changes"
         ],
-
-        settings: [
-            "Settings",
-            "System configuration"
-        ]
-
     };
 
 
