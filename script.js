@@ -1,6 +1,8 @@
 /* =========================================================
-   USEDBOOKR OPERATIONS MANAGEMENT SYSTEM
+   EXCELSO OPERATIONS MANAGEMENT SYSTEM
    FRONTEND JAVASCRIPT
+   (rebranded from UsedBookR Operations Management — all
+   original data logic, endpoints and element IDs preserved)
 ========================================================= */
 
 
@@ -88,10 +90,111 @@ document.addEventListener(
 
         initializeExports();
 
+        initializeSidebarToggle();
+
         checkLogin();
+
+        initializePageLoader();
 
     }
 );
+
+
+/* =========================================================
+   PAGE LOADER
+========================================================= */
+
+function initializePageLoader() {
+
+    /*
+     * The loader always shows for a minimum amount of time
+     * so the entrance animation reads intentionally rather
+     * than flickering on fast connections.
+     */
+
+    const MIN_VISIBLE_MS = 1100;
+
+    const start = Date.now();
+
+
+    const hide = function () {
+
+        const elapsed =
+            Date.now() - start;
+
+
+        const remaining =
+            Math.max(
+                0,
+                MIN_VISIBLE_MS - elapsed
+            );
+
+
+        setTimeout(
+            function () {
+
+                const loader =
+                    document.getElementById(
+                        "pageLoader"
+                    );
+
+
+                if (loader) {
+
+                    loader.classList.add(
+                        "loader-hidden"
+                    );
+
+
+                    setTimeout(
+                        function () {
+
+                            loader.style.display =
+                                "none";
+
+                        },
+                        650
+                    );
+
+                }
+
+            },
+            remaining
+        );
+
+    };
+
+
+    if (
+        document.readyState ===
+        "complete"
+    ) {
+
+        hide();
+
+    }
+
+    else {
+
+        window.addEventListener(
+            "load",
+            hide
+        );
+
+
+        /*
+         * Safety net in case the load event
+         * is delayed by slow external assets.
+         */
+
+        setTimeout(
+            hide,
+            2500
+        );
+
+    }
+
+}
 
 
 /* =========================================================
@@ -134,6 +237,12 @@ function initializeLogin() {
                 );
 
 
+            const submitButton =
+                form.querySelector(
+                    ".login-button"
+                );
+
+
             if (error) {
 
                 error.classList.remove(
@@ -161,6 +270,12 @@ function initializeLogin() {
                 return;
 
             }
+
+
+            setButtonLoading(
+                submitButton,
+                true
+            );
 
 
             try {
@@ -202,6 +317,12 @@ function initializeLogin() {
 
                     }
 
+                    setButtonLoading(
+                        submitButton,
+                        false
+                    );
+
+
                     return;
 
                 }
@@ -239,6 +360,14 @@ function initializeLogin() {
                  */
 
                 hideLogin();
+
+
+                /*
+                 * Reflect the authenticated
+                 * user in the sidebar
+                 */
+
+                updateLoggedInUserProfile();
 
 
                 /*
@@ -280,8 +409,48 @@ function initializeLogin() {
 
             }
 
+            finally {
+
+                setButtonLoading(
+                    submitButton,
+                    false
+                );
+
+            }
+
         }
     );
+
+}
+
+
+function setButtonLoading(
+    button,
+    isLoading
+) {
+
+    if (!button) return;
+
+
+    if (isLoading) {
+
+        button.classList.add(
+            "is-loading"
+        );
+
+        button.disabled = true;
+
+    }
+
+    else {
+
+        button.classList.remove(
+            "is-loading"
+        );
+
+        button.disabled = false;
+
+    }
 
 }
 
@@ -318,6 +487,9 @@ function checkLogin() {
 
 
             hideLogin();
+
+
+            updateLoggedInUserProfile();
 
 
             loadTasks();
@@ -407,7 +579,7 @@ function showLogin() {
     if (login) {
 
         login.style.display =
-            "flex";
+            "grid";
 
     }
 
@@ -817,6 +989,8 @@ function initializeNavigation() {
                                 department
                             );
 
+                            closeSidebarOnMobile();
+
                             return;
 
                         }
@@ -827,6 +1001,8 @@ function initializeNavigation() {
                             showPage(
                                 page
                             );
+
+                            closeSidebarOnMobile();
 
                         }
 
@@ -849,19 +1025,127 @@ function initializeNavigation() {
             "click",
             function () {
 
-                document
-                    .querySelector(
-                        ".sidebar"
-                    )
-                    ?.classList
-                    .toggle(
-                        "sidebar-open"
-                    );
+                toggleSidebar();
 
             }
         );
 
     }
+
+}
+
+
+/* =========================================================
+   MOBILE SIDEBAR TOGGLE
+========================================================= */
+
+function initializeSidebarToggle() {
+
+    const backdrop =
+        document.getElementById(
+            "sidebarBackdrop"
+        );
+
+
+    if (backdrop) {
+
+        backdrop.addEventListener(
+            "click",
+            closeSidebarOnMobile
+        );
+
+    }
+
+}
+
+
+function toggleSidebar() {
+
+    const sidebar =
+        document.querySelector(
+            ".sidebar"
+        );
+
+
+    const backdrop =
+        document.getElementById(
+            "sidebarBackdrop"
+        );
+
+
+    const menu =
+        document.getElementById(
+            "menuToggle"
+        );
+
+
+    if (!sidebar) return;
+
+
+    const isOpen =
+        sidebar.classList.toggle(
+            "sidebar-open"
+        );
+
+
+    if (backdrop) {
+
+        backdrop.classList.toggle(
+            "show",
+            isOpen
+        );
+
+    }
+
+
+    if (menu) {
+
+        menu.classList.toggle(
+            "is-open",
+            isOpen
+        );
+
+    }
+
+}
+
+
+function closeSidebarOnMobile() {
+
+    const sidebar =
+        document.querySelector(
+            ".sidebar"
+        );
+
+
+    const backdrop =
+        document.getElementById(
+            "sidebarBackdrop"
+        );
+
+
+    const menu =
+        document.getElementById(
+            "menuToggle"
+        );
+
+
+    if (sidebar)
+        sidebar.classList.remove(
+            "sidebar-open"
+        );
+
+
+    if (backdrop)
+        backdrop.classList.remove(
+            "show"
+        );
+
+
+    if (menu)
+        menu.classList.remove(
+            "is-open"
+        );
 
 }
 
@@ -1471,6 +1755,50 @@ function normalizeTasks(data) {
 
         }
     );
+
+}
+
+
+/* =========================================================
+   LOAD TASKS
+========================================================= */
+
+async function loadTasks() {
+
+    const result =
+        await apiRequest(
+            "getTasks"
+        );
+
+
+    if (
+        result &&
+        result.success
+    ) {
+
+        const normalized =
+            normalizeTasks(
+                result.tasks ||
+                result.data ||
+                []
+            );
+
+
+        tasks =
+            filterTasksForCurrentUser(
+                normalized
+            );
+
+    }
+
+    else {
+
+        tasks = [];
+
+    }
+
+
+    updateAllViews();
 
 }
 
@@ -2554,7 +2882,7 @@ function renderDepartmentCards() {
 
                 </div>
 
-                <button class="secondary-button">
+                <button class="secondary-button department-view-button">
                     View Department
                 </button>
                 `;
@@ -2757,6 +3085,50 @@ function initializeTaskButtons() {
             "click",
             closeTaskModal
         );
+
+
+    const overlay =
+        document.getElementById(
+            "taskModal"
+        );
+
+
+    if (overlay) {
+
+        overlay.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    event.target ===
+                    overlay
+                ) {
+
+                    closeTaskModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                closeTaskModal();
+
+            }
+
+        }
+    );
 
 }
 
@@ -3079,6 +3451,19 @@ async function saveTask() {
     }
 
 
+    const submitButton =
+        document
+            .querySelector(
+                "#taskForm .primary-button"
+            );
+
+
+    setButtonLoading(
+        submitButton,
+        true
+    );
+
+
     let result;
 
 
@@ -3107,6 +3492,12 @@ async function saveTask() {
             );
 
     }
+
+
+    setButtonLoading(
+        submitButton,
+        false
+    );
 
 
     if (
@@ -3362,7 +3753,7 @@ function exportTasksCSV() {
 
 
     link.download =
-        "UsedBookR_Operations_Tasks.csv";
+        "Excelso_Operations_Tasks.csv";
 
 
     link.click();
