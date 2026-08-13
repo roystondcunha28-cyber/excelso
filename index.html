@@ -2098,7 +2098,154 @@
     </div>
 
 </div>
+<!-- =====================================================
+     REGULAR TASK UPDATE MODAL
+===================================================== -->
 
+<div
+    id="regularTaskUpdateModal"
+    class="regular-task-update-modal"
+    style="display: none;"
+>
+
+    <div class="regular-task-update-modal-overlay"
+         onclick="closeRegularTaskUpdate()">
+    </div>
+
+
+    <div class="regular-task-update-modal-card">
+
+        <div class="regular-task-update-modal-header">
+
+            <div>
+                <h2>Update Regular Task</h2>
+
+                <p id="regularTaskUpdateTaskName">
+                    Regular Task
+                </p>
+            </div>
+
+
+            <button
+                type="button"
+                class="regular-task-update-close"
+                onclick="closeRegularTaskUpdate()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="regular-task-update-info">
+
+            <div>
+                <span>Task ID</span>
+                <strong id="regularTaskUpdateTaskId">
+                    -
+                </strong>
+            </div>
+
+
+            <div>
+                <span>Department</span>
+                <strong id="regularTaskUpdateDepartment">
+                    -
+                </strong>
+            </div>
+
+
+            <div>
+                <span>Expected Time</span>
+                <strong id="regularTaskUpdateExpectedTime">
+                    -
+                </strong>
+            </div>
+
+        </div>
+
+
+        <form
+            id="regularTaskUpdateForm"
+        >
+
+            <div class="form-group">
+
+                <label for="regularTaskStatus">
+                    Status
+                </label>
+
+                <select
+                    id="regularTaskStatus"
+                    required
+                >
+
+                    <option value="">
+                        Select status
+                    </option>
+
+                    <option value="Completed">
+                        Completed
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="regularTaskDescription">
+                    Description
+                </label>
+
+                <textarea
+                    id="regularTaskDescription"
+                    rows="5"
+                    placeholder="Enter your update or remarks..."
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <div
+                id="regularTaskUpdateError"
+                class="regular-task-update-error"
+            >
+            </div>
+
+
+            <div class="regular-task-update-actions">
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    onclick="closeRegularTaskUpdate()"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                    id="saveRegularTaskUpdateButton"
+                >
+                    Save Update
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
 
 
 <!-- =====================================================
