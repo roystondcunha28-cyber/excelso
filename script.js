@@ -1822,7 +1822,24 @@ async function loadTasks() {
 
 async function loadRegularTasks() {
 
+    const container =
+        document.getElementById(
+            "regularTasksContainer"
+        );
+
+
     try {
+
+        if (container) {
+
+            container.innerHTML = `
+                <div class="regular-tasks-loading">
+                    Loading regular tasks...
+                </div>
+            `;
+
+        }
+
 
         const result =
             await apiRequest(
@@ -1830,19 +1847,36 @@ async function loadRegularTasks() {
             );
 
 
+        console.log(
+            "REGULAR TASKS API RESPONSE:",
+            result
+        );
+
+
         if (
             !result ||
             !result.success
         ) {
 
-            console.error(
-                "Unable to load Regular Tasks:",
-                result?.message ||
-                "Unknown error"
-            );
-
-
             regularTasks = [];
+
+
+            if (container) {
+
+                container.innerHTML = `
+                    <div class="regular-tasks-empty">
+                        Unable to load regular tasks.
+                        ${
+                            result?.message
+                                ? escapeHtml(
+                                    result.message
+                                )
+                                : ""
+                        }
+                    </div>
+                `;
+
+            }
 
 
             return;
@@ -1859,36 +1893,43 @@ async function loadRegularTasks() {
 
 
         console.log(
-            "Regular Tasks loaded:",
-            regularTasks.length
+            "REGULAR TASKS LOADED:",
+            regularTasks.length,
+            regularTasks
         );
 
 
         /*
-         * If the Regular Tasks page
-         * is currently open, refresh it.
+         * IMPORTANT:
+         * Always render after the API
+         * response is received.
          */
 
-        if (
-            currentPage ===
-            "regularTasks"
-        ) {
-
-            renderRegularTasks();
-
-        }
+        renderRegularTasks();
 
     }
 
     catch (error) {
 
         console.error(
-            "Error loading Regular Tasks:",
+            "REGULAR TASKS ERROR:",
             error
         );
 
 
         regularTasks = [];
+
+
+        if (container) {
+
+            container.innerHTML = `
+                <div class="regular-tasks-empty">
+                    Unable to load regular tasks.
+                    Please try again.
+                </div>
+            `;
+
+        }
 
     }
 
