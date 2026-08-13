@@ -1822,7 +1822,31 @@ async function loadTasks() {
     updateAllViews();
 
 }
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
 
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
+   LOAD REGULAR TASKS
+========================================================= */
+
+async function loadRegularTasks() {
+
+    // your loadRegularTasks code here
+
+}
 /* =========================================================
    LOAD REGULAR TASKS
 ========================================================= */
@@ -1848,10 +1872,20 @@ async function loadRegularTasks() {
         }
 
 
-        const result =
-            await apiRequest(
-                "getRegularTasks"
+        /*
+         * Regular Tasks are provided by
+         * the Apps Script GET endpoint.
+         */
+
+        const response =
+            await fetch(
+                API_URL +
+                "?action=getRegularTasks"
             );
+
+
+        const result =
+            await response.json();
 
 
         console.log(
@@ -1905,12 +1939,6 @@ async function loadRegularTasks() {
             regularTasks
         );
 
-
-        /*
-         * IMPORTANT:
-         * Always render after the API
-         * response is received.
-         */
 
         renderRegularTasks();
 
