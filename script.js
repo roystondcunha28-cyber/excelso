@@ -93,6 +93,8 @@ document.addEventListener(
 
         initializeLogin();
 
+        initializeRegularTaskUpdateForm();
+
         initializeExports();
 
         initializeSidebarToggle();
