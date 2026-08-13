@@ -1809,7 +1809,83 @@ async function loadTasks() {
 
 }
 
+/* =========================================================
+   LOAD REGULAR TASKS
+========================================================= */
 
+async function loadRegularTasks() {
+
+    try {
+
+        const result =
+            await apiRequest(
+                "getRegularTasks"
+            );
+
+
+        if (
+            !result ||
+            !result.success
+        ) {
+
+            console.error(
+                "Unable to load Regular Tasks:",
+                result?.message ||
+                "Unknown error"
+            );
+
+
+            regularTasks = [];
+
+
+            return;
+
+        }
+
+
+        regularTasks =
+            Array.isArray(
+                result.regularTasks
+            )
+                ? result.regularTasks
+                : [];
+
+
+        console.log(
+            "Regular Tasks loaded:",
+            regularTasks.length
+        );
+
+
+        /*
+         * If the Regular Tasks page
+         * is currently open, refresh it.
+         */
+
+        if (
+            currentPage ===
+            "regularTasks"
+        ) {
+
+            renderRegularTasks();
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error loading Regular Tasks:",
+            error
+        );
+
+
+        regularTasks = [];
+
+    }
+
+}
 /* =========================================================
    UPDATE ALL VIEWS
 ========================================================= */
