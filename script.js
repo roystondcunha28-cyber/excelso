@@ -1245,7 +1245,14 @@ function showPage(page) {
         "tasks"
     )
         renderTasksTable();
+if (
+    page ===
+    "regularTasks"
+) {
 
+    renderRegularTasks();
+
+}
 
     if (
         page ===
