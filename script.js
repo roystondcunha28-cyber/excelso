@@ -57,6 +57,9 @@ let currentPage =
 let editingTaskId =
     "";
 
+let isSavingTask =
+    false;
+
 
 /* =========================================================
    AUTHENTICATION SESSION
@@ -579,7 +582,7 @@ function showLogin() {
     if (login) {
 
         login.style.display =
-            "grid";
+            "flex";
 
     }
 
@@ -3365,6 +3368,66 @@ function populateTaskForm(
 
 async function saveTask() {
 
+    /*
+     * -----------------------------------------------------
+     * DOUBLE-SUBMIT GUARD
+     * -----------------------------------------------------
+     *
+     * A fast double-click (or double-tap on mobile) can fire
+     * two "submit" events before the first async call has a
+     * chance to disable the button. This module-level lock
+     * makes sure only one save is ever in flight, regardless
+     * of how many times the button is pressed.
+     */
+
+    if (isSavingTask) {
+
+        return;
+
+    }
+
+
+    isSavingTask =
+        true;
+
+
+    const submitButton =
+        document
+            .querySelector(
+                "#taskForm .primary-button"
+            );
+
+
+    setButtonLoading(
+        submitButton,
+        true
+    );
+
+
+    try {
+
+        await saveTaskRequest();
+
+    }
+
+    finally {
+
+        isSavingTask =
+            false;
+
+
+        setButtonLoading(
+            submitButton,
+            false
+        );
+
+    }
+
+}
+
+
+async function saveTaskRequest() {
+
     const editId =
         getInput(
             "editTaskId"
@@ -3451,19 +3514,6 @@ async function saveTask() {
     }
 
 
-    const submitButton =
-        document
-            .querySelector(
-                "#taskForm .primary-button"
-            );
-
-
-    setButtonLoading(
-        submitButton,
-        true
-    );
-
-
     let result;
 
 
@@ -3492,12 +3542,6 @@ async function saveTask() {
             );
 
     }
-
-
-    setButtonLoading(
-        submitButton,
-        false
-    );
 
 
     if (
