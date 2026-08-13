@@ -65,68 +65,72 @@
 
 
 <!-- =====================================================
-     LOGIN SCREEN
+     LOGIN SCREEN 
 ===================================================== -->
-
-<div
-    id="loginScreen"
-    class="login-screen"
->
-
+ 
+<div id="loginScreen" class="login-screen">
+ 
+    <div class="login-aurora"></div>
+ 
     <div class="login-main">
-
-        <div class="login-card">
-
-            <div class="login-brand">
-
-                <div class="logo-mark">
-
-                    <img
-                        src="assets/logo-usedbookr.png"
-                        alt="UsedBookR"
-                    >
-
-                </div>
-
-                <h1>
-                    Excelso
-                </h1>
-
-                <p>
-                    UsedBookR/Simply Sell Books Operations Tracker
-                </p>
-
+ 
+        <!-- LEFT: animated brand showcase -->
+        <section class="login-showcase" aria-hidden="true">
+ 
+            <div class="showcase-glow"></div>
+ 
+            <div class="showcase-book">
+                <div class="showcase-page showcase-page-1"></div>
+                <div class="showcase-page showcase-page-2"></div>
+                <div class="showcase-spine"></div>
             </div>
-
-
+ 
+            <div class="showcase-leaf showcase-leaf-a"></div>
+            <div class="showcase-leaf showcase-leaf-b"></div>
+            <div class="showcase-leaf showcase-leaf-c"></div>
+ 
+            <div class="showcase-copy">
+                <span class="showcase-eyebrow">OPERATIONS DESK</span>
+                <h2>Every department,<br>one open ledger.</h2>
+                <p>
+                    Excelso keeps UsedBookR and SimplySellBooks moving —
+                    tasks, follow-ups and 14 departments tracked in one place.
+                </p>
+            </div>
+ 
+        </section>
+ 
+        <!-- RIGHT: sign-in card -->
+        <div class="login-card">
+ 
+            <div class="login-brand">
+ 
+                <div class="logo-mark">
+                    <img src="assets/logo-usedbookr.png" alt="UsedBookR">
+                </div>
+ 
+                <h1>Excelso</h1>
+ 
+                <p>UsedBookR/Simply Sell Books Operations Tracker</p>
+ 
+            </div>
+ 
             <div class="login-divider"></div>
-
-
-            <h2>
-                Operations Login
-            </h2>
-
-
+ 
+            <h2>Operations Login</h2>
+ 
             <p class="login-description">
                 Centralized system for tracking, monitoring and
                 managing all departmental operations.
             </p>
-
-
+ 
             <form id="loginForm">
-
+ 
                 <!-- USERNAME -->
-
                 <div class="form-group">
-
-                    <label for="loginUsername">
-                        Username
-                    </label>
-
+                    <label for="loginUsername">Username</label>
                     <div class="input-shell">
-
                         <span class="input-icon" aria-hidden="true">&#9998;</span>
-
                         <input
                             type="text"
                             id="loginUsername"
@@ -135,24 +139,14 @@
                             autocomplete="username"
                             required
                         >
-
                     </div>
-
                 </div>
-
-
+ 
                 <!-- PASSWORD -->
-
                 <div class="form-group">
-
-                    <label for="loginPassword">
-                        Password
-                    </label>
-
+                    <label for="loginPassword">Password</label>
                     <div class="input-shell">
-
                         <span class="input-icon" aria-hidden="true">&#128274;</span>
-
                         <input
                             type="password"
                             id="loginPassword"
@@ -161,43 +155,30 @@
                             autocomplete="current-password"
                             required
                         >
-
                     </div>
-
                 </div>
-
-
+ 
                 <!-- LOGIN ERROR -->
-
-                <div
-                    id="loginError"
-                    class="login-error"
-                >
+                <div id="loginError" class="login-error">
                     Incorrect username or password. Please try again.
                 </div>
-
-
+ 
                 <!-- SIGN IN -->
-
-                <button
-                    type="submit"
-                    class="login-button"
-                >
+                <button type="submit" class="login-button">
                     <span class="login-button-label">Sign In</span>
                     <span class="login-button-spinner" aria-hidden="true"></span>
                 </button>
-
+ 
             </form>
-
-
+ 
             <div class="login-footer">
                 Authorized Operations Access
             </div>
-
+ 
         </div>
-
+ 
     </div>
-
+ 
 </div>
 
 <!-- =====================================================
