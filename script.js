@@ -200,478 +200,479 @@ function initializePageLoader() {
 }
 
 
+ 
 /* =========================================================
    LOGIN / AUTHENTICATION
 ========================================================= */
-
+ 
 function initializeLogin() {
-
+ 
     const form =
         document.getElementById(
             "loginForm"
         );
-
+ 
     if (!form) return;
-
-
+ 
+ 
     form.addEventListener(
         "submit",
         async function (event) {
-
+ 
             event.preventDefault();
-
-
+ 
+ 
             const username =
                 document.getElementById(
                     "loginUsername"
                 )?.value
                 ?.trim() || "";
-
-
+ 
+ 
             const password =
                 document.getElementById(
                     "loginPassword"
                 )?.value || "";
-
-
+ 
+ 
             const error =
                 document.getElementById(
                     "loginError"
                 );
-
-
+ 
+ 
             const submitButton =
                 form.querySelector(
                     ".login-button"
                 );
-
-
+ 
+ 
             if (error) {
-
+ 
                 error.classList.remove(
                     "show"
                 );
-
+ 
                 error.textContent = "";
-
+ 
             }
-
-
+ 
+ 
             if (!username || !password) {
-
+ 
                 if (error) {
-
+ 
                     error.textContent =
                         "Please enter your username and password.";
-
+ 
                     error.classList.add(
                         "show"
                     );
-
+ 
                 }
-
+ 
                 return;
-
+ 
             }
-
-
+ 
+ 
             setButtonLoading(
                 submitButton,
                 true
             );
-
-
+ 
+ 
             try {
-
+ 
                 const result =
                     await apiRequest(
                         "login",
                         {
                             username:
                                 username,
-
+ 
                             password:
                                 password
                         }
                     );
-
-
+ 
+ 
                 console.log(
                     "LOGIN RESPONSE:",
                     result
                 );
-
-
+ 
+ 
                 if (
                     !result ||
                     !result.success ||
                     !result.user
                 ) {
-
+ 
                     if (error) {
-
+ 
                         error.textContent =
                             result?.message ||
                             "Invalid username or password.";
-
+ 
                         error.classList.add(
                             "show"
                         );
-
+ 
                     }
-
+ 
                     setButtonLoading(
                         submitButton,
                         false
                     );
-
-
+ 
+ 
                     return;
-
+ 
                 }
-
-
+ 
+ 
                 /*
                  * Store authenticated user
                  */
-
+ 
                 currentUser =
                     result.user;
-
-
+ 
+ 
                 sessionStorage.setItem(
                     "usedbookrCurrentUser",
                     JSON.stringify(
                         currentUser
                     )
                 );
-
-
+ 
+ 
                 /*
                  * Keep the existing
                  * login state
                  */
-
+ 
                 sessionStorage.setItem(
                     "usedbookrOperationsLogin",
                     "true"
                 );
-
-
+ 
+ 
                 /*
                  * Hide login screen
                  */
-
+ 
                 hideLogin();
-
-
+ 
+ 
                 /*
                  * Reflect the authenticated
                  * user in the sidebar
                  */
-
+ 
                 updateLoggedInUserProfile();
-
-
+ 
+ 
                 /*
                  * Load tasks after
                  * successful authentication
                  */
-
+ 
                 await loadTasks();
-
-
+ 
+ 
                 /*
                  * Apply permissions /
                  * department visibility
                  */
-
+ 
                 applyUserAccess();
-
-
+ 
+ 
             }
-
+ 
             catch (err) {
-
+ 
                 console.error(
                     "LOGIN ERROR:",
                     err
                 );
-
-
+ 
+ 
                 if (error) {
-
+ 
                     error.textContent =
                         "Unable to connect to the authentication server.";
-
+ 
                     error.classList.add(
                         "show"
                     );
-
+ 
                 }
-
+ 
             }
-
+ 
             finally {
-
+ 
                 setButtonLoading(
                     submitButton,
                     false
                 );
-
+ 
             }
-
+ 
         }
     );
-
+ 
 }
-
-
+ 
+ 
 function setButtonLoading(
     button,
     isLoading
 ) {
-
+ 
     if (!button) return;
-
-
+ 
+ 
     if (isLoading) {
-
+ 
         button.classList.add(
             "is-loading"
         );
-
+ 
         button.disabled = true;
-
+ 
     }
-
+ 
     else {
-
+ 
         button.classList.remove(
             "is-loading"
         );
-
+ 
         button.disabled = false;
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================================================
    CHECK LOGIN
 ========================================================= */
-
+ 
 function checkLogin() {
-
+ 
     const loggedIn =
         sessionStorage.getItem(
             "usedbookrOperationsLogin"
         );
-
-
+ 
+ 
     const savedUser =
         sessionStorage.getItem(
             "usedbookrCurrentUser"
         );
-
-
+ 
+ 
     if (
         loggedIn === "true" &&
         savedUser
     ) {
-
+ 
         try {
-
+ 
             currentUser =
                 JSON.parse(
                     savedUser
                 );
-
-
+ 
+ 
             hideLogin();
-
-
+ 
+ 
             updateLoggedInUserProfile();
-
-
+ 
+ 
             loadTasks();
-
-
+ 
+ 
             applyUserAccess();
-
+ 
         }
-
+ 
         catch (error) {
-
+ 
             console.error(
                 "SESSION RESTORE ERROR:",
                 error
             );
-
-
+ 
+ 
             logoutUser();
-
+ 
         }
-
+ 
     }
-
+ 
     else {
-
+ 
         showLogin();
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================================================
    HIDE LOGIN
 ========================================================= */
-
+ 
 function hideLogin() {
-
+ 
     const login =
         document.getElementById(
             "loginScreen"
         );
-
-
+ 
+ 
     const app =
         document.getElementById(
             "app"
         );
-
-
+ 
+ 
     if (login) {
-
+ 
         login.style.display =
             "none";
-
+ 
     }
-
-
+ 
+ 
     if (app) {
-
+ 
         app.style.display =
             "flex";
-
+ 
     }
-
+ 
 }
-
-
+ 
+ 
 /* =========================================================
    SHOW LOGIN
 ========================================================= */
-
+ 
 function showLogin() {
-
+ 
     const login =
         document.getElementById(
             "loginScreen"
         );
-
-
+ 
+ 
     const app =
         document.getElementById(
             "app"
         );
-
-
+ 
+ 
     if (login) {
-
+ 
         login.style.display =
             "flex";
-
+ 
     }
-
-
+ 
+ 
     if (app) {
-
+ 
         app.style.display =
             "none";
-
+ 
     }
-
+ 
 }
 /* =========================================================
    UPDATE LOGGED-IN USER PROFILE
 ========================================================= */
-
+ 
 function updateLoggedInUserProfile() {
-
+ 
     if (!currentUser) {
-
+ 
         console.warn(
             "No current user available for profile display."
         );
-
+ 
         return;
-
+ 
     }
-
-
+ 
+ 
     const avatar =
         document.getElementById(
             "loggedUserAvatar"
         );
-
-
+ 
+ 
     const nameElement =
         document.getElementById(
             "loggedUserName"
         );
-
-
+ 
+ 
     const roleElement =
         document.getElementById(
             "loggedUserRole"
         );
-
-
+ 
+ 
     const name =
         String(
             currentUser.name || ""
         ).trim();
-
-
+ 
+ 
     const role =
         String(
             currentUser.role || ""
         ).trim();
-
-
+ 
+ 
     const username =
         String(
             currentUser.username || ""
         ).trim();
-
-
+ 
+ 
     /*
      * Display name
      */
-
+ 
     if (nameElement) {
-
+ 
         nameElement.textContent =
             name || username || "User";
-
+ 
     }
-
-
+ 
+ 
     /*
      * Display role
      */
-
+ 
     if (roleElement) {
-
+ 
         roleElement.textContent =
             role || "User";
-
+ 
     }
-
-
+ 
+ 
     /*
      * Create initials for avatar
      *
@@ -681,12 +682,12 @@ function updateLoggedInUserProfile() {
      * Sundara → S
      * Bhuvana → B
      */
-
+ 
     let initials = "";
-
-
+ 
+ 
     if (name) {
-
+ 
         const words =
             name
                 .replace(/\./g, " ")
@@ -696,44 +697,45 @@ function updateLoggedInUserProfile() {
                         return word.length > 0;
                     }
                 );
-
-
+ 
+ 
         if (words.length >= 2) {
-
+ 
             initials =
                 words[0].charAt(0) +
                 words[words.length - 1].charAt(0);
-
+ 
         }
-
+ 
         else {
-
+ 
             initials =
                 words[0]
                     .substring(0, 2);
-
+ 
         }
-
+ 
     }
-
-
+ 
+ 
     if (!initials) {
-
+ 
         initials =
             username
                 .substring(0, 2);
-
+ 
     }
-
-
+ 
+ 
     if (avatar) {
-
+ 
         avatar.textContent =
             initials.toUpperCase();
-
+ 
     }
-
+ 
 }
+ 
 
 /* =========================================================
    LOGOUT
