@@ -49,6 +49,8 @@ const DEPARTMENTS = [
 
 let tasks = [];
 
+let regularTasks = [];
+
 let currentDepartment = "";
 
 let currentPage =
