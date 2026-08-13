@@ -7,14 +7,14 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
-    <title>Excelso &middot; UsedBookR Operations Management</title>
+    <title>Excelso — Operations Management</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 
     <link
         rel="stylesheet"
@@ -26,41 +26,43 @@
 
 <body>
 
+
 <!-- =====================================================
      PAGE LOADER
 ===================================================== -->
- 
+
 <div
     id="pageLoader"
     class="page-loader"
 >
- 
+
     <div class="loader-scene">
- 
+
         <div class="loader-book">
- 
+
             <div class="loader-page loader-page-1"></div>
             <div class="loader-page loader-page-2"></div>
             <div class="loader-page loader-page-3"></div>
             <div class="loader-spine"></div>
- 
+
         </div>
- 
+
         <div class="loader-leaf loader-leaf-a"></div>
         <div class="loader-leaf loader-leaf-b"></div>
         <div class="loader-leaf loader-leaf-c"></div>
- 
+
     </div>
- 
+
     <div class="loader-word">
         <span>EXCEL</span><span class="loader-word-accent">SO</span>
     </div>
- 
+
     <p class="loader-caption">
         Preparing your operations desk…
     </p>
- 
+
 </div>
+
 
 <!-- =====================================================
      LOGIN SCREEN
@@ -71,107 +73,127 @@
     class="login-screen"
 >
 
-    <div class="login-canopy" aria-hidden="true"></div>
+    <div class="login-main">
 
-    <div class="login-card">
+        <div class="login-card">
 
-        <div class="login-brand">
+            <div class="login-brand">
 
-            <div class="logo-mark">
-                <img src="assets/usedbookr-logo.png" alt="UsedBookR logo">
+                <div class="logo-mark">
+
+                    <img
+                        src="assets/logo-usedbookr.png"
+                        alt="UsedBookR"
+                    >
+
+                </div>
+
+                <h1>
+                    Excelso
+                </h1>
+
+                <p>
+                    OPERATIONS MANAGEMENT SYSTEM
+                </p>
+
             </div>
 
-            <h1>
-                Excelso
-            </h1>
 
-            <p>
-                UsedBookR Operations Management System
+            <div class="login-divider"></div>
+
+
+            <h2>
+                Operations Login
+            </h2>
+
+
+            <p class="login-description">
+                Centralized system for tracking, monitoring and
+                managing all departmental operations.
             </p>
 
-        </div>
+
+            <form id="loginForm">
+
+                <!-- USERNAME -->
+
+                <div class="form-group">
+
+                    <label for="loginUsername">
+                        Username
+                    </label>
+
+                    <div class="input-shell">
+
+                        <span class="input-icon" aria-hidden="true">&#9998;</span>
+
+                        <input
+                            type="text"
+                            id="loginUsername"
+                            name="username"
+                            placeholder="Enter username"
+                            autocomplete="username"
+                            required
+                        >
+
+                    </div>
+
+                </div>
 
 
-        <div class="login-divider"></div>
+                <!-- PASSWORD -->
+
+                <div class="form-group">
+
+                    <label for="loginPassword">
+                        Password
+                    </label>
+
+                    <div class="input-shell">
+
+                        <span class="input-icon" aria-hidden="true">&#128274;</span>
+
+                        <input
+                            type="password"
+                            id="loginPassword"
+                            name="password"
+                            placeholder="Enter password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
 
 
-        <h2>
-            Operations Login
-        </h2>
+                <!-- LOGIN ERROR -->
 
-
-        <p class="login-description">
-            Centralized system for tracking, monitoring and
-            managing all departmental operations.
-        </p>
-
-
-        <form id="loginForm">
-
-            <!-- USERNAME -->
-
-            <div class="form-group">
-
-                <label for="loginUsername">
-                    Username
-                </label>
-
-                <input
-                    type="text"
-                    id="loginUsername"
-                    name="username"
-                    placeholder="Enter username"
-                    autocomplete="username"
-                    required
+                <div
+                    id="loginError"
+                    class="login-error"
                 >
+                    Incorrect username or password. Please try again.
+                </div>
 
-            </div>
 
+                <!-- SIGN IN -->
 
-            <!-- PASSWORD -->
-
-            <div class="form-group">
-
-                <label for="loginPassword">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="loginPassword"
-                    name="password"
-                    placeholder="Enter password"
-                    autocomplete="current-password"
-                    required
+                <button
+                    type="submit"
+                    class="login-button"
                 >
+                    <span class="login-button-label">Sign In</span>
+                    <span class="login-button-spinner" aria-hidden="true"></span>
+                </button>
 
+            </form>
+
+
+            <div class="login-footer">
+                Authorized Operations Access
             </div>
 
-
-            <!-- LOGIN ERROR -->
-
-            <div
-                id="loginError"
-                class="login-error"
-            >
-                Incorrect username or password. Please try again.
-            </div>
-
-
-            <!-- SIGN IN -->
-
-            <button
-                type="submit"
-                class="login-button"
-            >
-                Sign In
-            </button>
-
-        </form>
-
-
-        <div class="login-footer">
-            Authorized Operations Access
         </div>
 
     </div>
@@ -188,13 +210,17 @@
     style="display:none;"
 >
 
-    <div class="sidebar-scrim" id="sidebarScrim"></div>
+    <div
+        id="sidebarBackdrop"
+        class="sidebar-backdrop"
+    ></div>
+
 
     <!-- =================================================
          SIDEBAR
     ================================================== -->
 
-    <aside class="sidebar" id="sidebarEl">
+    <aside class="sidebar">
 
 
         <!-- BRAND -->
@@ -202,7 +228,12 @@
         <div class="sidebar-header">
 
             <div class="sidebar-logo">
-                <img src="assets/usedbookr-logo.png" alt="UsedBookR logo">
+
+                <img
+                    src="assets/logo-usedbookr.png"
+                    alt="UsedBookR"
+                >
+
             </div>
 
 
@@ -213,13 +244,12 @@
                 </strong>
 
                 <span>
-                    UsedBookR Operations
+                    OPERATIONS
                 </span>
 
             </div>
 
         </div>
-
 
 
         <!-- NAVIGATION -->
@@ -559,21 +589,22 @@
 
         <div class="sidebar-footer">
 
-            <div class="sidebar-loop-badge">
-                <img src="assets/buy-read-resell-repeat.png" alt="Buy, Read, Resell, Repeat">
-            </div>
-
             <div class="logged-user">
 
-                <div class="user-avatar">OT</div>
+                <div
+                    id="loggedUserAvatar"
+                    class="user-avatar"
+                >
+                    OT
+                </div>
 
                 <div class="user-details">
 
-                    <strong>
+                    <strong id="loggedUserName">
                         Operations Tracker
                     </strong>
 
-                    <span>
+                    <span id="loggedUserRole">
                         UsedBookR/SimplySellBooks
                     </span>
 
@@ -586,6 +617,7 @@
                 id="logoutButton"
                 class="logout-button"
             >
+                <span aria-hidden="true">&#10148;</span>
                 Logout
             </button>
 
@@ -613,8 +645,11 @@
                     id="menuToggle"
                     class="menu-toggle"
                     type="button"
+                    aria-label="Toggle navigation"
                 >
-                    ☰
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </button>
 
 
@@ -646,7 +681,7 @@
                     class="top-add-button"
                     type="button"
                 >
-                    + Add Task
+                    <span aria-hidden="true">+</span> Add Task
                 </button>
 
             </div>
@@ -670,25 +705,6 @@
                 id="dashboardPage"
                 class="page active-page"
             >
-
-                <!-- HERO / HIGHLIGHTED BRAND SPACE -->
-                <div class="brand-hero">
-
-                    <div class="brand-hero-mark">
-                        <img src="assets/usedbookr-logo.png" alt="UsedBookR logo">
-                    </div>
-
-                    <div class="brand-hero-copy">
-                        <span class="page-label">EXCELSO OPERATIONS PLATFORM</span>
-                        <h2>Every book has a next reader. Every task has a next step.</h2>
-                        <p>One home for tasks, follow-ups and performance across every UsedBookR &amp; SimplySellBooks department.</p>
-                    </div>
-
-                    <div class="brand-hero-loop">
-                        <img src="assets/buy-read-resell-repeat.png" alt="Buy, Read, Resell, Repeat &mdash; UsedBookR and SimplySellBooks">
-                    </div>
-
-                </div>
 
 
                 <div class="page-header">
@@ -728,7 +744,7 @@
                 <div class="kpi-grid">
 
 
-                    <div class="kpi-card">
+                    <div class="kpi-card kpi-total">
 
                         <span>
                             Total Tasks
@@ -745,7 +761,7 @@
                     </div>
 
 
-                    <div class="kpi-card">
+                    <div class="kpi-card kpi-open">
 
                         <span>
                             Open
@@ -762,7 +778,7 @@
                     </div>
 
 
-                    <div class="kpi-card">
+                    <div class="kpi-card kpi-progress">
 
                         <span>
                             In Progress
@@ -779,7 +795,7 @@
                     </div>
 
 
-                    <div class="kpi-card kpi-warn">
+                    <div class="kpi-card kpi-blocked">
 
                         <span>
                             Blocked
@@ -796,7 +812,7 @@
                     </div>
 
 
-                    <div class="kpi-card kpi-danger">
+                    <div class="kpi-card kpi-overdue">
 
                         <span>
                             Overdue
@@ -813,7 +829,7 @@
                     </div>
 
 
-                    <div class="kpi-card kpi-success">
+                    <div class="kpi-card kpi-completed">
 
                         <span>
                             Completed
@@ -861,7 +877,10 @@
 
                             <div>
 
-                                <span><i class="dot dot-high"></i>High Priority</span>
+                                <span>
+                                    <i class="priority-dot priority-dot-high"></i>
+                                    High Priority
+                                </span>
 
                                 <strong id="highPriorityCount">
                                     0
@@ -872,7 +891,10 @@
 
                             <div>
 
-                                <span><i class="dot dot-medium"></i>Medium Priority</span>
+                                <span>
+                                    <i class="priority-dot priority-dot-medium"></i>
+                                    Medium Priority
+                                </span>
 
                                 <strong id="mediumPriorityCount">
                                     0
@@ -883,7 +905,10 @@
 
                             <div>
 
-                                <span><i class="dot dot-low"></i>Low Priority</span>
+                                <span>
+                                    <i class="priority-dot priority-dot-low"></i>
+                                    Low Priority
+                                </span>
 
                                 <strong id="lowPriorityCount">
                                     0
@@ -1047,6 +1072,41 @@
 
                 </div>
 
+
+                <!-- BRAND ECOSYSTEM STRIP -->
+
+                <div class="panel ecosystem-panel">
+
+                    <div class="ecosystem-copy">
+
+                        <span class="page-label">
+                            THE ECOSYSTEM
+                        </span>
+
+                        <h3>
+                            One loop, two storefronts
+                        </h3>
+
+                        <p>
+                            Excelso is the operational backbone connecting
+                            UsedbookR.com and SimplySellBooks — every task
+                            logged here keeps books moving from buy to
+                            resell and back again.
+                        </p>
+
+                    </div>
+
+                    <div class="ecosystem-image">
+
+                        <img
+                            src="assets/logo-cycle.png"
+                            alt="Buy, Read, Resell, Repeat — UsedBookR and SimplySellBooks ecosystem"
+                        >
+
+                    </div>
+
+                </div>
+
             </section>
 
 
@@ -1080,13 +1140,25 @@
                     </div>
 
 
-                    <button
-                        id="tasksAddButton"
-                        class="primary-button"
-                        type="button"
-                    >
-                        + Add New Task
-                    </button>
+                    <div class="page-header-actions">
+
+                        <button
+                            id="exportTasksButton"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            ⭳ Export CSV
+                        </button>
+
+                        <button
+                            id="tasksAddButton"
+                            class="primary-button"
+                            type="button"
+                        >
+                            + Add New Task
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -1530,7 +1602,7 @@
                     </div>
 
 
-                    <div class="kpi-card kpi-warn">
+                    <div class="kpi-card">
 
                         <span>
                             Blocked
@@ -1543,7 +1615,7 @@
                     </div>
 
 
-                    <div class="kpi-card kpi-danger">
+                    <div class="kpi-card">
 
                         <span>
                             Overdue
@@ -1556,7 +1628,7 @@
                     </div>
 
 
-                    <div class="kpi-card kpi-success">
+                    <div class="kpi-card">
 
                         <span>
                             Completed
@@ -2001,13 +2073,19 @@
     class="notification"
 >
 
-    <strong id="notificationTitle">
-        Notification
-    </strong>
+    <div class="notification-icon" aria-hidden="true">✓</div>
 
-    <span id="notificationMessage">
-        --
-    </span>
+    <div class="notification-body">
+
+        <strong id="notificationTitle">
+            Notification
+        </strong>
+
+        <span id="notificationMessage">
+            --
+        </span>
+
+    </div>
 
 </div>
 
