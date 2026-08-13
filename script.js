@@ -383,7 +383,12 @@ function initializeLogin() {
  
                 await loadTasks();
  
- 
+ /*
+ * Load regular tasks after
+ * successful authentication
+ */
+
+await loadRegularTasks();
                 /*
                  * Apply permissions /
                  * department visibility
