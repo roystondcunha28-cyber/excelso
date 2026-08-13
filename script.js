@@ -504,7 +504,8 @@ function checkLogin() {
  
             updateLoggedInUserProfile();
  
- 
+            loadRegularTasks();
+
             loadTasks();
  
  
