@@ -2114,6 +2114,453 @@ function renderRegularTasks() {
 
 }
 /* =========================================================
+   OPEN REGULAR TASK UPDATE
+========================================================= */
+
+function openRegularTaskUpdate(
+    regularTaskId
+) {
+
+    const task =
+        regularTasks.find(
+            function(item) {
+
+                return String(
+                    item.regularTaskId || ""
+                ).trim() === String(
+                    regularTaskId || ""
+                ).trim();
+
+            }
+        );
+
+
+    if (!task) {
+
+        showNotification(
+            "Error",
+            "Regular task could not be found."
+        );
+
+        return;
+
+    }
+
+
+    const modal =
+        document.getElementById(
+            "regularTaskUpdateModal"
+        );
+
+
+    if (!modal) {
+
+        console.error(
+            "Regular Task Update modal not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Populate task information
+     */
+
+    const taskName =
+        document.getElementById(
+            "regularTaskUpdateTaskName"
+        );
+
+    const taskId =
+        document.getElementById(
+            "regularTaskUpdateTaskId"
+        );
+
+    const department =
+        document.getElementById(
+            "regularTaskUpdateDepartment"
+        );
+
+    const expectedTime =
+        document.getElementById(
+            "regularTaskUpdateExpectedTime"
+        );
+
+
+    if (taskName) {
+
+        taskName.textContent =
+            task.task || "Regular Task";
+
+    }
+
+
+    if (taskId) {
+
+        taskId.textContent =
+            task.regularTaskId || "-";
+
+    }
+
+
+    if (department) {
+
+        department.textContent =
+            task.department || "-";
+
+    }
+
+
+    if (expectedTime) {
+
+        expectedTime.textContent =
+            task.expectedTime || "-";
+
+    }
+
+
+    /*
+     * Store the selected Regular Task ID
+     * on the form for submission.
+     */
+
+    const form =
+        document.getElementById(
+            "regularTaskUpdateForm"
+        );
+
+
+    if (form) {
+
+        form.dataset.regularTaskId =
+            task.regularTaskId || "";
+
+    }
+
+
+    /*
+     * Reset the form
+     */
+
+    const status =
+        document.getElementById(
+            "regularTaskStatus"
+        );
+
+    const description =
+        document.getElementById(
+            "regularTaskDescription"
+        );
+
+    const error =
+        document.getElementById(
+            "regularTaskUpdateError"
+        );
+
+
+    if (status) {
+
+        status.value = "";
+
+    }
+
+
+    if (description) {
+
+        description.value = "";
+
+    }
+
+
+    if (error) {
+
+        error.textContent = "";
+
+        error.style.display =
+            "none";
+
+    }
+
+
+    /*
+     * Show modal
+     */
+
+    modal.style.display =
+        "flex";
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE REGULAR TASK UPDATE
+========================================================= */
+
+function closeRegularTaskUpdate() {
+
+    const modal =
+        document.getElementById(
+            "regularTaskUpdateModal"
+        );
+
+
+    if (modal) {
+
+        modal.style.display =
+            "none";
+
+    }
+
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+/* =========================================================
+   INITIALIZE REGULAR TASK UPDATE FORM
+========================================================= */
+
+function initializeRegularTaskUpdateForm() {
+
+    const form =
+        document.getElementById(
+            "regularTaskUpdateForm"
+        );
+
+
+    if (!form) {
+
+        return;
+
+    }
+
+
+    /*
+     * Prevent duplicate event listeners
+     */
+
+    if (
+        form.dataset.initialized ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    form.dataset.initialized =
+        "true";
+
+
+    form.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            const regularTaskId =
+                String(
+                    form.dataset.regularTaskId ||
+                    ""
+                ).trim();
+
+
+            const status =
+                document.getElementById(
+                    "regularTaskStatus"
+                )?.value || "";
+
+
+            const description =
+                document.getElementById(
+                    "regularTaskDescription"
+                )?.value.trim() || "";
+
+
+            const error =
+                document.getElementById(
+                    "regularTaskUpdateError"
+                );
+
+
+            /*
+             * Validation
+             */
+
+            if (!regularTaskId) {
+
+                if (error) {
+
+                    error.textContent =
+                        "Regular Task ID is missing.";
+
+                    error.style.display =
+                        "block";
+
+                }
+
+                return;
+
+            }
+
+
+            if (
+                status !== "Completed" &&
+                status !== "Pending"
+            ) {
+
+                if (error) {
+
+                    error.textContent =
+                        "Please select Completed or Pending.";
+
+                    error.style.display =
+                        "block";
+
+                }
+
+                return;
+
+            }
+
+
+            if (!description) {
+
+                if (error) {
+
+                    error.textContent =
+                        "Please enter a description.";
+
+                    error.style.display =
+                        "block";
+
+                }
+
+                return;
+
+            }
+
+
+            const button =
+                document.getElementById(
+                    "saveRegularTaskUpdateButton"
+                );
+
+
+            if (button) {
+
+                button.disabled =
+                    true;
+
+                button.textContent =
+                    "Saving...";
+
+            }
+
+
+            try {
+
+                const result =
+                    await apiRequest(
+                        "saveRegularTaskUpdate",
+                        {
+                            regularTaskId:
+                                regularTaskId,
+
+                            status:
+                                status,
+
+                            description:
+                                description,
+
+                            updatedBy:
+                                currentUser?.username ||
+                                currentUser?.name ||
+                                "Website"
+                        }
+                    );
+
+
+                if (
+                    !result ||
+                    !result.success
+                ) {
+
+                    throw new Error(
+                        result?.message ||
+                        "Unable to save update."
+                    );
+
+                }
+
+
+                closeRegularTaskUpdate();
+
+
+                showNotification(
+                    "Updated",
+                    "Regular task update saved successfully."
+                );
+
+
+                /*
+                 * Reload the Regular Tasks
+                 * from Google Sheets.
+                 */
+
+                await loadRegularTasks();
+
+            }
+
+            catch (submitError) {
+
+                console.error(
+                    "Regular task update error:",
+                    submitError
+                );
+
+
+                if (error) {
+
+                    error.textContent =
+                        submitError.message ||
+                        "Unable to save update.";
+
+                    error.style.display =
+                        "block";
+
+                }
+
+            }
+
+            finally {
+
+                if (button) {
+
+                    button.disabled =
+                        false;
+
+                    button.textContent =
+                        "Save Update";
+
+                }
+
+            }
+
+        }
+    );
+
+}
+/* =========================================================
    CREATE REGULAR TASK CARD
 ========================================================= */
 
