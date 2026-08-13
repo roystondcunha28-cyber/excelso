@@ -1250,10 +1250,10 @@ function showPage(page) {
     if (
         page ===
        "regularTasks"
-    ) 
+    )  {
         renderRegularTasks();
 
-
+    }
     if (
         page ===
         "followups"
