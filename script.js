@@ -1892,6 +1892,366 @@ async function loadRegularTasks() {
 
 }
 /* =========================================================
+   RENDER REGULAR TASKS
+========================================================= */
+
+function renderRegularTasks() {
+
+    const container =
+        document.getElementById(
+            "regularTasksContainer"
+        );
+
+
+    if (!container) {
+
+        console.warn(
+            "Regular Tasks container not found."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !Array.isArray(
+            regularTasks
+        ) ||
+        regularTasks.length === 0
+    ) {
+
+        container.innerHTML = `
+            <div class="regular-tasks-empty">
+                No regular tasks found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    /*
+     * Frequency order
+     */
+
+    const frequencyOrder = [
+        "daily",
+        "weekly",
+        "twice a week",
+        "twice-a-week",
+        "twice_a_week",
+        "monthly",
+        "other"
+    ];
+
+
+    /*
+     * Group tasks by Expected Time
+     */
+
+    const groups = {};
+
+
+    regularTasks.forEach(
+        function(task) {
+
+            const frequency =
+                String(
+                    task.expectedTime || "Other"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            let groupName =
+                "Other";
+
+
+            if (
+                frequency === "daily"
+            ) {
+
+                groupName =
+                    "Daily";
+
+            }
+
+            else if (
+                frequency === "weekly"
+            ) {
+
+                groupName =
+                    "Weekly";
+
+            }
+
+            else if (
+                frequency === "twice a week" ||
+                frequency === "twice-a-week" ||
+                frequency === "twice_a_week"
+            ) {
+
+                groupName =
+                    "Twice a Week";
+
+            }
+
+            else if (
+                frequency === "monthly"
+            ) {
+
+                groupName =
+                    "Monthly";
+
+            }
+
+
+            if (
+                !groups[groupName]
+            ) {
+
+                groups[groupName] =
+                    [];
+
+            }
+
+
+            groups[groupName].push(
+                task
+            );
+
+        }
+    );
+
+
+    /*
+     * Display order
+     */
+
+    const displayOrder = [
+        "Daily",
+        "Weekly",
+        "Twice a Week",
+        "Monthly",
+        "Other"
+    ];
+
+
+    let html = "";
+
+
+    displayOrder.forEach(
+        function(groupName) {
+
+            const group =
+                groups[groupName];
+
+
+            if (
+                !group ||
+                group.length === 0
+            ) {
+
+                return;
+
+            }
+
+
+            html += `
+                <div
+                    class="regular-task-group"
+                >
+
+                    <div
+                        class="regular-task-group-header"
+                    >
+
+                        <h2>
+                            ${escapeHtml(
+                                groupName
+                            )}
+                        </h2>
+
+                        <span>
+                            ${group.length}
+                            task${group.length === 1 ? "" : "s"}
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="regular-task-list"
+                    >
+            `;
+
+
+            group.forEach(
+                function(task) {
+
+                    html += createRegularTaskCard(
+                        task
+                    );
+
+                }
+            );
+
+
+            html += `
+                    </div>
+
+                </div>
+            `;
+
+        }
+    );
+
+
+    container.innerHTML =
+        html;
+
+}
+/* =========================================================
+   CREATE REGULAR TASK CARD
+========================================================= */
+
+function createRegularTaskCard(task) {
+
+    const id =
+        String(
+            task.regularTaskId || ""
+        ).trim();
+
+
+    const department =
+        String(
+            task.department || ""
+        ).trim();
+
+
+    const taskName =
+        String(
+            task.task || ""
+        ).trim();
+
+
+    const assignedTo =
+        String(
+            task.assignedTo || ""
+        ).trim();
+
+
+    const priority =
+        String(
+            task.priority || ""
+        ).trim();
+
+
+    const expectedTime =
+        String(
+            task.expectedTime || ""
+        ).trim();
+
+
+    const expectedDate =
+        String(
+            task.expectedDate || ""
+        ).trim();
+
+
+    return `
+        <div
+            class="regular-task-card"
+            data-regular-task-id="${escapeHtml(id)}"
+        >
+
+            <div class="regular-task-card-main">
+
+                <div class="regular-task-id">
+                    ${escapeHtml(id)}
+                </div>
+
+                <h3>
+                    ${escapeHtml(taskName)}
+                </h3>
+
+                <div class="regular-task-details">
+
+                    ${
+                        department
+                            ? `
+                                <span>
+                                    Department:
+                                    ${escapeHtml(department)}
+                                </span>
+                              `
+                            : ""
+                    }
+
+                    ${
+                        assignedTo
+                            ? `
+                                <span>
+                                    Assigned To:
+                                    ${escapeHtml(assignedTo)}
+                                </span>
+                              `
+                            : ""
+                    }
+
+                    ${
+                        priority
+                            ? `
+                                <span>
+                                    Priority:
+                                    ${escapeHtml(priority)}
+                                </span>
+                              `
+                            : ""
+                    }
+
+                    ${
+                        expectedTime
+                            ? `
+                                <span>
+                                    Expected:
+                                    ${escapeHtml(expectedTime)}
+                                </span>
+                              `
+                            : ""
+                    }
+
+                    ${
+                        expectedDate
+                            ? `
+                                <span>
+                                    Expected Date:
+                                    ${escapeHtml(expectedDate)}
+                                </span>
+                              `
+                            : ""
+                    }
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="regular-task-update-button"
+                onclick="openRegularTaskUpdate('${escapeHtml(id)}')"
+            >
+                Update
+            </button>
+
+        </div>
+    `;
+
+}
+/* =========================================================
    UPDATE ALL VIEWS
 ========================================================= */
 
