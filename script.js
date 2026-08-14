@@ -1308,7 +1308,7 @@ function renderDepartmentCards() {
 
     container.innerHTML = "";
 
-    DEPARTMENTS.forEach(function(department) {
+    DEPARTMENTS.forEach(function (department) {
 
         const departmentTasks = tasks.filter(function(task) { return task.department === department; });
 
