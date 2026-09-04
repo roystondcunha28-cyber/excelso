@@ -2,7 +2,7 @@
 
 <img src="assets/logo-usedbookr.png" alt="UsedBookR logo" width="110">
 
-# Excelso
+# Excelso-UsedBookR
 
 **Operations tracker for UsedBookR / Simply Sell Books**
 
