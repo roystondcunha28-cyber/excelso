@@ -1,0 +1,30 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment / secrets (if any config/API keys are added later)
+.env
+.env.local
+*.key
+
+# Logs
+*.log
+
+# Dependency folders (in case a build step is added later)
+node_modules/
+
+# Build output (in case a build step is added later)
+dist/
+build/
+
+# Misc
+*.tmp
+*.bak
