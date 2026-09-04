@@ -24,15 +24,15 @@ This project was designed and built independently as a student developer project
 
 ## What it does
 
-- 🔐 **Operations login** — access is restricted to authorized team members
-- 🗂️ **14 departments tracked** — from B2B/Sales and Warehouse to IT and Product Development
-- ✅ **Task management** — create, assign, prioritize, and update tasks with due dates
-- ↺ **Regular (recurring) tasks** — a dedicated view for tasks that repeat on a schedule
-- ↻ **Follow-up monitoring** — see what's due today, overdue, or coming up
-- 📊 **Live dashboard** — KPI cards for open, in-progress, blocked, overdue, and completed tasks
-- 🔍 **Filtering & search** — filter the task list by department, priority, or status
-- ⭳ **CSV export** — pull task data out for reporting
-- 🕓 **Activity log** — an audit trail of task changes and follow-up actions
+-  **Operations login** — access is restricted to authorized team members
+-  **14 departments tracked** — from B2B/Sales and Warehouse to IT and Product Development
+-  **Task management** — create, assign, prioritize, and update tasks with due dates
+-  **Regular (recurring) tasks** — a dedicated view for tasks that repeat on a schedule
+-  **Follow-up monitoring** — see what's due today, overdue, or coming up
+-  **Live dashboard** — KPI cards for open, in-progress, blocked, overdue, and completed tasks
+-  **Filtering & search** — filter the task list by department, priority, or status
+-  **CSV export** — pull task data out for reporting
+-  **Activity log** — an audit trail of task changes and follow-up actions
 
 ## Tech Stack
 
@@ -90,7 +90,7 @@ This site is deployed via **GitHub Pages**:
 
 ## Security Note
 
-⚠️ Because this repository is **public**, make sure no real credentials, API keys, or sensitive business data are hardcoded anywhere in `script.js` or elsewhere. If login credentials are currently hardcoded client-side, consider:
+ Because this repository is **public**, make sure no real credentials, API keys, or sensitive business data are hardcoded anywhere in `script.js` or elsewhere. If login credentials are currently hardcoded client-side, consider:
 
 - Moving authentication to a backend service
 - Using environment variables / a secrets manager for any keys
